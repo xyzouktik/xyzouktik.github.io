@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Youktik Sajjan — Computational Biology &amp; Machine Learning</title>
-<meta name="description" content="Youktik Sajjan is a BS-MS student in biological sciences at IISER Kolkata and co-founder of Underwater AI and iFINN, working on machine learning for marine and scientific data.">
+<meta name="description" content="Youktik Sajjan is a final-year Integrated BS-MS student at IISER Kolkata and co-founder of Underwater AI and iFINN, building hardware and machine-learning models to identify species from biological images and videos.">
 <link rel="canonical" href="https://xyzouktik.github.io/">
 <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Youktik Sajjan — Computational Biology &amp; Machine Learning">
-<meta property="og:description" content="BS-MS student at IISER Kolkata. Co-founder of Underwater AI and iFINN. Machine learning for marine and scientific data.">
+<meta property="og:description" content="Final-year Integrated BS-MS student at IISER Kolkata. Co-founder of Underwater AI and iFINN. Hardware and machine learning for species identification from biological imagery.">
 <meta property="og:url" content="https://xyzouktik.github.io/">
 <meta property="og:site_name" content="Youktik Sajjan">
 <meta name="twitter:card" content="summary">
@@ -108,6 +108,8 @@
 
   .links{font-family:var(--mono); font-size:.82rem}
   .site-foot{border-top:1px solid var(--line); padding:1.6rem 0 2.4rem; color:var(--muted); font-size:.72rem; letter-spacing:.04em}
+  #dragon-canvas{position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:0; pointer-events:none}
+  .page{position:relative; z-index:1}
 </style>
 <script type="application/ld+json">
 {
@@ -130,6 +132,8 @@
 </script>
 </head>
 <body>
+<canvas id="dragon-canvas"></canvas>
+<div class="page">
 <a class="skip" href="#about">Skip to content</a>
 
 <header class="site-head">
@@ -153,8 +157,8 @@
   <section id="about" aria-labelledby="about-h">
     <p class="sec-label">About</p>
     <h1 id="about-h">Youktik Sajjan</h1>
-    <p class="lead">BS-MS student in biological sciences at IISER Kolkata, and co-founder of Underwater AI and iFINN.</p>
-    <p>I work where biology meets machine learning: analysing biological data, and building ML and computer-vision systems for marine and scientific use. I am finishing a BS-MS at IISER Kolkata (Biological Sciences major, Humanities minor; expected 2027).</p>
+    <p class="lead">Final-year Integrated BS-MS student at IISER Kolkata, and co-founder of Underwater AI and iFINN.</p>
+    <p>I work where biology meets machine learning. My master's thesis builds hardware and a machine-learning model to detect and identify species from biological images and videos. I have a research paper submitted, and I study Biological Sciences with a minor in Computer Sciences.</p>
     <p>Based in Kolkata, India. Email <a href="mailto:ys22ms059@iiserkol.ac.in">ys22ms059@iiserkol.ac.in</a>.</p>
     <p class="links">
       <a href="https://www.linkedin.com/in/youktik-sajjan">LinkedIn</a> ·
@@ -170,6 +174,7 @@
       <li><strong>Machine learning for scientific data.</strong> NumPy and TensorFlow pipelines over experimental data.</li>
       <li><strong>Marine computer vision.</strong> Restoration, detection, and 3D reconstruction of underwater imagery at Underwater AI.</li>
       <li><strong>Applied machine learning in finance.</strong> Neural-network infrastructure for financial intelligence at iFINN.</li>
+      <li><strong>Species recognition from biological imagery.</strong> Detecting and identifying species from images and videos — building both the hardware and the model (master's thesis).</li>
     </ul>
   </section>
 
@@ -206,6 +211,11 @@
   <section id="experience" aria-labelledby="experience-h">
     <h2 class="sec-label" id="experience-h">Experience</h2>
     <ul class="plain">
+      <li>
+        <h3>Master's Thesis — Species Detection from Biological Imagery</h3>
+        <span class="role">IISER Kolkata · current</span>
+        <p>Building hardware and a machine-learning model to detect and identify species from biological images and videos.</p>
+      </li>
       <li>
         <h3>Co-founder — iFINN &amp; Underwater AI</h3>
         <span class="role">IISER Kolkata · current</span>
@@ -277,6 +287,7 @@
 <footer class="site-foot">
   <div class="wrap">© <span id="year">2026</span> Youktik Sajjan</div>
 </footer>
+</div>
 
 <script>
 (function(){
@@ -297,6 +308,821 @@
   });
   paint();
   document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+<script>
+// ─── ENDER DRAGON CANVAS — Enhanced Interactive Background ───
+(function() {
+  const canvas = document.getElementById('dragon-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let mouse = { x: W / 2, y: H / 2 };
+  document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  document.addEventListener('mouseleave', () => { mouse.x = W / 2; mouse.y = H / 2; });
+
+  ctx.imageSmoothingEnabled = false;
+
+  const CHORUS = '#c084fc';
+  const CHORUS_DIM = '#4c1d95';
+  const DRAGON_PURPLE = '#2d1b69';
+  const DRAGON_DARK = '#1a0f40';
+  const DRAGON_EYE = '#a855f7';
+  const FIRE_COLORS = ['#ff6600','#ff8800','#ffaa00','#ff4400','#ffcc33'];
+  const SMOKE_COLORS = ['#4a3520','#3d2b18','#2e1f10'];
+  const isMobile = window.innerWidth < 768;
+
+  function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+  function randRange(a, b) { return a + Math.random() * (b - a); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function randomEdgeSpawn() {
+    const side = Math.floor(Math.random() * 4);
+    if (side === 0) return { x: -50, y: randRange(40, H - 40) };
+    if (side === 1) return { x: W + 50, y: randRange(40, H - 40) };
+    if (side === 2) return { x: randRange(40, W - 40), y: -50 };
+    return { x: randRange(40, W - 40), y: H + 50 };
+  }
+
+  // ─── ENDER DRAGON (Enhanced) ───
+  class EnderDragon {
+    constructor() {
+      this.segments = [];
+      const segCount = 24;
+      for (let i = 0; i < segCount; i++) {
+        this.segments.push({ x: W / 2, y: H / 2, angle: 0 });
+      }
+      this.targetX = W / 2;
+      this.targetY = H / 2;
+      this.wingAngle = 0;
+      this.wingDir = 1;
+      this.breathTimer = 0;
+      this.fireParticles = [];
+      this.embers = [];
+      this.eyeTrail = [];
+      this.jawOpen = 0;
+      this.drift = Math.random() * Math.PI * 2;
+      this.interactTarget = null;
+      this.swoopTimer = 0;
+      this.isSwooping = false;
+      this.roarFlash = 0;
+    }
+
+    update(worldMobs) {
+      const head = this.segments[0];
+      this.drift += 0.012;
+
+      // Find nearest hostile mob to interact with
+      let nearestDist = Infinity;
+      let nearestMob = null;
+      worldMobs.forEach(m => {
+        if (!m.hostile) return;
+        const d = dist(head, m);
+        if (d < 280 && d < nearestDist) { nearestDist = d; nearestMob = m; }
+      });
+      this.interactTarget = nearestMob || null;
+
+      // Swoop attack logic
+      if (this.swoopTimer > 0) this.swoopTimer--;
+      if (!this.isSwooping && this.interactTarget && Math.random() < 0.004 && this.swoopTimer <= 0) {
+        this.isSwooping = true;
+        this.swoopTimer = 180;
+        this.roarFlash = 1;
+      }
+      if (this.isSwooping && (!this.interactTarget || this.swoopTimer <= 120)) {
+        this.isSwooping = false;
+      }
+
+      // Movement target
+      const orbitR = this.isSwooping ? 30 : 100;
+      const targetBaseX = mouse.x + Math.cos(this.drift) * orbitR;
+      const targetBaseY = mouse.y + Math.sin(this.drift * 1.3) * orbitR * 0.7;
+      const followSpeed = this.isSwooping ? 0.06 : 0.025;
+
+      let desiredX = targetBaseX, desiredY = targetBaseY;
+      if (this.interactTarget) {
+        const blend = this.isSwooping ? 0.7 : 0.3;
+        desiredX = lerp(targetBaseX, this.interactTarget.x, blend);
+        desiredY = lerp(targetBaseY, this.interactTarget.y, blend);
+      }
+
+      this.targetX = lerp(this.targetX, clamp(desiredX, 30, W - 30), followSpeed);
+      this.targetY = lerp(this.targetY, clamp(desiredY, 30, H - 30), followSpeed);
+      head.x = lerp(head.x, this.targetX, 0.065);
+      head.y = lerp(head.y, this.targetY, 0.065);
+      head.angle = Math.atan2(this.targetY - head.y, this.targetX - head.x);
+
+      // Body chain
+      for (let i = 1; i < this.segments.length; i++) {
+        const prev = this.segments[i - 1];
+        const seg = this.segments[i];
+        const dx = prev.x - seg.x;
+        const dy = prev.y - seg.y;
+        const angle = Math.atan2(dy, dx);
+        const spacing = 14 + i * 1.5;
+        seg.x = prev.x - Math.cos(angle) * spacing;
+        seg.y = prev.y - Math.sin(angle) * spacing;
+        seg.angle = angle;
+      }
+
+      // Wing flap (faster when swooping)
+      const flapSpeed = this.isSwooping ? 0.08 : 0.045;
+      this.wingAngle += flapSpeed * this.wingDir;
+      if (this.wingAngle > 0.7 || this.wingAngle < -0.7) this.wingDir *= -1;
+
+      // Jaw
+      const d = dist(head, mouse);
+      const jawTarget = this.isSwooping ? 1.2 : (this.interactTarget ? 0.9 : (d < 160 ? 0.7 : 0));
+      this.jawOpen = lerp(this.jawOpen, jawTarget, 0.06);
+
+      // Roar flash decay
+      if (this.roarFlash > 0) this.roarFlash -= 0.02;
+
+      // Eye trail
+      this.eyeTrail.push({ x: head.x, y: head.y, life: 1 });
+      this.eyeTrail = this.eyeTrail.filter(e => { e.life -= 0.04; return e.life > 0; });
+
+      // Fire breath
+      this.breathTimer++;
+      const shouldBreathe = d < 250 || !!this.interactTarget || this.isSwooping;
+      const fireRate = this.isSwooping ? 1 : (this.interactTarget ? 2 : 3);
+      if (shouldBreathe && this.breathTimer % fireRate === 0) {
+        const fireBias = this.interactTarget
+          ? Math.atan2(this.interactTarget.y - head.y, this.interactTarget.x - head.x)
+          : head.angle;
+        const angle = fireBias + randRange(-0.25, 0.25);
+        const spawnX = head.x + Math.cos(head.angle) * 30;
+        const spawnY = head.y + Math.sin(head.angle) * 30;
+        const speed = randRange(2.5, 5.5);
+
+        this.fireParticles.push({
+          x: spawnX, y: spawnY,
+          vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          life: 1, size: randRange(4, 10),
+          color: FIRE_COLORS[Math.floor(Math.random() * FIRE_COLORS.length)],
+        });
+
+        // Add smoke behind fire
+        if (Math.random() < 0.3) {
+          this.fireParticles.push({
+            x: spawnX - Math.cos(angle) * 5, y: spawnY - Math.sin(angle) * 5,
+            vx: Math.cos(angle) * speed * 0.3 + randRange(-0.3, 0.3),
+            vy: Math.sin(angle) * speed * 0.3 - 0.3,
+            life: 0.8, size: randRange(6, 12),
+            color: SMOKE_COLORS[Math.floor(Math.random() * SMOKE_COLORS.length)],
+            isSmoke: true,
+          });
+        }
+
+        // Add embers
+        if (Math.random() < 0.4) {
+          this.embers.push({
+            x: spawnX, y: spawnY,
+            vx: Math.cos(angle + randRange(-0.6, 0.6)) * randRange(1, 3),
+            vy: Math.sin(angle + randRange(-0.6, 0.6)) * randRange(1, 3) - 0.5,
+            life: 1, size: randRange(1, 3),
+          });
+        }
+      }
+
+      // Update fire particles
+      this.fireParticles = this.fireParticles.filter(p => {
+        p.x += p.vx; p.y += p.vy;
+        p.vx *= 0.97; p.vy *= 0.97;
+        if (p.isSmoke) { p.vy -= 0.02; p.size *= 1.005; }
+        p.life -= p.isSmoke ? 0.015 : 0.025;
+        return p.life > 0;
+      });
+
+      // Update embers
+      this.embers = this.embers.filter(e => {
+        e.x += e.vx; e.y += e.vy;
+        e.vy -= 0.01;
+        e.life -= 0.02;
+        return e.life > 0;
+      });
+
+      // Dragon fire pushes mobs
+      worldMobs.forEach(mob => {
+        this.fireParticles.forEach(p => {
+          if (p.isSmoke) return;
+          if (dist(p, mob) < 28) {
+            const push = Math.atan2(mob.y - head.y, mob.x - head.x);
+            mob.vx += Math.cos(push) * 0.2;
+            mob.vy += Math.sin(push) * 0.2;
+            mob.scared = Math.max(mob.scared, 30);
+            mob.hitFlash = 8;
+          }
+        });
+      });
+    }
+
+    draw() {
+      const s = isMobile ? 3 : 4.5;
+      const head = this.segments[0];
+      const neck = this.segments[2];
+      const body = this.segments[5];
+      const hip = this.segments[8];
+      const tailA = this.segments[12];
+      const tailB = this.segments[17];
+      const tailEnd = this.segments[this.segments.length - 1];
+
+      const bodyAngle = Math.atan2(body.y - neck.y, body.x - neck.x);
+      const tailAngle = Math.atan2(tailEnd.y - hip.y, tailEnd.x - hip.x);
+
+      // Eye trail (purple glow behind dragon)
+      this.eyeTrail.forEach(e => {
+        ctx.globalAlpha = e.life * 0.06;
+        ctx.fillStyle = DRAGON_EYE;
+        const r = 6 * s * e.life;
+        ctx.fillRect(e.x - r/2, e.y - r/2, r, r);
+      });
+
+      // Fire particles
+      this.fireParticles.forEach(p => {
+        if (p.isSmoke) {
+          ctx.globalAlpha = p.life * 0.2;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+        } else {
+          ctx.globalAlpha = p.life * 0.65;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+          // Inner bright core
+          ctx.globalAlpha = p.life * 0.4;
+          ctx.fillStyle = '#ffe066';
+          const cs = p.size * 0.4;
+          ctx.fillRect(p.x - cs/2, p.y - cs/2, cs, cs);
+        }
+      });
+
+      // Embers (tiny bright sparks)
+      this.embers.forEach(e => {
+        ctx.globalAlpha = e.life * 0.7;
+        ctx.fillStyle = e.life > 0.5 ? '#ffcc00' : '#ff6600';
+        ctx.fillRect(e.x, e.y, e.size, e.size);
+      });
+
+      // Fire glow around mouth when breathing
+      if (this.jawOpen > 0.3) {
+        const head = this.segments[0];
+        const glowR = 20 * s * this.jawOpen;
+        ctx.globalAlpha = this.jawOpen * 0.08;
+        ctx.fillStyle = '#ff6600';
+        ctx.fillRect(
+          head.x + Math.cos(head.angle) * 20 - glowR/2,
+          head.y + Math.sin(head.angle) * 20 - glowR/2,
+          glowR, glowR
+        );
+      }
+
+      // Tail ribbon
+      ctx.globalAlpha = 0.42;
+      ctx.strokeStyle = DRAGON_DARK;
+      ctx.lineWidth = 4 * s;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(hip.x, hip.y);
+      ctx.lineTo(tailA.x, tailA.y);
+      ctx.lineTo(tailB.x, tailB.y);
+      ctx.lineTo(tailEnd.x, tailEnd.y);
+      ctx.stroke();
+      ctx.strokeStyle = '#241258';
+      ctx.lineWidth = 2.2 * s;
+      ctx.beginPath();
+      ctx.moveTo(hip.x, hip.y);
+      ctx.lineTo(tailA.x, tailA.y);
+      ctx.lineTo(tailB.x, tailB.y);
+      ctx.lineTo(tailEnd.x, tailEnd.y);
+      ctx.stroke();
+
+      // Tail spear tip
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = '#1a0a3a';
+      ctx.save();
+      ctx.translate(tailEnd.x, tailEnd.y);
+      ctx.rotate(tailAngle);
+      ctx.fillRect(-4 * s, -1.4 * s, 8 * s, 2.8 * s);
+      ctx.fillRect(2 * s, -0.7 * s, 3 * s, 1.4 * s);
+      ctx.restore();
+
+      // Main body sprite
+      ctx.globalAlpha = 0.54;
+      ctx.save();
+      ctx.translate(body.x, body.y);
+      ctx.rotate(bodyAngle);
+      ctx.fillStyle = DRAGON_PURPLE;
+      ctx.fillRect(-11 * s, -6 * s, 22 * s, 12 * s);
+      ctx.fillStyle = '#3b1f8e';
+      ctx.fillRect(-9 * s, -7.2 * s, 18 * s, 1.6 * s);
+      ctx.fillStyle = '#3d2a6e';
+      ctx.fillRect(-8 * s, 1.2 * s, 16 * s, 2.4 * s);
+      ctx.fillStyle = '#241258';
+      ctx.fillRect(-7 * s, -2 * s, 3 * s, 2 * s);
+      ctx.fillRect(0, -2.4 * s, 3 * s, 2 * s);
+      ctx.fillRect(6 * s, -1.8 * s, 2.5 * s, 2 * s);
+
+      // Hind legs
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(-7 * s, 5 * s, 3 * s, 6 * s);
+      ctx.fillRect(2 * s, 5 * s, 3 * s, 6 * s);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-7 * s, 10 * s, 3 * s, 1.2 * s);
+      ctx.fillRect(2 * s, 10 * s, 3 * s, 1.2 * s);
+      ctx.restore();
+
+      // Wings anchored to body, arcade silhouette
+      ctx.globalAlpha = 0.42;
+      const wingBase = body;
+      ctx.save();
+      ctx.translate(wingBase.x, wingBase.y);
+      ctx.rotate(bodyAngle);
+
+      // Left wing
+      ctx.save();
+      ctx.rotate(-Math.PI / 2.2 + this.wingAngle * 0.95);
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(0, -1 * s, 4 * s, 30 * s);
+      ctx.fillStyle = '#1e0a4a';
+      ctx.fillRect(2 * s, 2 * s, 13 * s, 22 * s);
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(4 * s, 1 * s, 2 * s, 10 * s);
+      ctx.fillRect(7 * s, 7 * s, 2 * s, 10 * s);
+      ctx.fillRect(10 * s, 14 * s, 2 * s, 10 * s);
+      ctx.fillStyle = '#2d1060';
+      ctx.fillRect(3 * s, 4 * s, 1 * s, 20 * s);
+      ctx.fillRect(8 * s, 10 * s, 1 * s, 14 * s);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(14 * s, 23 * s, 2 * s, 2 * s);
+      ctx.restore();
+
+      // Right wing (mirror)
+      ctx.save();
+      ctx.rotate(Math.PI / 2.2 - this.wingAngle * 0.95);
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(0, -29 * s, 4 * s, 30 * s);
+      ctx.fillStyle = '#1e0a4a';
+      ctx.fillRect(2 * s, -24 * s, 13 * s, 22 * s);
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(4 * s, -11 * s, 2 * s, 10 * s);
+      ctx.fillRect(7 * s, -17 * s, 2 * s, 10 * s);
+      ctx.fillRect(10 * s, -24 * s, 2 * s, 10 * s);
+      ctx.fillStyle = '#2d1060';
+      ctx.fillRect(3 * s, -24 * s, 1 * s, 20 * s);
+      ctx.fillRect(8 * s, -24 * s, 1 * s, 14 * s);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(14 * s, -25 * s, 2 * s, 2 * s);
+      ctx.restore();
+      ctx.restore();
+
+      // Neck bridge
+      ctx.globalAlpha = 0.46;
+      ctx.strokeStyle = DRAGON_PURPLE;
+      ctx.lineWidth = 5 * s;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(body.x - Math.cos(bodyAngle) * 8 * s, body.y - Math.sin(bodyAngle) * 8 * s);
+      ctx.lineTo(neck.x, neck.y);
+      ctx.lineTo(head.x, head.y);
+      ctx.stroke();
+      ctx.strokeStyle = '#3b1f8e';
+      ctx.lineWidth = 2 * s;
+      ctx.beginPath();
+      ctx.moveTo(body.x - Math.cos(bodyAngle) * 6 * s, body.y - Math.sin(bodyAngle) * 6 * s);
+      ctx.lineTo(neck.x, neck.y);
+      ctx.lineTo(head.x, head.y);
+      ctx.stroke();
+
+      // Forelegs
+      ctx.globalAlpha = 0.48;
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.save();
+      ctx.translate(neck.x, neck.y + 4 * s);
+      ctx.rotate(bodyAngle + 0.18);
+      ctx.fillRect(-2 * s, 0, 2.6 * s, 7 * s);
+      ctx.fillRect(4 * s, 0, 2.6 * s, 7 * s);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-2 * s, 6.4 * s, 2.6 * s, 1 * s);
+      ctx.fillRect(4 * s, 6.4 * s, 2.6 * s, 1 * s);
+      ctx.restore();
+
+      // HEAD (detailed)
+      ctx.globalAlpha = 0.58;
+      ctx.save();
+      ctx.translate(head.x, head.y);
+      ctx.rotate(head.angle);
+
+      // Head block
+      ctx.fillStyle = DRAGON_PURPLE;
+      ctx.fillRect(-6 * s, -5 * s, 12 * s, 10 * s);
+      // Brow ridge
+      ctx.fillStyle = '#3b1f8e';
+      ctx.fillRect(-5 * s, -5.5 * s, 10 * s, 1.5 * s);
+      // Snout (upper jaw)
+      ctx.fillStyle = DRAGON_PURPLE;
+      ctx.fillRect(6 * s, -3 * s, 7 * s, 6 * s);
+      // Snout ridge
+      ctx.fillStyle = '#241258';
+      ctx.fillRect(6 * s, -3.5 * s, 7 * s, 1 * s);
+      // Lower jaw (opens with jawOpen)
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(6 * s, 2 * s, 7 * s, (2 + this.jawOpen * 4) * s);
+      // Teeth (visible when jaw open)
+      if (this.jawOpen > 0.15) {
+        ctx.fillStyle = '#e5e5e5';
+        for (let t = 0; t < 4; t++) {
+          ctx.fillRect((7 + t * 1.5) * s, -1 * s, s * 0.7, s * 1.2);
+          ctx.fillRect((7 + t * 1.5) * s, 2 * s, s * 0.7, s * 1.2);
+        }
+      }
+      // Nostrils
+      ctx.fillStyle = '#111';
+      ctx.fillRect(11 * s, -2 * s, s * 0.8, s * 0.8);
+      ctx.fillRect(11 * s, 1 * s, s * 0.8, s * 0.8);
+      // Horns (large, curved)
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(-4 * s, -9 * s, 3 * s, 5 * s);
+      ctx.fillRect(-4 * s, -11 * s, 2 * s, 2.5 * s);
+      ctx.fillRect(-3.5 * s, -12.5 * s, 1.2 * s, 2 * s);
+      ctx.fillRect(2 * s, -9 * s, 3 * s, 5 * s);
+      ctx.fillRect(2 * s, -11 * s, 2 * s, 2.5 * s);
+      ctx.fillRect(2.5 * s, -12.5 * s, 1.2 * s, 2 * s);
+      // Eyes (glowing purple, larger)
+      ctx.fillStyle = DRAGON_EYE;
+      ctx.globalAlpha = 0.85;
+      ctx.fillRect(3 * s, -4 * s, 3 * s, 2.5 * s);
+      ctx.fillRect(3 * s, 1.5 * s, 3 * s, 2.5 * s);
+      // Pupils (bright magenta slit)
+      ctx.fillStyle = '#ff00ff';
+      ctx.fillRect(4.5 * s, -3.5 * s, s * 0.8, 1.5 * s);
+      ctx.fillRect(4.5 * s, 2 * s, s * 0.8, 1.5 * s);
+      // Eye glow aura
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = CHORUS;
+      ctx.fillRect(1 * s, -6 * s, 8 * s, 12 * s);
+      // Fire glow inside mouth when breathing
+      if (this.jawOpen > 0.2) {
+        ctx.globalAlpha = 0.35 * this.jawOpen;
+        ctx.fillStyle = '#ff6600';
+        ctx.fillRect(8 * s, -1 * s, 5 * s, (2 + this.jawOpen * 3) * s);
+        ctx.globalAlpha = 0.2 * this.jawOpen;
+        ctx.fillStyle = '#ffcc00';
+        ctx.fillRect(10 * s, 0, 3 * s, (1 + this.jawOpen * 2) * s);
+      }
+
+      ctx.restore();
+
+      // Roar flash (purple shockwave when swooping)
+      if (this.roarFlash > 0) {
+        ctx.globalAlpha = this.roarFlash * 0.08;
+        ctx.fillStyle = CHORUS;
+        const r = (1 - this.roarFlash) * 200;
+        ctx.fillRect(head.x - r, head.y - r, r * 2, r * 2);
+      }
+
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ─── AMBIENT MOB (Enhanced) ───
+  class AmbientMob {
+    constructor(type) {
+      this.type = type;
+      this.hostile = type !== 'villager';
+      this.hitFlash = 0;
+      this.walkCycle = Math.random() * Math.PI * 2;
+      this.reset(true);
+    }
+
+    reset(initial = false) {
+      const spawn = randomEdgeSpawn();
+      this.x = spawn.x;
+      this.y = spawn.y;
+      const target = { x: randRange(W * 0.1, W * 0.9), y: randRange(H * 0.1, H * 0.9) };
+      const angle = Math.atan2(target.y - this.y, target.x - this.x) + randRange(-0.3, 0.3);
+      const speed = this.type === 'villager' ? randRange(0.5, 0.9) : randRange(0.8, 1.4);
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.opacity = initial ? randRange(0.2, 0.32) : randRange(0.3, 0.5);
+      this.age = 0;
+      this.scared = 0;
+      this.hitFlash = 0;
+      this.blink = Math.random() * Math.PI * 2;
+    }
+
+    outOfBounds() {
+      return this.x < -100 || this.x > W + 100 || this.y < -100 || this.y > H + 100;
+    }
+
+    update(dragonHead) {
+      this.age++;
+      this.blink += 0.08;
+      this.walkCycle += 0.1;
+      if (this.scared > 0) this.scared--;
+      if (this.hitFlash > 0) this.hitFlash--;
+
+      // Creepers flee from dragon
+      if (this.type === 'creeper' && dist(this, dragonHead) < 180) {
+        const angle = Math.atan2(this.y - dragonHead.y, this.x - dragonHead.x);
+        this.vx += Math.cos(angle) * 0.08;
+        this.vy += Math.sin(angle) * 0.08;
+        this.scared = Math.max(this.scared, 15);
+      }
+
+      // Endermen teleport away from dragon
+      if (this.type === 'enderman' && dist(this, dragonHead) < 140 && this.scared <= 2) {
+        const respawn = randomEdgeSpawn();
+        this.x = respawn.x;
+        this.y = respawn.y;
+        this.scared = 30;
+      }
+
+      // Villagers panic when dragon is close
+      if (this.type === 'villager' && dist(this, dragonHead) < 160) {
+        const angle = Math.atan2(this.y - dragonHead.y, this.x - dragonHead.x);
+        this.vx += Math.cos(angle) * 0.04;
+        this.vy += Math.sin(angle) * 0.04;
+        this.scared = Math.max(this.scared, 10);
+      }
+
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vx *= 0.996;
+      this.vy *= 0.996;
+
+      if (this.age > 900 || this.outOfBounds()) this.reset();
+    }
+
+    draw() {
+      const s = isMobile ? 2.5 : 3.5;
+      const legBob = Math.sin(this.walkCycle) * 1.5;
+      ctx.globalAlpha = this.opacity + Math.min(0.15, this.scared * 0.006);
+      ctx.save();
+      ctx.translate(this.x, this.y);
+
+      // Hit flash overlay
+      if (this.hitFlash > 0) {
+        ctx.globalAlpha = Math.min(0.6, this.opacity + 0.3);
+      }
+
+      if (this.type === 'villager') {
+        // Robe
+        ctx.fillStyle = '#8B6914';
+        ctx.fillRect(-3 * s, -3 * s, 6 * s, 9 * s);
+        // Robe detail
+        ctx.fillStyle = '#7a5a10';
+        ctx.fillRect(-3 * s, 2 * s, 6 * s, 1 * s);
+        // Head
+        ctx.fillStyle = '#D2A679';
+        ctx.fillRect(-3 * s, -9 * s, 6 * s, 6 * s);
+        // Headband / hat
+        ctx.fillStyle = '#555';
+        ctx.fillRect(-3.5 * s, -10 * s, 7 * s, 2 * s);
+        ctx.fillRect(-2.5 * s, -11 * s, 5 * s, 1.5 * s);
+        // Eyes
+        ctx.fillStyle = '#333';
+        ctx.fillRect(-2 * s, -7 * s, 1.5 * s, 1 * s);
+        ctx.fillRect(0.5 * s, -7 * s, 1.5 * s, 1 * s);
+        // Big nose
+        ctx.fillStyle = '#C4956A';
+        ctx.fillRect(-0.5 * s, -6 * s, 1 * s, 2.5 * s);
+        // Arms (folded, with bob)
+        ctx.fillStyle = '#8B6914';
+        ctx.fillRect(-4 * s, -2 * s + legBob * 0.3, 1.5 * s, 5 * s);
+        ctx.fillRect(2.5 * s, -2 * s - legBob * 0.3, 1.5 * s, 5 * s);
+        // Legs
+        ctx.fillStyle = '#4a3a20';
+        ctx.fillRect(-2 * s, 6 * s, 2 * s, 2.5 * s + legBob);
+        ctx.fillRect(0 * s, 6 * s, 2 * s, 2.5 * s - legBob);
+      } else if (this.type === 'creeper') {
+        // Head (square)
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(-4 * s, -8 * s, 8 * s, 8 * s);
+        // Darker patches
+        ctx.fillStyle = '#16a34a';
+        ctx.fillRect(-3 * s, -7 * s, 2 * s, 2 * s);
+        ctx.fillRect(2 * s, -5 * s, 2 * s, 2 * s);
+        ctx.fillRect(-1 * s, -3 * s, 3 * s, 1 * s);
+        // Face (iconic sad face)
+        ctx.fillStyle = '#111';
+        // Eyes
+        ctx.fillRect(-3 * s, -6 * s, 2 * s, 2 * s);
+        ctx.fillRect(1 * s, -6 * s, 2 * s, 2 * s);
+        // Mouth (frown shape)
+        ctx.fillRect(-1 * s, -3 * s, 2 * s, 1 * s);
+        ctx.fillRect(-2 * s, -2 * s, 1 * s, 2 * s);
+        ctx.fillRect(1 * s, -2 * s, 1 * s, 2 * s);
+        // Body
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(-2 * s, 0 * s, 4 * s, 4 * s);
+        // Front legs
+        ctx.fillRect(-3 * s, 4 * s, 2 * s, 3 * s + legBob);
+        ctx.fillRect(1 * s, 4 * s, 2 * s, 3 * s - legBob);
+        // Back legs
+        ctx.fillRect(-3 * s, 4 * s, 2 * s, 3 * s - legBob * 0.5);
+        ctx.fillRect(1 * s, 4 * s, 2 * s, 3 * s + legBob * 0.5);
+        // Sizzle particles when scared
+        if (this.scared > 10) {
+          ctx.fillStyle = '#fff';
+          ctx.globalAlpha = this.scared / 30 * 0.5;
+          ctx.fillRect(randRange(-4, 4) * s, randRange(-9, -6) * s, s, s);
+          ctx.fillRect(randRange(-4, 4) * s, randRange(-9, -6) * s, s, s);
+        }
+      } else {
+        // Enderman (tall, menacing)
+        ctx.fillStyle = '#0f172a';
+        // Head
+        ctx.fillRect(-3 * s, -14 * s, 6 * s, 5 * s);
+        // Body (thin, tall)
+        ctx.fillRect(-2 * s, -9 * s, 4 * s, 13 * s);
+        // Long arms
+        ctx.fillRect(-4.5 * s, -8 * s, 2 * s, 12 * s);
+        ctx.fillRect(2.5 * s, -8 * s, 2 * s, 12 * s);
+        // Long legs
+        ctx.fillRect(-2 * s, 4 * s, 1.5 * s, 6 * s + legBob);
+        ctx.fillRect(0.5 * s, 4 * s, 1.5 * s, 6 * s - legBob);
+        // Eyes (glowing purple, blinking)
+        ctx.fillStyle = Math.sin(this.blink) > 0.8 ? '#fff' : CHORUS;
+        ctx.globalAlpha = this.opacity + 0.2;
+        ctx.fillRect(-2 * s, -13 * s, 1.5 * s, 1.5 * s);
+        ctx.fillRect(0.5 * s, -13 * s, 1.5 * s, 1.5 * s);
+        // Enderman particles (when scared/teleporting)
+        if (this.scared > 15) {
+          ctx.globalAlpha = (this.scared - 15) / 15 * 0.5;
+          ctx.fillStyle = CHORUS;
+          for (let i = 0; i < 6; i++) {
+            ctx.fillRect(
+              randRange(-6, 6) * s, randRange(-16, 10) * s,
+              randRange(1, 2) * s, randRange(1, 2) * s
+            );
+          }
+        }
+        // Holding block
+        if (!this.scared) {
+          ctx.fillStyle = '#4a3f2c';
+          ctx.globalAlpha = this.opacity * 0.7;
+          ctx.fillRect(3 * s, 1 * s, 3 * s, 3 * s);
+        }
+      }
+
+      // Fire hit flash (red/orange overlay)
+      if (this.hitFlash > 0) {
+        ctx.globalAlpha = this.hitFlash / 8 * 0.4;
+        ctx.fillStyle = '#ff4400';
+        ctx.fillRect(-5 * s, -15 * s, 10 * s, 25 * s);
+      }
+
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ─── Chorus Plant (static) ───
+  class ChorusPlant {
+    constructor() {
+      this.x = randRange(20, W - 20);
+      this.y = H - randRange(10, 60);
+      this.height = Math.floor(randRange(3, 8));
+      this.opacity = randRange(0.1, 0.18);
+    }
+    update() {}
+    draw() {
+      const s = 3;
+      ctx.globalAlpha = this.opacity;
+      ctx.fillStyle = CHORUS_DIM;
+      for (let i = 0; i < this.height; i++) {
+        ctx.fillRect(this.x, this.y - i * 2 * s, 1*s, 2*s);
+      }
+      ctx.fillStyle = '#a855f7';
+      ctx.fillRect(this.x - 1*s, this.y - this.height * 2 * s, 3*s, 2*s);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ─── End Crystal (decorative, pulsing) ───
+  class EndCrystal {
+    constructor() {
+      this.x = randRange(80, W - 80);
+      this.y = randRange(80, H - 80);
+      this.pulse = randRange(0, Math.PI * 2);
+      this.opacity = randRange(0.1, 0.2);
+    }
+    update() { this.pulse += 0.03; }
+    draw() {
+      const s = 3;
+      const glow = Math.sin(this.pulse) * 0.5 + 0.5;
+      ctx.globalAlpha = this.opacity + glow * 0.1;
+      ctx.fillStyle = '#1f2937';
+      ctx.fillRect(this.x - 3*s, this.y + 2*s, 6*s, 2*s);
+      ctx.fillStyle = '#7c3aed';
+      ctx.fillRect(this.x - 2*s, this.y - 3*s, 4*s, 5*s);
+      ctx.fillStyle = CHORUS;
+      ctx.globalAlpha = (this.opacity + glow * 0.15) * 0.6;
+      ctx.fillRect(this.x - 1*s, this.y - 2*s, 2*s, 3*s);
+      ctx.globalAlpha = glow * 0.04;
+      ctx.strokeStyle = CHORUS;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y - 3*s);
+      ctx.lineTo(dragon.segments[0].x, dragon.segments[0].y);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ─── Spawn ───
+  const dragon = new EnderDragon();
+  const mobs = [];
+  const crystals = [];
+  let spawnTimer = 0;
+  const maxMobs = isMobile ? 4 : 10;
+
+  if (isMobile) {
+    mobs.push(new AmbientMob('enderman'), new AmbientMob('creeper'), new AmbientMob('villager'));
+    crystals.push(new EndCrystal());
+    for (let i = 0; i < 3; i++) mobs.push(new ChorusPlant());
+  } else {
+    for (let i = 0; i < 3; i++) mobs.push(new AmbientMob('enderman'));
+    for (let i = 0; i < 3; i++) mobs.push(new AmbientMob('creeper'));
+    for (let i = 0; i < 2; i++) mobs.push(new AmbientMob('villager'));
+    for (let i = 0; i < 10; i++) mobs.push(new ChorusPlant());
+    for (let i = 0; i < 4; i++) crystals.push(new EndCrystal());
+  }
+
+  // ─── Void Particles ───
+  const particles = [];
+  const pCount = isMobile ? 30 : 100;
+  for (let i = 0; i < pCount; i++) {
+    particles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vy: randRange(-0.2, -0.05),
+      size: randRange(1, 2.5),
+      opacity: randRange(0.04, 0.14),
+    });
+  }
+
+  // ─── End Portal Starfield ───
+  const stars = [];
+  const starCount = isMobile ? 15 : 40;
+  for (let i = 0; i < starCount; i++) {
+    stars.push({
+      x: Math.random() * W, y: Math.random() * H,
+      size: randRange(1, 3),
+      twinkle: randRange(0, Math.PI * 2),
+      speed: randRange(0.01, 0.04),
+    });
+  }
+
+  // ─── Animation Loop ───
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Stars
+    stars.forEach(st => {
+      st.twinkle += st.speed;
+      const alpha = (Math.sin(st.twinkle) * 0.5 + 0.5) * 0.08;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#e9d5ff';
+      ctx.fillRect(st.x, st.y, st.size, st.size);
+    });
+
+    // Void particles
+    particles.forEach(p => {
+      p.y += p.vy;
+      if (p.y < 0) { p.y = H; p.x = Math.random() * W; }
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = CHORUS;
+      ctx.fillRect(p.x, p.y, p.size, p.size);
+    });
+    ctx.globalAlpha = 1;
+
+    // End Crystals
+    crystals.forEach(c => { c.update(); c.draw(); });
+
+    // Separate active mobs from static decorations
+    const activeMobs = mobs.filter(m => m instanceof AmbientMob);
+    const passiveProps = mobs.filter(m => !(m instanceof AmbientMob));
+
+    passiveProps.forEach(m => { m.update(); m.draw(); });
+    activeMobs.forEach(m => { m.update(dragon.segments[0]); m.draw(); });
+
+    // Periodically spawn new mobs from edges
+    spawnTimer++;
+    if (spawnTimer % 200 === 0 && activeMobs.length < maxMobs) {
+      const types = ['creeper', 'enderman', 'villager'];
+      mobs.push(new AmbientMob(types[Math.floor(Math.random() * types.length)]));
+    }
+
+    // Dragon (main attraction)
+    dragon.update(activeMobs);
+    dragon.draw();
+
+    requestAnimationFrame(animate);
+  }
+  animate();
 })();
 </script>
 </body>
