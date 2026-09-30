@@ -110,6 +110,13 @@
   .site-foot{border-top:1px solid var(--line); padding:1.6rem 0 2.4rem; color:var(--muted); font-size:.72rem; letter-spacing:.04em}
   #dragon-canvas{position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:0; pointer-events:none}
   .page{position:relative; z-index:1}
+  .game-tabs{display:flex; gap:.4rem; flex-wrap:wrap; margin:.1rem 0 .8rem}
+  .game-tab{font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; background:none; border:1px solid var(--line); color:var(--muted); border-radius:6px; padding:.35rem .7rem}
+  .game-tab:hover{color:var(--accent); border-color:var(--accent)}
+  .game-tab[aria-pressed="true"]{background:var(--accent); color:var(--bg); border-color:var(--accent)}
+  .game-wrap{border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--card)}
+  .game-wrap iframe{display:block; width:100%; height:430px; border:0}
+  .viewcount{text-align:center; padding:0 1.25rem 2.4rem; margin:0}
 </style>
 <script type="application/ld+json">
 {
@@ -145,6 +152,7 @@
       <a href="#focus">Focus</a>
       <a href="#research">Research</a>
       <a href="#projects">Projects</a>
+      <a href="#games">Games</a>
       <a href="#experience">Experience</a>
       <a href="#skills">Skills</a>
       <a href="#achievements">Achievements</a>
@@ -221,6 +229,19 @@
       <p>A small canvas game: a bacterium runs across a microscope slide, jumping white blood cells, cytotoxic T cells and antibodies. Jump over the cells on the ground, duck under the ones in the air.</p>
       <p class="links"><a href="game.html">Play the game →</a></p>
     </article>
+  </section>
+
+  <section id="games" aria-labelledby="games-h">
+    <h2 class="sec-label" id="games-h">Games</h2>
+    <p>Two small games you can play right here. Desktop: use the keyboard. Mobile: use the buttons under the screen.</p>
+    <div class="game-tabs" role="group" aria-label="Choose a game">
+      <button class="game-tab" type="button" data-src="game.html?game=immune&amp;embed=1" aria-pressed="true">Immune Runner</button>
+      <button class="game-tab" type="button" data-src="game.html?game=fighter&amp;embed=1" aria-pressed="false">Fighter</button>
+    </div>
+    <div class="game-wrap">
+      <iframe id="game-frame" src="game.html?game=immune&amp;embed=1" title="Play Immune Runner — a bacterium jumping immune cells" loading="lazy" referrerpolicy="no-referrer"></iframe>
+    </div>
+    <p class="muted">Prefer full screen? <a href="game.html">Open the games page →</a></p>
   </section>
 
   <section id="experience" aria-labelledby="experience-h">
@@ -314,6 +335,8 @@
 </footer>
 </div>
 
+<p class="viewcount"><img src="https://visitor-badge.laobi.icu/badge?page_id=xyzouktik.website&amp;left_color=0e7490&amp;right_color=2dd4bf&amp;left_text=Site%20views" alt="Site views"></p>
+
 <script>
 (function(){
   var root = document.documentElement;
@@ -333,6 +356,14 @@
   });
   paint();
   document.getElementById('year').textContent = new Date().getFullYear();
+  var frame = document.getElementById('game-frame');
+  document.querySelectorAll('.game-tab').forEach(function (b) {
+    b.addEventListener('click', function () {
+      frame.src = b.getAttribute('data-src');
+      document.querySelectorAll('.game-tab').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      frame.focus();
+    });
+  });
 })();
 </script>
 <script>
