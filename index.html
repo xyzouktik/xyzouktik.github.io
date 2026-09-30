@@ -456,7 +456,7 @@
         const dx = prev.x - seg.x;
         const dy = prev.y - seg.y;
         const angle = Math.atan2(dy, dx);
-        const spacing = 14 + i * 1.5;
+        const spacing = i <= 8 ? (14 + i * 1.2) : (10 + i * 0.55);
         seg.x = prev.x - Math.cos(angle) * spacing;
         seg.y = prev.y - Math.sin(angle) * spacing;
         seg.angle = angle;
@@ -555,288 +555,265 @@
     }
 
     draw() {
-      const pts = this.segments;
-      const n = pts.length;
-      const head = pts[0];
-      const S = isMobile ? 0.85 : 1.15;
+      const s = isMobile ? 3 : 4.5;
+      const head = this.segments[0];
+      const neck = this.segments[2];
+      const body = this.segments[5];
+      const hip = this.segments[8];
+      const tailA = this.segments[12];
+      const tailB = this.segments[17];
+      const tailEnd = this.segments[this.segments.length - 1];
 
-      const C = {
-        body0: '#140d2e', body1: '#2c1560', body2: '#4a2596', body3: '#7c4dff',
-        ridge: 'rgba(196,164,255,0.55)',
-        edge: 'rgba(190,150,255,0.5)',
-        membrane: 'rgba(78,38,150,0.42)',
-        membraneEdge: 'rgba(196,164,255,0.5)',
-        eye: '#c77dff', eyeCore: '#f6d9ff',
-        horn: '#e8e2f5', hornShade: '#a99fc4',
-        glow: 'rgba(150,80,255,0.9)',
-      };
+      const bodyAngle = Math.atan2(body.y - neck.y, body.x - neck.x);
+      const tailAngle = Math.atan2(tailEnd.y - hip.y, tailEnd.x - hip.x);
 
-      // ── trailing purple aura behind the dragon
+      // Eye trail (purple glow behind dragon)
       this.eyeTrail.forEach(e => {
-        const r = 34 * e.life * S;
-        const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, r);
-        g.addColorStop(0, 'rgba(150,80,255,' + (0.14 * e.life) + ')');
-        g.addColorStop(1, 'rgba(150,80,255,0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(e.x - r, e.y - r, r * 2, r * 2);
+        ctx.globalAlpha = e.life * 0.06;
+        ctx.fillStyle = DRAGON_EYE;
+        const r = 6 * s * e.life;
+        ctx.fillRect(e.x - r/2, e.y - r/2, r, r);
       });
 
-      // ── fire + smoke
+      // Fire particles
       this.fireParticles.forEach(p => {
-        const rr = p.size * (p.isSmoke ? 1 : 0.7);
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rr);
         if (p.isSmoke) {
-          g.addColorStop(0, 'rgba(90,80,110,' + (p.life * 0.35) + ')');
-          g.addColorStop(1, 'rgba(90,80,110,0)');
+          ctx.globalAlpha = p.life * 0.2;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
         } else {
-          g.addColorStop(0, 'rgba(255,240,180,' + (p.life * 0.95) + ')');
-          g.addColorStop(0.45, 'rgba(255,150,60,' + (p.life * 0.7) + ')');
-          g.addColorStop(1, 'rgba(200,60,20,0)');
+          ctx.globalAlpha = p.life * 0.65;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+          // Inner bright core
+          ctx.globalAlpha = p.life * 0.4;
+          ctx.fillStyle = '#ffe066';
+          const cs = p.size * 0.4;
+          ctx.fillRect(p.x - cs/2, p.y - cs/2, cs, cs);
         }
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, 6.2832); ctx.fill();
       });
 
-      // ── embers
+      // Embers (tiny bright sparks)
       this.embers.forEach(e => {
-        ctx.globalAlpha = e.life * 0.85;
-        ctx.fillStyle = e.life > 0.5 ? '#ffd166' : '#ff7b00';
-        ctx.beginPath(); ctx.arc(e.x, e.y, Math.max(0.6, e.size), 0, 6.2832); ctx.fill();
+        ctx.globalAlpha = e.life * 0.7;
+        ctx.fillStyle = e.life > 0.5 ? '#ffcc00' : '#ff6600';
+        ctx.fillRect(e.x, e.y, e.size, e.size);
       });
-      ctx.globalAlpha = 1;
 
-      // ── geometry helpers
-      const widthAt = (i) => {
-        if (i <= 3) return lerp(7, 16, i / 3);
-        if (i <= 9) return lerp(16, 27, (i - 3) / 6);
-        return lerp(27, 2.2, (i - 9) / (n - 1 - 9));
-      };
-      const normals = pts.map((p, i) => {
-        const a = pts[Math.min(n - 1, i + 1)], b = pts[Math.max(0, i - 1)];
-        const dx = a.x - b.x, dy = a.y - b.y, L = Math.hypot(dx, dy) || 1;
-        return { x: -dy / L, y: dx / L };
-      });
-      const left = pts.map((p, i) => ({ x: p.x + normals[i].x * widthAt(i), y: p.y + normals[i].y * widthAt(i) }));
-      const right = pts.map((p, i) => ({ x: p.x - normals[i].x * widthAt(i), y: p.y - normals[i].y * widthAt(i) }));
-      const curve = (list, move) => {
-        if (move) ctx.moveTo(list[0].x, list[0].y); else ctx.lineTo(list[0].x, list[0].y);
-        for (let i = 1; i < list.length - 1; i++) {
-          const mx = (list[i].x + list[i + 1].x) / 2, my = (list[i].y + list[i + 1].y) / 2;
-          ctx.quadraticCurveTo(list[i].x, list[i].y, mx, my);
-        }
-        ctx.lineTo(list[list.length - 1].x, list[list.length - 1].y);
-      };
-      const bodyPath = () => {
-        ctx.beginPath();
-        curve(left, true);
-        curve(right.slice().reverse(), false);
-        ctx.closePath();
-      };
-      const tang = (i) => {
-        const a = pts[Math.min(n - 1, i + 1)], b = pts[Math.max(0, i - 1)];
-        return Math.atan2(a.y - b.y, a.x - b.x);
-      };
-
-      // ── soft aura under the body
-      const torso = pts[8];
-      const au = ctx.createRadialGradient(torso.x, torso.y, 0, torso.x, torso.y, 150 * S);
-      au.addColorStop(0, 'rgba(132,60,255,0.16)');
-      au.addColorStop(1, 'rgba(132,60,255,0)');
-      ctx.fillStyle = au;
-      ctx.fillRect(torso.x - 150 * S, torso.y - 150 * S, 300 * S, 300 * S);
-
-      // ── wings (drawn beneath the body)
-      const wingAt = 6;
-      const wa = pts[wingAt];
-      const baseAng = tang(wingAt);
-      const flap = this.wingAngle;
-      const wingShape = [
-        [10, 6], [60, 34], [128, 18], [116, -2], [150, -12],
-        [126, -28], [140, -50], [95, -34], [60, -24], [22, -8],
-      ];
-      for (const sgn of [1, -1]) {
-        ctx.save();
-        ctx.translate(wa.x, wa.y);
-        ctx.rotate(baseAng + sgn * (Math.PI / 2 + flap * 0.8));
-        if (sgn === -1) ctx.scale(1, -1);
-        ctx.scale(S, S);
-        // membrane
-        ctx.beginPath();
-        ctx.moveTo(wingShape[0][0], wingShape[0][1]);
-        ctx.quadraticCurveTo(38, 24, wingShape[1][0], wingShape[1][1]);
-        for (let i = 2; i < wingShape.length; i++) {
-          const p = wingShape[i], q = wingShape[i - 1];
-          const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
-          ctx.quadraticCurveTo(q[0], q[1], mx, my);
-        }
-        ctx.closePath();
-        const mg = ctx.createLinearGradient(0, 0, 150, 0);
-        mg.addColorStop(0, 'rgba(58,26,120,0.5)');
-        mg.addColorStop(1, C.membrane);
-        ctx.fillStyle = mg; ctx.fill();
-        ctx.strokeStyle = C.membraneEdge; ctx.lineWidth = 1.2; ctx.stroke();
-        // finger struts
-        ctx.strokeStyle = 'rgba(120,70,210,0.85)'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
-        const wrist = [58, 16];
-        [[128, 18], [150, -12], [140, -50]].forEach(tip => {
-          ctx.beginPath();
-          ctx.moveTo(6, 4); ctx.quadraticCurveTo(wrist[0], wrist[1], tip[0], tip[1]);
-          ctx.stroke();
-        });
-        // leading-edge claw
-        ctx.fillStyle = C.horn;
-        ctx.beginPath();
-        ctx.moveTo(60, 34); ctx.lineTo(74, 40); ctx.lineTo(62, 44); ctx.closePath(); ctx.fill();
-        ctx.restore();
+      // Fire glow around mouth when breathing
+      if (this.jawOpen > 0.3) {
+        const head = this.segments[0];
+        const glowR = 20 * s * this.jawOpen;
+        ctx.globalAlpha = this.jawOpen * 0.08;
+        ctx.fillStyle = '#ff6600';
+        ctx.fillRect(
+          head.x + Math.cos(head.angle) * 20 - glowR/2,
+          head.y + Math.sin(head.angle) * 20 - glowR/2,
+          glowR, glowR
+        );
       }
 
-      // ── body: glow, fill, outline
-      ctx.save();
-      ctx.globalAlpha = 0.62;
-      ctx.shadowColor = C.glow; ctx.shadowBlur = 20;
-      const bb = { minx: Math.min(...left.map(p => p.x)), miny: Math.min(...left.map(p => p.y)), maxx: Math.max(...left.map(p => p.x)), maxy: Math.max(...left.map(p => p.y)) };
-      const bg = ctx.createLinearGradient(bb.minx, bb.miny, bb.maxx, bb.maxy);
-      bg.addColorStop(0, C.body0);
-      bg.addColorStop(0.4, C.body1);
-      bg.addColorStop(0.6, C.body2);
-      bg.addColorStop(1, C.body3);
-      bodyPath();
-      ctx.fillStyle = bg; ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = C.edge; ctx.lineWidth = 1.4; ctx.stroke();
-      ctx.restore();
-
-      // ── dorsal ridge + scale plates
-      ctx.save();
-      ctx.globalAlpha = 0.5;
-      ctx.strokeStyle = C.ridge; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+      // Tail ribbon
+      ctx.globalAlpha = 0.42;
+      ctx.strokeStyle = DRAGON_DARK;
+      ctx.lineWidth = 4 * s;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(pts[1].x, pts[1].y);
-      for (let i = 2; i < n - 3; i++) {
-        const mx = (pts[i].x + pts[i + 1].x) / 2, my = (pts[i].y + pts[i + 1].y) / 2;
-        ctx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
-      }
+      ctx.moveTo(hip.x, hip.y);
+      ctx.lineTo(tailA.x, tailA.y);
+      ctx.lineTo(tailB.x, tailB.y);
+      ctx.lineTo(tailEnd.x, tailEnd.y);
       ctx.stroke();
-      ctx.globalAlpha = 0.28;
-      ctx.strokeStyle = 'rgba(215,190,255,0.6)'; ctx.lineWidth = 1;
-      for (let i = 4; i <= 13; i += 2) {
-        ctx.beginPath();
-        ctx.moveTo(left[i].x * 0.55 + pts[i].x * 0.45, left[i].y * 0.55 + pts[i].y * 0.45);
-        ctx.lineTo(right[i].x * 0.55 + pts[i].x * 0.45, right[i].y * 0.55 + pts[i].y * 0.45);
-        ctx.stroke();
-      }
+      ctx.strokeStyle = '#241258';
+      ctx.lineWidth = 2.2 * s;
+      ctx.beginPath();
+      ctx.moveTo(hip.x, hip.y);
+      ctx.lineTo(tailA.x, tailA.y);
+      ctx.lineTo(tailB.x, tailB.y);
+      ctx.lineTo(tailEnd.x, tailEnd.y);
+      ctx.stroke();
+
+      // Tail spear tip
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = '#1a0a3a';
+      ctx.save();
+      ctx.translate(tailEnd.x, tailEnd.y);
+      ctx.rotate(tailAngle);
+      ctx.fillRect(-4 * s, -1.4 * s, 8 * s, 2.8 * s);
+      ctx.fillRect(2 * s, -0.7 * s, 3 * s, 1.4 * s);
       ctx.restore();
 
-      // ── head
-      const jaw = this.jawOpen;
+      // Main body sprite
+      ctx.globalAlpha = 0.54;
+      ctx.save();
+      ctx.translate(body.x, body.y);
+      ctx.rotate(bodyAngle);
+      ctx.fillStyle = DRAGON_PURPLE;
+      ctx.fillRect(-11 * s, -6 * s, 22 * s, 12 * s);
+      ctx.fillStyle = '#3b1f8e';
+      ctx.fillRect(-9 * s, -7.2 * s, 18 * s, 1.6 * s);
+      ctx.fillStyle = '#3d2a6e';
+      ctx.fillRect(-8 * s, 1.2 * s, 16 * s, 2.4 * s);
+      ctx.fillStyle = '#241258';
+      ctx.fillRect(-7 * s, -2 * s, 3 * s, 2 * s);
+      ctx.fillRect(0, -2.4 * s, 3 * s, 2 * s);
+      ctx.fillRect(6 * s, -1.8 * s, 2.5 * s, 2 * s);
+
+      // Hind legs
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(-7 * s, 5 * s, 3 * s, 6 * s);
+      ctx.fillRect(2 * s, 5 * s, 3 * s, 6 * s);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-7 * s, 10 * s, 3 * s, 1.2 * s);
+      ctx.fillRect(2 * s, 10 * s, 3 * s, 1.2 * s);
+      ctx.restore();
+
+      // Wings anchored to body, arcade silhouette
+      ctx.globalAlpha = 0.42;
+      const wingBase = body;
+      ctx.save();
+      ctx.translate(wingBase.x, wingBase.y);
+      ctx.rotate(bodyAngle);
+
+      // Left wing
+      ctx.save();
+      ctx.rotate(-Math.PI / 2.2 + this.wingAngle * 0.95);
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(0, -1 * s, 4 * s, 30 * s);
+      ctx.fillStyle = '#1e0a4a';
+      ctx.fillRect(2 * s, 2 * s, 13 * s, 22 * s);
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(4 * s, 1 * s, 2 * s, 10 * s);
+      ctx.fillRect(7 * s, 7 * s, 2 * s, 10 * s);
+      ctx.fillRect(10 * s, 14 * s, 2 * s, 10 * s);
+      ctx.fillStyle = '#2d1060';
+      ctx.fillRect(3 * s, 4 * s, 1 * s, 20 * s);
+      ctx.fillRect(8 * s, 10 * s, 1 * s, 14 * s);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(14 * s, 23 * s, 2 * s, 2 * s);
+      ctx.restore();
+
+      // Right wing (mirror)
+      ctx.save();
+      ctx.rotate(Math.PI / 2.2 - this.wingAngle * 0.95);
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(0, -29 * s, 4 * s, 30 * s);
+      ctx.fillStyle = '#1e0a4a';
+      ctx.fillRect(2 * s, -24 * s, 13 * s, 22 * s);
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(4 * s, -11 * s, 2 * s, 10 * s);
+      ctx.fillRect(7 * s, -17 * s, 2 * s, 10 * s);
+      ctx.fillRect(10 * s, -24 * s, 2 * s, 10 * s);
+      ctx.fillStyle = '#2d1060';
+      ctx.fillRect(3 * s, -24 * s, 1 * s, 20 * s);
+      ctx.fillRect(8 * s, -24 * s, 1 * s, 14 * s);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(14 * s, -25 * s, 2 * s, 2 * s);
+      ctx.restore();
+      ctx.restore();
+
+      // Neck bridge
+      ctx.globalAlpha = 0.46;
+      ctx.strokeStyle = DRAGON_PURPLE;
+      ctx.lineWidth = 5 * s;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(body.x - Math.cos(bodyAngle) * 8 * s, body.y - Math.sin(bodyAngle) * 8 * s);
+      ctx.lineTo(neck.x, neck.y);
+      ctx.lineTo(head.x, head.y);
+      ctx.stroke();
+      ctx.strokeStyle = '#3b1f8e';
+      ctx.lineWidth = 2 * s;
+      ctx.beginPath();
+      ctx.moveTo(body.x - Math.cos(bodyAngle) * 6 * s, body.y - Math.sin(bodyAngle) * 6 * s);
+      ctx.lineTo(neck.x, neck.y);
+      ctx.lineTo(head.x, head.y);
+      ctx.stroke();
+
+      // Forelegs
+      ctx.globalAlpha = 0.48;
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.save();
+      ctx.translate(neck.x, neck.y + 4 * s);
+      ctx.rotate(bodyAngle + 0.18);
+      ctx.fillRect(-2 * s, 0, 2.6 * s, 7 * s);
+      ctx.fillRect(4 * s, 0, 2.6 * s, 7 * s);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-2 * s, 6.4 * s, 2.6 * s, 1 * s);
+      ctx.fillRect(4 * s, 6.4 * s, 2.6 * s, 1 * s);
+      ctx.restore();
+
+      // HEAD (detailed)
+      ctx.globalAlpha = 0.58;
       ctx.save();
       ctx.translate(head.x, head.y);
       ctx.rotate(head.angle);
-      ctx.scale(S, S);
-      ctx.globalAlpha = 0.7;
 
-      // swept-back horns
-      for (const sgn of [1, -1]) {
-        ctx.beginPath();
-        ctx.moveTo(-5, sgn * 3.5);
-        ctx.quadraticCurveTo(-19, sgn * 9, -34, sgn * 7);
-        ctx.quadraticCurveTo(-20, sgn * 4, -7, sgn * 0.5);
-        ctx.closePath();
-        ctx.fillStyle = C.hornShade; ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(-5, sgn * 3.2);
-        ctx.quadraticCurveTo(-18, sgn * 7.6, -31, sgn * 6.4);
-        ctx.quadraticCurveTo(-19, sgn * 4.2, -7, sgn * 1.4);
-        ctx.closePath();
-        ctx.fillStyle = C.horn; ctx.fill();
-      }
-
-      // skull
-      const hg = ctx.createLinearGradient(-10, -10, 22, 10);
-      hg.addColorStop(0, C.body1); hg.addColorStop(1, C.body3);
-      ctx.fillStyle = hg;
-      ctx.beginPath(); ctx.ellipse(0, 0, 13, 9, 0, 0, 6.2832); ctx.fill();
-      ctx.strokeStyle = C.edge; ctx.lineWidth = 1.1; ctx.stroke();
-      // snout / upper jaw
-      ctx.beginPath();
-      ctx.moveTo(8, -5.5);
-      ctx.quadraticCurveTo(22, -4.5, 27, -1.4);
-      ctx.lineTo(27, 1.4);
-      ctx.quadraticCurveTo(22, 4.5, 8, 5.5);
-      ctx.closePath();
-      ctx.fillStyle = C.body2; ctx.fill();
-      ctx.strokeStyle = C.edge; ctx.lineWidth = 1; ctx.stroke();
-      // lower jaw (opens)
-      ctx.beginPath();
-      ctx.moveTo(8, 2.4 + jaw * 2.5);
-      ctx.quadraticCurveTo(22, 3.2 + jaw * 5.5, 26, 2 + jaw * 6.5);
-      ctx.quadraticCurveTo(20, 6 + jaw * 7.5, 7, 5.2 + jaw * 3);
-      ctx.closePath();
-      ctx.fillStyle = '#1b1140'; ctx.fill();
-      // teeth
-      if (jaw > 0.12) {
-        ctx.fillStyle = '#f2ecff';
+      // Head block
+      ctx.fillStyle = DRAGON_PURPLE;
+      ctx.fillRect(-6 * s, -5 * s, 12 * s, 10 * s);
+      // Brow ridge
+      ctx.fillStyle = '#3b1f8e';
+      ctx.fillRect(-5 * s, -5.5 * s, 10 * s, 1.5 * s);
+      // Snout (upper jaw)
+      ctx.fillStyle = DRAGON_PURPLE;
+      ctx.fillRect(6 * s, -3 * s, 7 * s, 6 * s);
+      // Snout ridge
+      ctx.fillStyle = '#241258';
+      ctx.fillRect(6 * s, -3.5 * s, 7 * s, 1 * s);
+      // Lower jaw (opens with jawOpen)
+      ctx.fillStyle = DRAGON_DARK;
+      ctx.fillRect(6 * s, 2 * s, 7 * s, (2 + this.jawOpen * 4) * s);
+      // Teeth (visible when jaw open)
+      if (this.jawOpen > 0.15) {
+        ctx.fillStyle = '#e5e5e5';
         for (let t = 0; t < 4; t++) {
-          const x = 11 + t * 3.6;
-          ctx.beginPath(); ctx.moveTo(x, 1.2 + jaw * 3); ctx.lineTo(x + 1.7, 1.2 + jaw * 3); ctx.lineTo(x + 0.85, 3.4 + jaw * 3.6); ctx.closePath(); ctx.fill();
-          ctx.beginPath(); ctx.moveTo(x, 1.2 + jaw * 3); ctx.lineTo(x + 1.7, 1.2 + jaw * 3); ctx.lineTo(x + 0.85, -1 - jaw * 0.6); ctx.closePath(); ctx.fill();
+          ctx.fillRect((7 + t * 1.5) * s, -1 * s, s * 0.7, s * 1.2);
+          ctx.fillRect((7 + t * 1.5) * s, 2 * s, s * 0.7, s * 1.2);
         }
       }
-      // nostrils
-      ctx.fillStyle = '#0d0820';
-      ctx.beginPath(); ctx.arc(22, -2.2, 1, 0, 6.2832); ctx.fill();
-      ctx.beginPath(); ctx.arc(22, 2.2, 1, 0, 6.2832); ctx.fill();
-      // eyes with glow
-      for (const sgn of [1, -1]) {
-        ctx.save();
-        ctx.shadowColor = C.eye; ctx.shadowBlur = 12;
-        ctx.fillStyle = C.eye;
-        ctx.beginPath(); ctx.ellipse(3, sgn * 4.6, 4.2, 2.4, sgn * 0.25, 0, 6.2832); ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = C.eyeCore;
-        ctx.beginPath(); ctx.ellipse(3, sgn * 4.6, 1.5, 0.7, sgn * 0.25, 0, 6.2832); ctx.fill();
-        ctx.restore();
+      // Nostrils
+      ctx.fillStyle = '#111';
+      ctx.fillRect(11 * s, -2 * s, s * 0.8, s * 0.8);
+      ctx.fillRect(11 * s, 1 * s, s * 0.8, s * 0.8);
+      // Horns (large, curved)
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(-4 * s, -9 * s, 3 * s, 5 * s);
+      ctx.fillRect(-4 * s, -11 * s, 2 * s, 2.5 * s);
+      ctx.fillRect(-3.5 * s, -12.5 * s, 1.2 * s, 2 * s);
+      ctx.fillRect(2 * s, -9 * s, 3 * s, 5 * s);
+      ctx.fillRect(2 * s, -11 * s, 2 * s, 2.5 * s);
+      ctx.fillRect(2.5 * s, -12.5 * s, 1.2 * s, 2 * s);
+      // Eyes (glowing purple, larger)
+      ctx.fillStyle = DRAGON_EYE;
+      ctx.globalAlpha = 0.85;
+      ctx.fillRect(3 * s, -4 * s, 3 * s, 2.5 * s);
+      ctx.fillRect(3 * s, 1.5 * s, 3 * s, 2.5 * s);
+      // Pupils (bright magenta slit)
+      ctx.fillStyle = '#ff00ff';
+      ctx.fillRect(4.5 * s, -3.5 * s, s * 0.8, 1.5 * s);
+      ctx.fillRect(4.5 * s, 2 * s, s * 0.8, 1.5 * s);
+      // Eye glow aura
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = CHORUS;
+      ctx.fillRect(1 * s, -6 * s, 8 * s, 12 * s);
+      // Fire glow inside mouth when breathing
+      if (this.jawOpen > 0.2) {
+        ctx.globalAlpha = 0.35 * this.jawOpen;
+        ctx.fillStyle = '#ff6600';
+        ctx.fillRect(8 * s, -1 * s, 5 * s, (2 + this.jawOpen * 3) * s);
+        ctx.globalAlpha = 0.2 * this.jawOpen;
+        ctx.fillStyle = '#ffcc00';
+        ctx.fillRect(10 * s, 0, 3 * s, (1 + this.jawOpen * 2) * s);
       }
-      // fire in the mouth
-      if (jaw > 0.2) {
-        const fg2 = ctx.createRadialGradient(24, 0, 0, 24, 0, 12);
-        fg2.addColorStop(0, 'rgba(255,236,160,' + (0.8 * jaw) + ')');
-        fg2.addColorStop(0.5, 'rgba(255,140,40,' + (0.5 * jaw) + ')');
-        fg2.addColorStop(1, 'rgba(255,80,0,0)');
-        ctx.fillStyle = fg2;
-        ctx.beginPath(); ctx.arc(24, 0, 12, 0, 6.2832); ctx.fill();
-      }
+
       ctx.restore();
 
-      // ── tail fin
-      const tip = pts[n - 1];
-      const ta = tang(n - 1);
-      ctx.save();
-      ctx.translate(tip.x, tip.y);
-      ctx.rotate(ta);
-      ctx.scale(S, S);
-      ctx.globalAlpha = 0.55;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(-8, -15, -26, -21);
-      ctx.quadraticCurveTo(-16, -7, -20, 0);
-      ctx.quadraticCurveTo(-16, 7, -26, 21);
-      ctx.quadraticCurveTo(-8, 15, 0, 0);
-      ctx.closePath();
-      const tg = ctx.createLinearGradient(0, 0, -26, 0);
-      tg.addColorStop(0, C.body2); tg.addColorStop(1, C.body3);
-      ctx.fillStyle = tg; ctx.fill();
-      ctx.strokeStyle = C.edge; ctx.lineWidth = 1; ctx.stroke();
-      ctx.restore();
-
-      // ── roar shockwave
+      // Roar flash (purple shockwave when swooping)
       if (this.roarFlash > 0) {
-        const r = (1 - this.roarFlash) * 220;
-        const rg = ctx.createRadialGradient(head.x, head.y, r * 0.4, head.x, head.y, r);
-        rg.addColorStop(0, 'rgba(196,120,255,0)');
-        rg.addColorStop(0.75, 'rgba(196,120,255,' + (this.roarFlash * 0.18) + ')');
-        rg.addColorStop(1, 'rgba(196,120,255,0)');
-        ctx.fillStyle = rg;
+        ctx.globalAlpha = this.roarFlash * 0.08;
+        ctx.fillStyle = CHORUS;
+        const r = (1 - this.roarFlash) * 200;
         ctx.fillRect(head.x - r, head.y - r, r * 2, r * 2);
       }
 
