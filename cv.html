@@ -3,115 +3,135 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Youktik Sajjan — CV</title>
-<meta name="description" content="Curriculum vitae of Youktik Sajjan — interdisciplinary builder across AI, computer vision, robotics and finance; co-founder of Underwater AI and iFiNN.">
+<title>Youktik Sajjan — Curriculum Vitae</title>
+<meta name="description" content="Curriculum vitae of Youktik Sajjan — researcher and product builder; co-founder of Underwater AI and iFiNN, IISER Kolkata.">
 <link rel="canonical" href="https://xyzouktik.github.io/cv.html">
-<meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16171a" media="(prefers-color-scheme: dark)">
 <script>
-(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+(function(){try{var t=localStorage.getItem('cv-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
 </script>
 <style>
   :root{
     color-scheme: light;
-    --bg:#fbfaf7; --fg:#1c1b19; --muted:#5c5a54; --line:#e4e1d8; --card:#ffffff; --accent:#0b6e8f;
-    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
-    --mono:ui-monospace,"SFMono-Regular","SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --paper:#ffffff; --ink:#141414; --muted:#555; --rule:#333; --link:#1a3c8b;
+    --serif:"Latin Modern Roman","CMU Serif","Computer Modern Serif","Iowan Old Style",Georgia,"Times New Roman",serif;
+    --sans:"Latin Modern Sans","Helvetica Neue",Arial,sans-serif;
   }
   @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){ color-scheme:dark; --bg:#121212; --fg:#e9e7e2; --muted:#a3a09a; --line:#2b2a27; --card:#181818; --accent:#6cc9e8; }
+    :root:not([data-theme="light"]){ color-scheme:dark; --paper:#16171a; --ink:#e9e7e2; --muted:#a3a09a; --rule:#6b6b6b; --link:#9ec5ff; }
   }
-  :root[data-theme="dark"]{ color-scheme:dark; --bg:#121212; --fg:#e9e7e2; --muted:#a3a09a; --line:#2b2a27; --card:#181818; --accent:#6cc9e8; }
-  :root[data-theme="light"]{ color-scheme:light; --bg:#fbfaf7; --fg:#1c1b19; --muted:#5c5a54; --line:#e4e1d8; --card:#fff; --accent:#0b6e8f; }
+  :root[data-theme="dark"]{ color-scheme:dark; --paper:#16171a; --ink:#e9e7e2; --muted:#a3a09a; --rule:#6b6b6b; --link:#9ec5ff; }
+  :root[data-theme="light"]{ color-scheme:light; --paper:#ffffff; --ink:#141414; --muted:#555; --rule:#333; --link:#1a3c8b; }
 
   *{box-sizing:border-box}
-  body{margin:0; background:var(--bg); color:var(--fg); font-family:var(--serif); font-size:1.0625rem; line-height:1.6; -webkit-font-smoothing:antialiased}
-  .wrap{max-width:48rem; margin:0 auto; padding:0 1.25rem}
-  a{color:var(--accent); text-underline-offset:2px}
-  a:hover{text-decoration-thickness:2px}
-  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-  h1,h2,h3{font-weight:600; letter-spacing:-.01em; line-height:1.25}
-  h1{font-size:1.9rem; margin:0 0 .2rem}
-  h2{font-size:.75rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-family:var(--mono); font-weight:600; margin:2rem 0 .8rem; padding-bottom:.35rem; border-bottom:1px solid var(--line)}
-  h3{font-size:1rem; margin:0 0 .1rem}
-  p{margin:0 0 .6rem}
-  .mono,.role,.meta,.top,.foot{font-family:var(--mono)}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif);
+       font-size:1.02rem; line-height:1.4; -webkit-font-smoothing:antialiased}
+  .sheet{max-width:47rem; margin:0 auto; padding:2.2rem 1.4rem 3rem}
+  a{color:var(--link); text-decoration:none; border-bottom:1px solid rgba(26,60,139,.28)}
+  a:hover{border-bottom-color:currentColor}
+  :focus-visible{outline:2px solid var(--link); outline-offset:2px}
 
-  .top{position:sticky; top:0; z-index:10; background:var(--bg); border-bottom:1px solid var(--line)}
-  .top .wrap{display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-top:.7rem; padding-bottom:.7rem}
-  .top a{font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); text-decoration:none}
-  .top a:hover{color:var(--accent)}
-  .toggle{font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; background:none; border:1px solid var(--line); color:var(--muted); padding:.3rem .55rem; border-radius:6px; cursor:pointer}
-  .toggle:hover{color:var(--accent); border-color:var(--accent)}
+  .toolbar{display:flex; justify-content:space-between; align-items:center; gap:1rem; font-family:var(--sans); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:1.6rem}
+  .toolbar a{color:var(--muted); border:0}
+  .toolbar a:hover{color:var(--link)}
+  #toggle{font:inherit; cursor:pointer; background:none; border:1px solid var(--rule); color:var(--muted); border-radius:3px; padding:.25rem .55rem}
+  #toggle:hover{color:var(--link); border-color:var(--link)}
 
-  header.cv{padding:2.4rem 0 .5rem}
-  .title-role{font-family:var(--mono); font-size:.78rem; letter-spacing:.04em; color:var(--muted); margin:.3rem 0}
-  .contact{font-family:var(--mono); font-size:.8rem; color:var(--muted)}
-  .contact a{color:var(--accent)}
-  .contact span{white-space:nowrap}
+  header.cv{text-align:center; margin-bottom:.6rem}
+  h1{font-size:1.95rem; font-weight:600; letter-spacing:.02em; margin:0 0 .18rem}
+  .cv-sub{font-variant:small-caps; letter-spacing:.16em; font-size:.82rem; color:var(--muted); margin:0 0 .35rem}
+  .contact{font-size:.85rem; color:var(--ink); margin:.35rem 0 0}
+  .contact .sep{color:var(--muted); padding:0 .35rem}
 
-  .entry{margin:0 0 1rem; padding:0 0 1rem; border-bottom:1px solid var(--line)}
-  .entry:last-child{border-bottom:0; padding-bottom:0}
-  .entry-head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:.2rem 1rem}
-  .role{font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
-  ul{margin:.35rem 0 0; padding-left:1.1rem}
-  li{margin:.15rem 0}
-  .two{display:grid; grid-template-columns:11rem 1fr; gap:.3rem 1rem}
-  .two dt{font-family:var(--mono); font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); padding-top:.15rem}
-  .two dd{margin:0 0 .7rem}
-  @media (max-width:560px){ .two{grid-template-columns:1fr; gap:0} .two dd{margin-bottom:.9rem} }
+  h2{font-variant:small-caps; letter-spacing:.07em; font-size:1.04rem; font-weight:600;
+     margin:1.5rem 0 .45rem; padding-bottom:2px; border-bottom:1px solid var(--rule)}
+  .entry{margin:.5rem 0 .65rem}
+  .head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:.1rem 1rem}
+  .head h3{font-size:1rem; font-weight:600; margin:0}
+  .head .org{font-style:italic; font-weight:400}
+  .date{font-size:.86rem; font-style:italic; color:var(--muted); white-space:nowrap}
+  .row{font-size:.96rem; margin:.1rem 0 0}
+  ul{margin:.2rem 0 .1rem 1.05rem; padding:0}
+  li{margin:.1rem 0}
+  .skills{display:grid; grid-template-columns:10.5rem 1fr; gap:.15rem .9rem; font-size:.94rem}
+  .skills dt{font-variant:small-caps; letter-spacing:.05em; color:var(--muted); text-align:right}
+  .skills dd{margin:0}
+  @media (max-width:560px){ .skills{grid-template-columns:1fr; gap:0} .skills dt{text-align:left; margin-top:.4rem; font-weight:600} }
 
-  .foot{border-top:1px solid var(--line); margin-top:2rem; padding:1.2rem 0 2.4rem; color:var(--muted); font-size:.72rem; letter-spacing:.04em}
+  footer{font-family:var(--sans); font-size:.72rem; color:var(--muted); text-align:center; margin-top:2rem; padding-top:.8rem; border-top:1px solid var(--rule)}
 
   @media print{
-    .top,.toggle{display:none}
-    body{background:#fff; color:#000; font-size:11pt}
-    a{color:#000; text-decoration:none}
-    h2{color:#000; border-color:#999}
-    .entry{border-color:#ddd}
-    .wrap{max-width:none; padding:0}
+    .toolbar, footer .screen{display:none}
+    body{background:#fff; color:#000; font-size:10.5pt}
+    .sheet{max-width:none; padding:0 .6in}
+    a{color:#000; border:0}
+    h2{border-color:#000; color:#000}
+    .entry{page-break-inside:avoid}
   }
 </style>
 </head>
 <body>
-<div class="top">
-  <div class="wrap">
-    <a href="index.html">← Youktik Sajjan</a>
-    <button id="theme-toggle" class="toggle" type="button" aria-label="Switch theme">☾</button>
+<div class="sheet">
+  <div class="toolbar">
+    <a href="index.html">&larr; Portfolio</a>
+    <button id="toggle" type="button" aria-label="Switch theme">☾</button>
   </div>
-</div>
 
-<main class="wrap">
   <header class="cv">
     <h1>Youktik Sajjan</h1>
-    <p class="title-role">Interdisciplinary builder — AI, computer vision, robotics, finance</p>
-    <p class="title-role">Co-founder, Underwater AI &amp; iFiNN · IISER Kolkata</p>
+    <p class="cv-sub">Curriculum Vitae</p>
     <p class="contact">
-      <span><a href="mailto:ys22ms059@iiserkol.ac.in">ys22ms059@iiserkol.ac.in</a></span> ·
-      <span><a href="tel:+919330192230">+91-9330192230</a></span> ·
-      <span>Kolkata, India</span> ·
-      <span><a href="https://www.linkedin.com/in/youktik-sajjan">LinkedIn</a></span> ·
-      <span><a href="https://github.com/xyzouktik">GitHub</a></span> ·
-      <span><a href="https://xyzouktik.github.io/">Portfolio</a></span>
+      <a href="mailto:ys22ms059@iiserkol.ac.in">ys22ms059@iiserkol.ac.in</a><span class="sep">·</span>
+      <a href="tel:+919330192230">+91-9330192230</a><span class="sep">·</span>
+      Kolkata, India<span class="sep">·</span>
+      <a href="https://www.linkedin.com/in/youktik-sajjan">LinkedIn</a><span class="sep">·</span>
+      <a href="https://github.com/xyzouktik">GitHub</a><span class="sep">·</span>
+      <a href="https://xyzouktik.github.io/">xyzouktik.github.io</a>
     </p>
   </header>
 
-  <section aria-labelledby="edu">
-    <h2 id="edu">Education</h2>
+  <section aria-labelledby="s-education">
+    <h2 id="s-education">Education</h2>
     <div class="entry">
-      <div class="entry-head"><h3>Indian Institute of Science Education and Research (IISER) Kolkata</h3><span class="role">2022 – 2027 (final year)</span></div>
-      <p>Integrated BS-MS — Biological Sciences major; Computer Sciences minor, Humanities minor. CGPA: 7.78</p>
+      <div class="head"><h3>Indian Institute of Science Education and Research (IISER) Kolkata</h3><span class="date">2022 – 2027 (final year)</span></div>
+      <p class="row">Integrated BS-MS — Biological Sciences major; Computer Sciences minor, Humanities minor. CGPA 7.78</p>
     </div>
     <div class="entry">
-      <div class="entry-head"><h3>Barasat M.G.M H.S.</h3><span class="role">2013 – 2021</span></div>
-      <p>Higher Secondary Education (WBCHSE) — 97%</p>
+      <div class="head"><h3>Barasat M.G.M H.S.</h3><span class="date">2013 – 2021</span></div>
+      <p class="row">Higher Secondary Education (WBCHSE) — 97%</p>
     </div>
   </section>
 
-  <section aria-labelledby="exp">
-    <h2 id="exp">Experience</h2>
+  <section aria-labelledby="s-research">
+    <h2 id="s-research">Research &amp; Publications</h2>
     <div class="entry">
-      <div class="entry-head"><h3>Co-founder &amp; COO — Underwater AI</h3><span class="role">IISER Kolkata · current</span></div>
+      <div class="head"><h3>Master's Thesis — Species detection from biological imagery <span class="org">· IISER Kolkata</span></h3><span class="date">current</span></div>
+      <p class="row">Building hardware and a machine-learning model to detect and identify species from biological images and videos.</p>
+    </div>
+    <div class="entry">
+      <div class="head"><h3>Attention Follows Power, Not Population: Thirty Years of Political Coverage in the Indian English-Language Press</h3><span class="date">under review · ICWSM</span></div>
+    </div>
+    <div class="entry">
+      <div class="head"><h3>AquaVision: A Trainable Iterative Refinement Loop for Underwater Image Enhancement</h3><span class="date">under review · IndoML</span></div>
+    </div>
+    <div class="entry">
+      <div class="head"><h3>Research Intern <span class="org">· Bose Institute, Kolkata</span></h3><span class="date">May – July 2024</span></div>
+      <ul>
+        <li>Cell-culture techniques and fundamental biological data analysis using Python.</li>
+        <li>Applied NumPy and TensorFlow to experimental data as a foundation for scientific computing.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="head"><h3>Research Intern <span class="org">· EEPC India, Kolkata</span></h3><span class="date">internship</span></div>
+      <p class="row">Industry and economic research: data analysis, research synthesis and analytical writing.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-ventures">
+    <h2 id="s-ventures">Entrepreneurship &amp; Product</h2>
+    <div class="entry">
+      <div class="head"><h3>Co-founder &amp; COO <span class="org">· Underwater AI</span></h3><span class="date">current</span></div>
       <ul>
         <li>Computational marine imagery: real-time restoration, detection and 3D reconstruction running on the vehicle, deployed on the ABYSS-1 ROV.</li>
         <li>Underwater robotics hardware — prototype hardware, in-house 3D printing, and open-source drone/robotics firmware and hardware.</li>
@@ -120,63 +140,25 @@
       </ul>
     </div>
     <div class="entry">
-      <div class="entry-head"><h3>Co-founder, CEO / Managing Partner — iFiNN</h3><span class="role">IISER Kolkata · current</span></div>
+      <div class="head"><h3>Co-founder, CEO / Managing Partner <span class="org">· iFiNN — Intelligent Financial Neural Network</span></h3><span class="date">current</span></div>
       <ul>
-        <li>Intelligent Financial Neural Network: an AI-powered quantitative finance and algorithmic-trading platform.</li>
-        <li>Financial analysis, strategy development, backtesting, machine-learning workflows and automated execution.</li>
+        <li>AI-powered quantitative finance and algorithmic-trading platform: financial analysis, strategy development, backtesting, machine-learning workflows and automated execution.</li>
         <li>Took the concept to a working prototype. Finalist at the IIT Delhi Incubator Summit and the IIT Madras I-Summit.</li>
       </ul>
     </div>
-    
+  </section>
+
+  <section aria-labelledby="s-teaching">
+    <h2 id="s-teaching">Teaching</h2>
     <div class="entry">
-      <div class="entry-head"><h3>Undergraduate Teaching Assistant — IISER Kolkata</h3><span class="role">Aug – Dec 2026</span></div>
-      <p>LS2102 Biophysics Laboratory (sophomores) under Dr. Bidisha Sinha, and CS1101 Introduction to Computer Programming (first-year students).</p>
-    </div>
-    <div class="entry">
-      <div class="entry-head"><h3>Research Intern — EEPC India</h3><span class="role">Kolkata</span></div>
-      <p>Industry and economic research: data analysis, research synthesis and analytical writing.</p>
-    </div>
-    <div class="entry">
-      <div class="entry-head"><h3>Research Intern — Bose Institute</h3><span class="role">Kolkata · May – July 2024</span></div>
-      <ul>
-        <li>Cell-culture techniques and fundamental biological data analysis using Python.</li>
-        <li>Applied NumPy and TensorFlow to experimental data as a foundation for scientific computing.</li>
-      </ul>
-    </div>
-    <div class="entry">
-      <div class="entry-head"><h3>VC Analyst — Investment Research cohort</h3><span class="role">Cohort participant</span></div>
-      <p>Startup evaluation and due diligence: market sizing, product-market fit, scalability, unit economics, financial projections and investment theses, including valuation methodology associated with Aswath Damodaran.</p>
-    </div>
-    <div class="entry">
-      <div class="entry-head"><h3>Departmental Representative — Biological Sciences, IISER Kolkata</h3><span class="role">Aug 2024 – present</span></div>
-      <p>Managing class and exam activities; primary student liaison to the faculty administration.</p>
-    </div>
-    <div class="entry">
-      <div class="entry-head"><h3>Inquivesta XI (IISER Kolkata Science Fest) — Hospitality Head (2026), Event Manager (2024–25)</h3><span class="role">2024 – 2026</span></div>
-      <ul>
-        <li>Onboarded Krafton and NoScopeGaming as official sponsors for the 2025 edition.</li>
-        <li>Hospitality Head for 2026, overseeing guest relations and logistics for dignitaries.</li>
-      </ul>
+      <div class="head"><h3>Undergraduate Teaching Assistant <span class="org">· IISER Kolkata</span></h3><span class="date">Aug – Dec 2026</span></div>
+      <p class="row">LS2102 Biophysics Laboratory (sophomores) under Dr. Bidisha Sinha, and CS1101 Introduction to Computer Programming (first-year students).</p>
     </div>
   </section>
 
-  <section aria-labelledby="research">
-    <h2 id="research">Research</h2>
-    <div class="entry">
-      <div class="entry-head"><h3>Master's Thesis — Species detection from biological imagery</h3><span class="role">Current</span></div>
-      <p>Building hardware and a machine-learning model to detect and identify species from biological images and videos.</p>
-    </div>
-    <div class="entry">
-      <div class="entry-head"><h3>Attention Follows Power, Not Population: Thirty Years of Political Coverage in the Indian English-Language Press</h3><span class="role">Under review · ICWSM</span></div>
-    </div>
-    <div class="entry">
-      <div class="entry-head"><h3>AquaVision: A Trainable Iterative Refinement Loop for Underwater Image Enhancement</h3><span class="role">Under review · IndoML</span></div>
-    </div>
-  </section>
-
-  <section aria-labelledby="skills">
-    <h2 id="skills">Technical Skills</h2>
-    <dl class="two">
+  <section aria-labelledby="s-skills">
+    <h2 id="s-skills">Technical Skills</h2>
+    <dl class="skills">
       <dt>Programming</dt><dd>Python (data analysis); HTML/CSS; MATLAB (basic); C++ (basic)</dd>
       <dt>AI / ML</dt><dd>NumPy, TensorFlow; computer vision; image enhancement</dd>
       <dt>Finance / quant</dt><dd>Algorithmic trading, backtesting, financial modelling, quantitative analysis</dd>
@@ -189,8 +171,8 @@
     </dl>
   </section>
 
-  <section aria-labelledby="hon">
-    <h2 id="hon">Achievements</h2>
+  <section aria-labelledby="s-awards">
+    <h2 id="s-awards">Awards &amp; Honors</h2>
     <ul>
       <li>1st place, pitching contest — Inter IISER–NISER Entrepreneurship Summit, IISER Tirupati (joint team), with Underwater AI.</li>
       <li>Finalist — IIT Delhi Incubator Summit and IIT Madras I-Summit, with iFiNN.</li>
@@ -202,18 +184,25 @@
     </ul>
   </section>
 
-  <section aria-labelledby="lead">
-    <h2 id="lead">Leadership &amp; Community</h2>
+  <section aria-labelledby="s-service">
+    <h2 id="s-service">Leadership &amp; Service</h2>
     <div class="entry">
-      <div class="entry-head"><h3>Departmental Representative — Biological Sciences, IISER-K</h3><span class="role">Aug 2024 – present</span></div>
-      <p>Managing class and exam activities; primary student liaison to the faculty administration.</p>
+      <div class="head"><h3>Departmental Representative <span class="org">· Biological Sciences, IISER Kolkata</span></h3><span class="date">Aug 2024 – present</span></div>
+      <p class="row">Managing class and exam activities; primary student liaison to the faculty administration.</p>
     </div>
     <div class="entry">
-      <div class="entry-head"><h3>SlashDot — coding and technology club, IISER Kolkata</h3><span class="role">Member</span></div>
-      <p>Technical community, web development and competitions; 3rd place, web-design competition (2026).</p>
+      <div class="head"><h3>Hospitality Head (2026) &amp; Event Manager (2024–25) <span class="org">· Inquivesta XI, IISER Kolkata</span></h3><span class="date">2024 – 2026</span></div>
+      <ul>
+        <li>Onboarded Krafton and NoScopeGaming as official sponsors for the 2025 edition.</li>
+        <li>Overseeing guest relations and logistics for dignitaries as Hospitality Head for 2026.</li>
+      </ul>
     </div>
     <div class="entry">
-      <div class="entry-head"><h3>Social impact — Ek Pehal, DKMS BMST</h3><span class="role">Volunteer</span></div>
+      <div class="head"><h3>SlashDot <span class="org">· coding and technology club, IISER Kolkata</span></h3><span class="date">member</span></div>
+      <p class="row">Technical community, web development and competitions; 3rd place, web-design competition (2026).</p>
+    </div>
+    <div class="entry">
+      <div class="head"><h3>Volunteer <span class="org">· Ek Pehal, DKMS BMST</span></h3><span class="date">community</span></div>
       <ul>
         <li>Taught English and Biology to underprivileged children (classes VI–IX) through the Ek Pehal programme.</li>
         <li>Volunteered for blood stem-cell and anti-cancer awareness drives with DKMS BMST.</li>
@@ -221,34 +210,25 @@
     </div>
   </section>
 
-  <section aria-labelledby="misc">
-    <h2 id="misc">Hobbies &amp; Languages</h2>
-    <dl class="two">
-      <dt>Music</dt><dd>Trained in Indian classical music (singing); self-learning keyboard and guitar</dd>
-      <dt>Creative</dt><dd>Enthusiast of Bangla Sahitya; public speaking and science communication</dd>
-    </dl>
+  <section aria-labelledby="s-extra">
+    <h2 id="s-extra">Extracurricular</h2>
+    <p class="row">Trained in Indian classical music (singing); self-learning keyboard and guitar. Enthusiast of Bangla Sahitya; public speaking and science communication.</p>
   </section>
-</main>
 
-<footer class="foot">
-  <div class="wrap">© <span id="year">2026</span> Youktik Sajjan · <a href="index.html">Portfolio</a></div>
-</footer>
+  <footer>© <span id="year">2026</span> Youktik Sajjan <span class="screen">· <a href="index.html">Portfolio</a></span></footer>
+</div>
 
 <script>
 (function(){
   var root = document.documentElement;
-  var btn = document.getElementById('theme-toggle');
+  var btn = document.getElementById('toggle');
   function system(){ return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
   function current(){ return root.getAttribute('data-theme') || system(); }
-  function paint(){
-    var t = current();
-    btn.textContent = t === 'dark' ? '☀' : '☾';
-    btn.setAttribute('aria-label', 'Switch to ' + (t === 'dark' ? 'light' : 'dark') + ' theme');
-  }
+  function paint(){ var t = current(); btn.textContent = t === 'dark' ? '☀' : '☾'; btn.setAttribute('aria-label', 'Switch to ' + (t === 'dark' ? 'light' : 'dark') + ' theme'); }
   btn.addEventListener('click', function(){
     var t = current() === 'dark' ? 'light' : 'dark';
     root.setAttribute('data-theme', t);
-    try { localStorage.setItem('theme', t); } catch (e) {}
+    try { localStorage.setItem('cv-theme', t); } catch (e) {}
     paint();
   });
   paint();

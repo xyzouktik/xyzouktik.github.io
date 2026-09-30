@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Immune Runner — Youktik Sajjan</title>
+<meta name="description" content="A small browser game: a bacterium runs across a microscope slide, jumping white blood cells, cytotoxic T cells and antibodies.">
+<link rel="canonical" href="https://xyzouktik.github.io/game.html">
+<meta name="theme-color" content="#0b1f2a">
+<style>
+  :root{ --bg:#0b1f2a; --panel:#0a1720; --fg:#e6f4f1; --muted:#8fb3ad; --accent:#34d399; --line:#1f3b45; }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--fg); min-height:100vh; display:flex; flex-direction:column;
+       font-family:ui-monospace,"SFMono-Regular","SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+  .bar{display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.7rem 1rem;
+       border-bottom:1px solid var(--line); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase}
+  .bar a{color:var(--muted); text-decoration:none}
+  .bar a:hover{color:var(--accent)}
+  main{flex:1; display:flex; flex-direction:column; align-items:center; gap:.9rem; padding:1.1rem}
+  h1{margin:.2rem 0 0; font-size:.95rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent)}
+  .stage{width:100%; max-width:900px; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--panel)}
+  canvas{display:block; width:100%; height:auto; touch-action:manipulation}
+  .hint{color:var(--muted); font-size:.74rem; line-height:1.7; text-align:center; max-width:900px; margin:0}
+  kbd{background:#132734; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font:inherit}
+  #restart{font:inherit; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer;
+           background:none; border:1px solid var(--line); color:var(--muted); border-radius:6px; padding:.4rem .8rem}
+  #restart:hover{color:var(--accent); border-color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="bar"><a href="index.html">&larr; Youktik Sajjan</a><span>Immune Runner</span></div>
+<main>
+  <h1>Immune Runner</h1>
+  <div class="stage">
+    <canvas id="game" width="900" height="260" tabindex="0"
+      aria-label="Immune Runner. A bacterium runs across a slide. Press space or up arrow to jump, down arrow to duck. Tap the top half to jump and the bottom half to duck."></canvas>
+  </div>
+  <p class="hint"><kbd>Space</kbd> / <kbd>&uarr;</kbd> jump &nbsp;·&nbsp; <kbd>&darr;</kbd> duck &nbsp;·&nbsp; tap top half to jump, bottom half to duck &nbsp;·&nbsp; <kbd>Space</kbd> to start and restart</p>
+  <button id="restart" type="button">Restart</button>
+</main>
+<script>
+(function () {
+  var cv = document.getElementById('game');
+  var ctx = cv.getContext('2d');
+  var W = 900, H = 260, groundY = H - 46;
+
+  var GRAVITY = 2200, JUMP_V = 660;
+  var PX = 96, PW = 34, STAND_H = 17, DUCK_H = 9;
+
+  var state = 'ready';
+  var py = 0, vy = 0, onGround = true, ducking = false;
+  var speed = 330, score = 0, best = 0, dist = 0, nextGap = 380, scroll = 0;
+  var obstacles = [], last = 0;
+
+  try { best = parseInt(localStorage.getItem('immuneRunnerBest') || '0', 10) || 0; } catch (e) { best = 0; }
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  var GROUND_TYPES = ['wbc', 'tcell', 'wbcSmall'];
+  var FLY_TYPES = ['tcellFly', 'antibody', 'macrophage'];
+
+  function spawn() {
+    var flying = Math.random() < 0.4;
+    if (flying) {
+      var t = FLY_TYPES[(Math.random() * FLY_TYPES.length) | 0];
+      var h = rand(18, 24);
+      var gap = rand(11, 17);
+      obstacles.push({ type: t, x: W + 20, w: t === 'antibody' ? 22 : 26, h: h, fly: true, gap: gap });
+    } else {
+      var g = GROUND_TYPES[(Math.random() * GROUND_TYPES.length) | 0];
+      var hh = rand(26, 34);
+      obstacles.push({ type: g, x: W + 20, w: hh, h: hh, fly: false, gap: 0 });
+    }
+    nextGap = rand(250, 470) * (speed / 380);
+  }
+
+  function reset() {
+    py = 0; vy = 0; onGround = true; ducking = false;
+    speed = 330; score = 0; dist = 0; nextGap = 420; scroll = 0;
+    obstacles = []; last = 0; state = 'playing';
+  }
+
+  function jump() {
+    if (state === 'ready') { reset(); return; }
+    if (state === 'over') { reset(); return; }
+    if (onGround) { vy = JUMP_V; onGround = false; ducking = false; }
+  }
+
+  var holdingDuck = false;
+  window.addEventListener('keydown', function (e) {
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { e.preventDefault(); jump(); }
+    else if (e.code === 'ArrowDown' || e.code === 'KeyS') { e.preventDefault(); holdingDuck = true; }
+  });
+  window.addEventListener('keyup', function (e) {
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') holdingDuck = false;
+  });
+
+  function pointerDown(e) {
+    e.preventDefault();
+    var r = cv.getBoundingClientRect();
+    var y = (e.clientY - r.top) / r.height;
+    if (y < 0.5) { jump(); } else { holdingDuck = true; }
+  }
+  cv.addEventListener('pointerdown', pointerDown);
+  window.addEventListener('pointerup', function () { holdingDuck = false; });
+  document.getElementById('restart').addEventListener('click', function () { reset(); cv.focus(); });
+
+  function playerBox() {
+    var h = (ducking && onGround) ? DUCK_H : ((vy < 0 ? DUCK_H : STAND_H));
+    if (onGround) h = ducking ? DUCK_H : STAND_H;
+    var bottom = groundY - py;
+    return { x: PX, y: bottom - h, w: PW, h: h };
+  }
+
+  function update(dt) {
+    scroll += speed * dt;
+    if (state !== 'playing') { if (obstacles.length === 0) draw(); return; }
+
+    dist += speed * dt;
+    speed = Math.min(780, 330 + dist / 140);
+    score += speed * dt * 0.05;
+
+    if (holdingDuck) {
+      if (onGround) ducking = true;
+      else vy -= GRAVITY * 1.6 * dt;
+    } else if (onGround) ducking = false;
+
+    if (!onGround) {
+      py += vy * dt;
+      vy -= GRAVITY * dt;
+      if (py <= 0) { py = 0; vy = 0; onGround = true; }
+    }
+
+    last += speed * dt;
+    if (last >= nextGap) { last = 0; spawn(); }
+
+    var p = playerBox();
+    for (var i = obstacles.length - 1; i >= 0; i--) {
+      var o = obstacles[i];
+      o.x -= speed * dt;
+      var oy = o.fly ? (groundY - o.gap - o.h) : (groundY - o.h);
+      var ob = o.fly ? (groundY - o.gap) : groundY;
+      if (p.x + p.w > o.x && p.x < o.x + o.w && p.y < ob && p.y + p.h > oy) { gameOver(); }
+      if (o.x + o.w < -40) obstacles.splice(i, 1);
+    }
+  }
+
+  function gameOver() {
+    state = 'over';
+    if (score > best) { best = score; try { localStorage.setItem('immuneRunnerBest', String(Math.floor(best))); } catch (e) {} }
+  }
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawObstacle(o) {
+    var oy = o.fly ? (groundY - o.gap - o.h) : (groundY - o.h);
+    var cx = o.x + o.w / 2, cy = oy + o.h / 2, r = o.h / 2;
+    ctx.lineWidth = 1.6;
+    if (o.type === 'wbc' || o.type === 'wbcSmall') {
+      ctx.fillStyle = '#cbd5e1'; ctx.strokeStyle = '#64748b';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.2832); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#64748b';
+      ctx.beginPath(); ctx.arc(cx - r * 0.35, cy - r * 0.22, r * 0.42, 0, 6.2832); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + r * 0.3, cy + r * 0.25, r * 0.34, 0, 6.2832); ctx.fill();
+    } else if (o.type === 'tcell' || o.type === 'tcellFly') {
+      ctx.fillStyle = '#2dd4bf'; ctx.strokeStyle = '#0f766e';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.2832); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0f766e';
+      ctx.beginPath(); ctx.arc(cx - r * 0.3, cy - r * 0.2, r * 0.2, 0, 6.2832); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + r * 0.3, cy + r * 0.1, r * 0.2, 0, 6.2832); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy + r * 0.4, r * 0.17, 0, 6.2832); ctx.fill();
+    } else if (o.type === 'antibody') {
+      ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      var m = oy + o.h * 0.7;
+      ctx.beginPath(); ctx.moveTo(cx, m); ctx.lineTo(cx, oy + 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, oy + 2); ctx.lineTo(cx - r * 0.8, oy - r * 0.2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, oy + 2); ctx.lineTo(cx + r * 0.8, oy - r * 0.2); ctx.stroke();
+    } else {
+      ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#b45309';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.2832); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#b45309';
+      ctx.beginPath(); ctx.arc(cx - r * 0.3, cy - r * 0.1, r * 0.36, 0, 6.2832); ctx.fill();
+    }
+  }
+
+  function draw() {
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#0e2634'); g.addColorStop(1, '#0a1720');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = 'rgba(148,163,184,0.14)';
+    for (var i = 0; i < 18; i++) {
+      var dx = (i * 137 - scroll * 0.15) % (W + 60) - 30;
+      var dy = 26 + (i * 53) % 120;
+      ctx.beginPath(); ctx.arc(dx, dy, (i % 3) + 1.4, 0, 6.2832); ctx.fill();
+    }
+
+    ctx.strokeStyle = 'rgba(148,163,184,0.35)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(W, groundY); ctx.stroke();
+    ctx.strokeStyle = 'rgba(148,163,184,0.22)';
+    for (var t = 0; t < 18; t++) {
+      var tx = ((t * 60 - scroll) % (W + 60) + (W + 60)) % (W + 60);
+      ctx.beginPath(); ctx.moveTo(tx, groundY + 3); ctx.lineTo(tx, groundY + 8); ctx.stroke();
+    }
+
+    for (var k = 0; k < obstacles.length; k++) drawObstacle(obstacles[k]);
+
+    var p = playerBox();
+    ctx.save();
+    ctx.translate(PX + PW / 2, p.y + p.h / 2);
+    if (!onGround) ctx.rotate(-0.14);
+    ctx.strokeStyle = '#34d399'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    ctx.globalAlpha = 0.55;
+    ctx.beginPath(); ctx.moveTo(-PW / 2, -2); ctx.quadraticCurveTo(-PW / 2 - 9, -8, -PW / 2 - 17, -2);
+    ctx.quadraticCurveTo(-PW / 2 - 9, 4, -PW / 2, -2); ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#34d399'; ctx.strokeStyle = '#0f766e'; ctx.lineWidth = 1.4;
+    rr(-PW / 2, -p.h / 2, PW, p.h, p.h / 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#0f766e';
+    ctx.beginPath(); ctx.arc(-6, -p.h / 2 + p.h * 0.42, 1.9, 0, 6.2832); ctx.fill();
+    ctx.beginPath(); ctx.arc(1, -p.h / 2 + p.h * 0.42, 1.9, 0, 6.2832); ctx.fill();
+    ctx.restore();
+
+    ctx.font = '600 20px ui-monospace, Menlo, Consolas, monospace';
+    ctx.textAlign = 'right'; ctx.fillStyle = '#e6f4f1';
+    ctx.fillText(String(Math.floor(score)).padStart(5, '0'), W - 18, 34);
+    ctx.font = '12px ui-monospace, Menlo, Consolas, monospace';
+    ctx.fillStyle = '#8fb3ad';
+    ctx.fillText('HI ' + String(Math.floor(best)).padStart(5, '0'), W - 18, 52);
+
+    if (state === 'ready') {
+      ctx.textAlign = 'center'; ctx.fillStyle = '#e6f4f1';
+      ctx.font = '600 22px ui-monospace, Menlo, Consolas, monospace';
+      ctx.fillText('IMMUNE RUNNER', W / 2, 98);
+      ctx.font = '13px ui-monospace, Menlo, Consolas, monospace'; ctx.fillStyle = '#8fb3ad';
+      ctx.fillText('space / tap to start', W / 2, 124);
+    } else if (state === 'over') {
+      ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(10,23,32,0.72)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#e6f4f1';
+      ctx.font = '600 24px ui-monospace, Menlo, Consolas, monospace';
+      ctx.fillText('CAUGHT', W / 2, 104);
+      ctx.font = '13px ui-monospace, Menlo, Consolas, monospace'; ctx.fillStyle = '#8fb3ad';
+      ctx.fillText('score ' + Math.floor(score) + '  ·  space / tap to run again', W / 2, 132);
+    }
+  }
+
+  function loop(ts) {
+    var dt = Math.min(0.05, (ts - (loop.t || ts)) / 1000 || 0);
+    loop.t = ts;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  cv.focus();
+  draw();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
