@@ -1,9 +1,9 @@
 # Youktik Sajjan
 
-**Interdisciplinary builder — AI · computer vision · robotics · finance · security.**
+**Interdisciplinary builder — AI · computer vision · robotics · finance.**
 Co-founder of Underwater AI and iFiNN. Integrated BS-MS at IISER Kolkata.
 
-I build applied systems where science meets computation: marine-imagery models and underwater robotics hardware, AI-powered quantitative finance, and — increasingly — security and cryptology. The through-line is turning research into working technology.
+I build applied systems where science meets computation: marine-imagery models and underwater robotics hardware, AI-powered quantitative finance. The through-line is turning research into working technology.
 
 - Web: https://xyzouktik.github.io/
 - LinkedIn: https://www.linkedin.com/in/youktik-sajjan
@@ -13,11 +13,10 @@ I build applied systems where science meets computation: marine-imagery models a
 
 ## About Me
 
-I work across disciplines rather than within one: biological sciences and computation, computer vision and robotics, quantitative finance, and security. I co-founded two deep-tech startups and have built hardware and software for underwater environments. Currently in the final year of an Integrated BS-MS at IISER Kolkata (Biological Sciences major, Computer Sciences minor), with a master's thesis on species detection from biological imagery and a submitted research paper.
+I work across disciplines rather than within one: biological sciences and computation, computer vision and robotics, and quantitative finance. I co-founded two deep-tech startups and have built hardware and software for underwater environments. Currently in the final year of an Integrated BS-MS at IISER Kolkata (Biological Sciences major; Computer Sciences minor, Humanities minor), with a master's thesis on species detection from biological imagery and a submitted research paper.
 
 ## Current Focus
 
-- **Cryptology and security** — advanced study through the M.Tech in Cryptology and Security, Indian Statistical Institute, Kolkata.
 - **Master's thesis** — hardware and a machine-learning model to detect and identify species from biological images and videos.
 - **Underwater AI** — marine-imagery models, underwater robotics hardware and an underwater AI laboratory.
 - **iFiNN** — AI-assisted quantitative strategy, backtesting and algorithmic execution.
@@ -30,7 +29,6 @@ I work across disciplines rather than within one: biological sciences and comput
 | Co-founder, CEO / Managing Partner | iFiNN | AI-powered quantitative finance and algorithmic trading |
 | Co-founder | Synapse | Fintech venture; Genesis EiR Cohort 2 (MeitY / RISE Foundation) |
 | Research Intern | EEPC India | Industry/economic research, data analysis, analytical writing |
-| Research Intern | CSIR–NGRI | Scientific investigation, data analysis, research presentation |
 | Research Intern | Bose Institute | Cell culture and biological data analysis in Python (NumPy, TensorFlow) |
 | VC Analyst | Investment Research cohort | Startup evaluation, valuation and due diligence |
 | Departmental Representative | IISER Kolkata | Biological Sciences, Aug 2024 – present |
@@ -40,7 +38,7 @@ I work across disciplines rather than within one: biological sciences and comput
 
 **Underwater AI — Co-founder & COO.** Intelligent systems for underwater environments: image restoration, detection and 3D reconstruction running on the vehicle (ABYSS-1 ROV). Built around prototype underwater-robotics hardware, in-house 3D printing, and open-source drone/robotics firmware and hardware. Deployed with AI models for underwater image enhancement. Backed by the MeitY Startup Hub, Government of India. 1st place, pitching contest, Inter IISER–NISER Entrepreneurship Summit (IISER Tirupati), joint team.
 
-**iFiNN — Intelligent Financial Neural Network — Co-founder, CEO / Managing Partner.** An AI-powered quantitative finance and algorithmic-trading platform: assisted financial analysis, strategy development, backtesting, machine-learning workflows, semantic/social signal analysis and automated execution, with a no-code/low-code surface for quantitative analysis. Finalist at the IIT Delhi Incubator Summit and the IIT Madras I-Summit. Proposed model: ₹499/month SaaS plus marketplace commission (not established revenue).
+**iFiNN — Intelligent Financial Neural Network — Co-founder, CEO / Managing Partner.** An AI-powered quantitative finance and algorithmic-trading platform: assisted financial analysis, strategy development, backtesting, machine-learning workflows, semantic/social signal analysis and automated execution, with a no-code/low-code surface for quantitative analysis. Finalist at the IIT Delhi Incubator Summit and the IIT Madras I-Summit.
 
 **Synapse — Co-founder.** Fintech venture building, supported through Genesis EiR Cohort 2 (MeitY, Government of India, via the RISE Foundation at IISER Kolkata).
 
@@ -48,8 +46,7 @@ I work across disciplines rather than within one: biological sciences and comput
 
 - **Master's thesis** — hardware + machine learning for species detection and identification from biological images and videos.
 - **Research paper** — submitted.
-- **Algal biotechnology (proposed/theoretical)** — genetic engineering of *Spirogyra neglecta* for improved biogas production: phytochrome-related regulation, cell-cycle regulation, Rubisco, anaerobic digestion and fermentation. Not experimentally validated.
-- **Internships** — EEPC India, CSIR–NGRI, Bose Institute.
+- **Internships** — EEPC India, Bose Institute.
 
 ## Selected Technical Projects
 
@@ -78,7 +75,6 @@ Algorithmic trading, backtesting, financial modelling, quantitative and financia
 
 ## Education
 
-- **Indian Statistical Institute, Kolkata** — M.Tech, Cryptology and Security (current direction).
 - **IISER Kolkata** — Integrated BS-MS, 2022–2027 (final year). Biological Sciences major, Computer Sciences minor. CGPA 7.78.
 - **Barasat M.G.M H.S.** — Higher Secondary (WBCHSE), 2013–2021. 97%.
 
@@ -98,7 +94,6 @@ Algorithmic trading, backtesting, financial modelling, quantitative and financia
 - **Scientific computing:** experimental data analysis; PDB and UniProt
 - **Robotics / hardware:** FPV drones, UAV/UUV, Matek flight controllers, Betaflight, GPS/compass, ELRS, BLDC motors, ESCs, FPV video, embedded firmware
 - **CAD / fabrication:** FreeCAD, parametric design, 3D printing (PLA), mechanical prototyping
-- **Cybersecurity / cryptology:** cryptology and security engineering (M.Tech programme)
 - **Research:** experimental design, literature review, immunofluorescence imaging, microscopy, Western blot, PCR, plasmid isolation, competent-cell preparation, bacterial and Drosophila culture
 - **Business / strategy:** startup operations, product, venture-capital and investment research, event management
 
@@ -108,7 +103,6 @@ Algorithmic trading, backtesting, financial modelling, quantitative and financia
 - Species recognition from biological images and videos
 - Computational biology and bioinformatics (PDB, UniProt)
 - Machine learning for scientific data
-- Cryptology and security
 - Quantitative finance and financial machine learning
 
 ## Currently Building
@@ -116,7 +110,6 @@ Algorithmic trading, backtesting, financial modelling, quantitative and financia
 - An underwater AI laboratory and prototype robotics hardware with in-house 3D printing.
 - Species-detection hardware and models for the master's thesis.
 - iFiNN's quantitative strategy and backtesting stack.
-- Grounding in cryptology and security through the ISI Kolkata M.Tech programme.
 
 ## GitHub Projects
 
