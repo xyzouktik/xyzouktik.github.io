@@ -27,7 +27,6 @@ I work across disciplines rather than within one: biological sciences and comput
 | --- | --- | --- |
 | Co-founder & COO | Underwater AI | Underwater imaging, sensing, robotics; hardware + AI |
 | Co-founder, CEO / Managing Partner | iFiNN | AI-powered quantitative finance and algorithmic trading |
-| Co-founder | Synapse | Fintech venture; Genesis EiR Cohort 2 (MeitY / RISE Foundation) |
 | Research Intern | EEPC India | Industry/economic research, data analysis, analytical writing |
 | Research Intern | Bose Institute | Cell culture and biological data analysis in Python (NumPy, TensorFlow) |
 | VC Analyst | Investment Research cohort | Startup evaluation, valuation and due diligence |
@@ -39,8 +38,6 @@ I work across disciplines rather than within one: biological sciences and comput
 **Underwater AI — Co-founder & COO.** Intelligent systems for underwater environments: image restoration, detection and 3D reconstruction running on the vehicle (ABYSS-1 ROV). Built around prototype underwater-robotics hardware, in-house 3D printing, and open-source drone/robotics firmware and hardware. Deployed with AI models for underwater image enhancement. Backed by the MeitY Startup Hub, Government of India. 1st place, pitching contest, Inter IISER–NISER Entrepreneurship Summit (IISER Tirupati), joint team.
 
 **iFiNN — Intelligent Financial Neural Network — Co-founder, CEO / Managing Partner.** An AI-powered quantitative finance and algorithmic-trading platform: assisted financial analysis, strategy development, backtesting, machine-learning workflows, semantic/social signal analysis and automated execution, with a no-code/low-code surface for quantitative analysis. Finalist at the IIT Delhi Incubator Summit and the IIT Madras I-Summit.
-
-**Synapse — Co-founder.** Fintech venture building, supported through Genesis EiR Cohort 2 (MeitY, Government of India, via the RISE Foundation at IISER Kolkata).
 
 ## Research
 
@@ -67,7 +64,7 @@ Algorithmic trading, backtesting, financial modelling, quantitative and financia
 
 - 1st place, pitching contest — Inter IISER–NISER Entrepreneurship Summit, IISER Tirupati (joint team), with Underwater AI.
 - Finalist — IIT Delhi Incubator Summit and IIT Madras I-Summit, with iFiNN.
-- Genesis EiR Cohort 2 support — MeitY, Government of India, via the RISE Foundation at IISER Kolkata.
+- Genesis EiR Cohort 2 support — MeitY, Government of India, via the RISE Foundation at IISER Kolkata (Underwater AI and iFiNN).
 - 3rd place — SlashDot web-design competition, IISER Kolkata, 2026.
 - Science Olympiad Foundation — Zonal Gold Medal, National Science Olympiad (2018); National Silver Medal, International English Olympiad.
 - Nirmala Smriti Puraskar — highest scorer in H.S. Biology.
