@@ -13,7 +13,7 @@ I build applied systems where science meets computation: marine-imagery models a
 
 ## About Me
 
-I work across disciplines rather than within one: biological sciences and computation, computer vision and robotics, and quantitative finance. I co-founded two deep-tech startups and have built hardware and software for underwater environments. Currently in the final year of an Integrated BS-MS at IISER Kolkata (Biological Sciences major; Computer Sciences minor, Humanities minor), with a master's thesis on species detection from biological imagery and a submitted research paper.
+I work across disciplines rather than within one: biological sciences and computation, computer vision and robotics, and quantitative finance. I co-founded two deep-tech startups and have built hardware and software for underwater environments. Currently in the final year of an Integrated BS-MS at IISER Kolkata (Biological Sciences major; Computer Sciences minor, Humanities minor), with a master's thesis on species detection from biological imagery and two papers under review (ICWSM, IndoML).
 
 ## Current Focus
 
@@ -27,6 +27,7 @@ I work across disciplines rather than within one: biological sciences and comput
 | --- | --- | --- |
 | Co-founder & COO | Underwater AI | Underwater imaging, sensing, robotics; hardware + AI |
 | Co-founder, CEO / Managing Partner | iFiNN | AI-powered quantitative finance and algorithmic trading |
+| Undergraduate Teaching Assistant | IISER Kolkata | LS2102 Biophysics Lab (Dr. Bidisha Sinha); CS1101 Intro to Computer Programming, Aug–Dec 2026 |
 | Research Intern | EEPC India | Industry/economic research, data analysis, analytical writing |
 | Research Intern | Bose Institute | Cell culture and biological data analysis in Python (NumPy, TensorFlow) |
 | VC Analyst | Investment Research cohort | Startup evaluation, valuation and due diligence |
@@ -42,7 +43,8 @@ I work across disciplines rather than within one: biological sciences and comput
 ## Research
 
 - **Master's thesis** — hardware + machine learning for species detection and identification from biological images and videos.
-- **Research paper** — submitted.
+- **Attention Follows Power, Not Population: Thirty Years of Political Coverage in the Indian English-Language Press** — under review, ICWSM.
+- **AquaVision: A Trainable Iterative Refinement Loop for Underwater Image Enhancement** — under review, IndoML.
 - **Internships** — EEPC India, Bose Institute.
 
 ## Selected Technical Projects
