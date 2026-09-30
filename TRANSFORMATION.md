@@ -1,192 +1,56 @@
-# XYZouktik Portal - Website Transformation
+# XYZouktik Portal — Implementation Notes
 
-## Overview
-Comprehensive redesign and upgrade of the xyzouktik.github.io portfolio website with advanced animations, branding updates, and a shift from pixelated retro style to realistic 3D/4D artwork.
+Technical notes for the `xyzouktik.github.io` static portfolio. This document describes what is actually implemented in the current files.
 
-## Major Changes
+## Stack
 
-### 1. **Branding Update: ysdvision → xyzouktik**
-- Updated all instances of "ysdvision" to "xyzouktik" throughout the site
-- Changed logo from "YS" to "XZ"
-- Updated logo subtitle from "hero mode" to "portal"
-- Updated all GitHub links to point to xyzouktik GitHub profile
-- Updated meta tags and page titles
+- Plain static HTML, no build step.
+- Tailwind CSS loaded from the CDN (`https://cdn.tailwindcss.com`) with an inline `tailwind.config`.
+- Fonts from Google Fonts: Press Start 2P, VT323, Share Tech Mono, Nunito.
+- All animation is vanilla JS on `<canvas>` 2D, inlined in the pages.
 
-### 2. **Interstellar Intro Animation Sequence**
-New file: `assets/js/intro-animations.js`
+## Pages
 
-A multi-stage loading sequence that plays on first visit:
-- **Terminal Phase**: ASCII-style terminal interface showing system initialization
-- **Galaxy Phase**: Animated spiral galaxy with rotating cosmic elements and Saturn-like rings
-- **Earth Phase**: 3D sphere representing Earth with continent overlay
-- **India Phase**: Simplified India map showing geographical focus
-- **Portal Completion**: Smooth fade to main content
+| File | Purpose |
+| --- | --- |
+| `index.html` | Main portfolio (About, Projects, Ventures, Culture, Music, Gallery, Contact, CV) |
+| `blog.html` | Creatives page with category filters |
+| `cv.html` | Standalone CV document, embedded into `index.html` via iframe |
 
-Features:
-- Session storage to prevent replay on subsequent visits
-- Canvas-based 2D animations with mathematical modeling
-- Progress indicators and real-time feedback
-- Smooth transitions between phases
-- Optimized performance
+## index.html
 
-### 3. **Realistic Dragon Animation**
-New files:
-- `assets/js/realistic-dragon.js` - 3D-style dragon with smooth curves
-- `assets/js/dragon-init.js` - Initialization wrapper
+### Ender Dragon background
+An inline `EnderDragon` class on `<canvas id="dragon-canvas">` renders a 2D pixel/arcade dragon:
 
-Replaces pixelated Minecraft-style dragon with:
-- Smooth ellipse-based body rendering
-- Realistic scale texture details
-- Animated wing flapping with physics
-- Dynamic eye system with glow effects
-- Breath/fire particle effects
-- Tail animations with segmented design
-- Mouth opening animation synchronized with roars
-- Horn and horn details
-- Responsive movement tracking
-- Ambient particle effects around dragon
+- A 24-segment body chain follows a smoothed target that orbits the cursor.
+- Animated wings, opening jaw, glowing eyes, and a fire-breath particle system with smoke and embers.
+- Fire particles push nearby mobs and trigger a hit flash.
 
-### 4. **Blog → Creatives Page Transformation**
-Updated file: `blog.html`
+### Ambient mobs
+`AmbientMob` instances (villagers, creepers, endermen) spawn from screen edges, walk around, and react to the dragon (creepers flee, endermen teleport, villagers panic). Decorative `ChorusPlant` and `EndCrystal` props are also drawn. Starfield and void-particle layers complete the scene.
 
-Changes:
-- Page title updated to "Creatives"
-- Section header changed from "📖 BOOK & QUILL" to "🎨 CREATIVES"
-- Background changed from static endstone texture to dynamic ocean animation
-- New canvas-based ocean visualization system
+### Projects
+`#projects-grid` is populated by fetching `https://api.github.com/users/xyzouktik/repos` and filtering to `xyzouktik.github.io`.
 
-### 5. **Deep Ocean Animation System**
-New file: `assets/js/ocean-animation.js`
+### Other behaviour
+- Mobile nav overlay, active-nav highlighting, and scroll-triggered `.fade-in` reveals via `IntersectionObserver`.
 
-Features realistic underwater scene with:
+## blog.html
 
-**Marine Life:**
-- Realistic whales with spout animations
-- Fish schools with coordinated movement patterns
-- Scuba divers with animated swimming
-- Submarines with working lights and depth effects
+- Same End visual system.
+- `<canvas id="dragon-canvas">` renders the drifting particle, starfield, and chorus-plant background.
+- Category tabs (`ALL` / `BLOG` / `POETRY` / `LITERATURE`) filter `article[data-type]` entries.
 
-**Environmental Details:**
-- Gradient ocean background (deep blue to dark)
-- Bubble animations rising from ocean floor
-- Light ray effects from surface
-- Realistic color palette (blues, cyans, sand tones)
-- Sand/sediment floor representation
+## cv.html
 
-**Technical Implementation:**
-- Object-oriented entity system
-- Smooth movement algorithms
-- Particle system for bubbles
-- Canvas-based 2D rendering
-- Responsive to window resizing
+- Generated by pdf2htmlEX; fonts are embedded as base64, so it is self-contained.
+- A small fixed bar links to LinkedIn, GitHub (`github.com/xyzouktik`), and the portfolio (`xyzouktik.github.io`).
 
-### 6. **Color Palette Modernization**
+## Legacy assets
 
-**Space Theme (Index Page):**
-- Dark backgrounds (#0a0b12, #050508)
-- Bright cyan accents (#67e8f9)
-- Purple highlights (#c084fc)
-- High contrast for readability
+`assets/` (html5up template CSS/JS/Sass/webfonts) and `images/` are not referenced by the current pages and are retained only as unused source assets.
 
-**Ocean Theme (Creatives Page):**
-- Deep blue backgrounds (#0a2342 → #051a2d gradient)
-- Cyan marine accents (#00d9ff)
-- Realistic water coloring
-- Coral and life colors
+## Known placeholders
 
-## File Structure
-
-```
-assets/
-├── js/
-│   ├── intro-animations.js      (NEW) Terminal → Galaxy → Earth → India sequence
-│   ├── realistic-dragon.js      (NEW) 3D-style dragon class
-│   ├── dragon-init.js           (NEW) Dragon initialization wrapper
-│   ├── ocean-animation.js       (NEW) Ocean scene with marine life
-│   ├── breakpoints.min.js       (existing)
-│   ├── browser.min.js           (existing)
-│   ├── jquery.min.js            (existing)
-│   ├── jquery.scrollex.min.js   (existing)
-│   ├── jquery.scrolly.min.js    (existing)
-│   ├── main.js                  (existing)
-│   └── util.js                  (existing)
-├── css/
-│   ├── fontawesome-all.min.css  (existing)
-│   ├── main.css                 (existing)
-│   └── images/                  (existing)
-├── sass/                        (existing)
-└── webfonts/                    (existing)
-
-index.html                       (MODIFIED - xyzouktik branding + dragon + intro)
-blog.html                        (MODIFIED - renamed to Creatives + ocean animation)
-cv.html                          (minimal changes)
-```
-
-## Technical Details
-
-### Intro Animation Performance
-- Uses requestAnimationFrame for smooth 60fps
-- Canvas-based rendering avoids DOM reflows
-- Session storage prevents repeated playback
-- Estimated load time: 8-10 seconds for full sequence
-
-### Dragon Animation
-- FK (Forward Kinematics) chain for body movement
-- Bezier curves for smooth wing rendering
-- Particle system for breath effects
-- Mouse tracking with smooth easing
-- Optimal performance at all screen sizes
-
-### Ocean Animation
-- Multi-entity system (Whale, FishSchool, Submarine, ScubaDiver classes)
-- Autonomous movement behaviors
-- Procedural bubble generation
-- Gradient-based background rendering
-- Scales well on mobile devices
-
-## Browser Compatibility
-- Modern browsers (Chrome, Firefox, Safari, Edge)
-- Canvas API 2D context required
-- CSS Grid and Flexbox required
-- No transpilation needed (ES6 supported)
-
-## Future Enhancement Opportunities
-1. WebGL upgrade for true 3D rendering
-2. Interaction mechanics (click dragon to perform actions)
-3. Mobile touch controls for dragon movement
-4. Audio system (dragon roars, ocean ambience)
-5. Additional ocean creatures and animations
-6. Weather effects (thunderstorms, bioluminescence)
-7. SVG-based scalable graphics option
-
-## Performance Notes
-- All animations run at 60fps
-- Minimal CPU usage through efficient algorithms
-- GPU acceleration available for Canvas rendering
-- Tested on desktop and mobile browsers
-- Total additional JS size: ~45KB (gzipped)
-
-## Known Limitations
-1. Intro animation plays at fixed resolution (no dynamic scaling during animation)
-2. Dragon animation does not detect mobile vs desktop automatically
-3. Ocean animation may have reduced performance on older mobile devices
-4. No accessibility alt-text for canvas animations
-
-## Deployment Notes
-- Changes are Git-committed and ready to push
-- GitHub Pages will automatically deploy on main branch push
-- No build process required
-- All assets are hosted locally
-
-## Attribution
-- Original portfolio framework preserved
-- New animations created using Canvas 2D API
-- Color palette inspired by deep ocean and space themes
-- Animation techniques based on interactive graphics principles
-
----
-
-**Version:** 2.0.0
-**Created:** April 2026
-**Author:** AI Assistant (GitHub Copilot)
-**Status:** Ready for Deployment
+- The contact form posts to `https://formspree.io/f/your-id` and requires a real Formspree form ID to function.
+- The Gallery section is marked `COMING SOON`.

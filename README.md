@@ -1,13 +1,16 @@
 # Youktik Sajjan — End Dimension Portfolio
 
-Static GitHub Pages portfolio with a Minecraft End-inspired interface, an arcade-style dragon canvas background, and a separate blog page for essays, poetry, and literature.
+Static GitHub Pages portfolio with a Minecraft End-inspired interface, an arcade-style dragon canvas background, and a separate Creatives page for essays, poetry, and literature.
+
+Live site: https://xyzouktik.github.io
 
 ## Files
 
 - `index.html` — main portfolio page
-- `blog.html` — separate writing page
-- `cv.html` — embedded CV document
+- `blog.html` — Creatives page (writing, poetry, literature)
+- `cv.html` — CV document, embedded in `index.html` and openable on its own
 - `README.md` — project notes
+- `TRANSFORMATION.md` — technical notes on the current implementation
 
 ## Current sections
 
@@ -19,7 +22,7 @@ Static GitHub Pages portfolio with a Minecraft End-inspired interface, an arcade
 - Gallery (`Coming Soon`)
 - Contact
 - CV (final section)
-- Blog / Poetry / Literature page in `blog.html`
+- Creatives page in `blog.html`
 
 ## Visual system
 
@@ -32,27 +35,24 @@ Static GitHub Pages portfolio with a Minecraft End-inspired interface, an arcade
 
 ## Interactive features
 
-- Fixed canvas background with a 2D arcade-style Ender Dragon
-- Dragon follows cursor movement and breathes fire
-- Ambient Minecraft mobs spawn from screen edges
-- GitHub project fetch for the selected public repo list
+- Fixed canvas background with a 2D arcade-style Ender Dragon (`index.html`)
+- Dragon follows cursor movement, animates wings/jaw, and breathes fire
+- Ambient Minecraft mobs spawn from screen edges and react to the dragon
+- GitHub project fetch for the `xyzouktik.github.io` repo
 - Scroll-triggered reveal animations
-- Separate blog page with category filters
-
-## Publish to GitHub Pages
-
-1. Create or use the repository `ysdvision.github.io`.
-2. Upload these files to the repository root:
-	- `index.html`
-	- `blog.html`
-	- `cv.html`
-	- `README.md`
-3. In GitHub repository settings, open `Pages`.
-4. Set source to `Deploy from a branch`.
-5. Choose branch `main` and folder `/ (root)`.
-6. Wait for Pages to build, then open `https://ysdvision.github.io`.
+- Separate Creatives page with category filters and a drifting particle/starfield background
 
 ## Notes
 
-- The workspace is not currently a git repository, so no local `git add` / `git commit` / `git push` was possible here.
-- The files themselves are ready to upload or commit from your GitHub repo folder.
+- No build step: plain HTML with Tailwind loaded from the CDN and inline canvas scripts.
+- The `assets/` and `images/` folders are legacy template assets and are not referenced by the current pages.
+- The contact form in `index.html` posts to a placeholder Formspree endpoint (`formspree.io/f/your-id`) and needs a real form ID to deliver messages.
+
+## Publish to GitHub Pages
+
+1. Use the repository `xyzouktik.github.io`.
+2. Keep these files in the repository root: `index.html`, `blog.html`, `cv.html`, `README.md`.
+3. In GitHub repository settings, open `Pages`.
+4. Set source to `Deploy from a branch`.
+5. Choose branch `main` and folder `/ (root)`.
+6. Wait for Pages to build, then open https://xyzouktik.github.io.
