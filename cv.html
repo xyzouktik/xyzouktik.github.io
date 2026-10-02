@@ -6,23 +6,31 @@
 <title>Youktik Sajjan — Curriculum Vitae</title>
 <meta name="description" content="Curriculum vitae of Youktik Sajjan — researcher and product builder; co-founder of Underwater AI and iFiNN, IISER Kolkata.">
 <link rel="canonical" href="https://xyzouktik.github.io/cv.html">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#16171a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" id="theme-color" content="#0b1f2a">
 <script>
-(function(){try{var t=localStorage.getItem('cv-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+/* Shares the site theme key with index.html; migrates the old cv-theme value. */
+(function(){
+  var D=document.documentElement;
+  try{
+    var t=localStorage.getItem('site-theme')||localStorage.getItem('cv-theme');
+    if(t!=='dark'&&t!=='light'&&t!=='green'&&t!=='blue'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
+    D.setAttribute('data-theme',t);
+    if(!localStorage.getItem('site-theme'))localStorage.setItem('site-theme',t);
+  }catch(e){ D.setAttribute('data-theme','light'); }
+})();
 </script>
 <style>
   :root{
     color-scheme: light;
-    --paper:#ffffff; --ink:#141414; --muted:#555; --rule:#333; --link:#1a3c8b;
     --serif:"Latin Modern Roman","CMU Serif","Computer Modern Serif","Iowan Old Style",Georgia,"Times New Roman",serif;
     --sans:"Latin Modern Sans","Helvetica Neue",Arial,sans-serif;
   }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){ color-scheme:dark; --paper:#16171a; --ink:#e9e7e2; --muted:#a3a09a; --rule:#6b6b6b; --link:#9ec5ff; }
-  }
-  :root[data-theme="dark"]{ color-scheme:dark; --paper:#16171a; --ink:#e9e7e2; --muted:#a3a09a; --rule:#6b6b6b; --link:#9ec5ff; }
-  :root[data-theme="light"]{ color-scheme:light; --paper:#ffffff; --ink:#141414; --muted:#555; --rule:#333; --link:#1a3c8b; }
+  /* Same four palettes as index.html (paper + ink naming for the CV) */
+  :root, :root[data-theme="light"]{ color-scheme:light; --paper:#f6f1e7; --ink:#221f1a; --muted:#6b6152; --rule:#c9bda6; --link:#a33b2a; --card-border:#d5c9b2; }
+  :root[data-theme="dark"]{ color-scheme:dark; --paper:#121212; --ink:#e9e7e2; --muted:#a3a09a; --rule:#4a4a4a; --link:#6cc9e8; --card-border:#2b2a27; }
+  :root[data-theme="green"]{ color-scheme:dark; --paper:#1a160d; --ink:#efe6cf; --muted:#b3a488; --rule:#4a3f28; --link:#e6b455; --card-border:#3a3120; }
+  :root[data-theme="blue"]{ color-scheme:dark; --paper:#04121c; --ink:#dff0f5; --muted:#8fb0bb; --rule:#1c4454; --link:#4fd6e0; --card-border:#12303c; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#121212; --ink:#e9e7e2; --muted:#a3a09a; --rule:#4a4a4a; --link:#6cc9e8; --card-border:#2b2a27; } }
 
   *{box-sizing:border-box}
   body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif);
@@ -35,8 +43,17 @@
   .toolbar{display:flex; justify-content:space-between; align-items:center; gap:1rem; font-family:var(--sans); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:1.6rem}
   .toolbar a{color:var(--muted); border:0}
   .toolbar a:hover{color:var(--link)}
-  #toggle{font:inherit; cursor:pointer; background:none; border:1px solid var(--rule); color:var(--muted); border-radius:3px; padding:.25rem .55rem}
-  #toggle:hover{color:var(--link); border-color:var(--link)}
+  /* 4-swatch picker, matching the homepage */
+  .theme-picker{display:flex; gap:.4rem; align-items:center}
+  .swatch{width:1.15rem; height:1.15rem; padding:0; border:1px solid var(--rule); border-radius:50%; background:transparent; cursor:pointer; display:grid; place-items:center; transition:transform .15s ease, border-color .15s ease}
+  .swatch > span{width:.72rem; height:.72rem; border-radius:50%; display:block}
+  .swatch[data-theme-choice="dark"] > span{background:#6cc9e8}
+  .swatch[data-theme-choice="light"] > span{background:#a33b2a}
+  .swatch[data-theme-choice="green"] > span{background:#e6b455}
+  .swatch[data-theme-choice="blue"] > span{background:#4fd6e0}
+  .swatch:hover{transform:scale(1.14)}
+  .swatch[aria-checked="true"]{border-color:var(--link)}
+  .swatch:focus-visible{outline:2px solid var(--link); outline-offset:2px}
 
   header.cv{text-align:center; margin-bottom:.6rem}
   h1{font-size:1.95rem; font-weight:600; letter-spacing:.02em; margin:0 0 .18rem}
@@ -62,6 +79,8 @@
   footer{font-family:var(--sans); font-size:.72rem; color:var(--muted); text-align:center; margin-top:2rem; padding-top:.8rem; border-top:1px solid var(--rule)}
 
   @media print{
+    /* printing always uses the light paper palette */
+    :root, :root[data-theme]{ color-scheme:light !important; --paper:#fff; --ink:#000; --muted:#555; --rule:#999; --link:#000; --card-border:#ccc; }
     .toolbar, footer .screen{display:none}
     body{background:#fff; color:#000; font-size:10.5pt}
     .sheet{max-width:none; padding:0 .6in}
@@ -75,7 +94,12 @@
 <div class="sheet">
   <div class="toolbar">
     <a href="index.html">&larr; Portfolio</a>
-    <button id="toggle" type="button" aria-label="Switch theme">☾</button>
+    <div class="theme-picker" role="radiogroup" aria-label="Colour theme">
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="dark" aria-label="Ender — dark" title="Ender"><span></span></button>
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="light" aria-label="Koi — light" title="Koi"><span></span></button>
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="green" aria-label="Verdant — green" title="Verdant"><span></span></button>
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="blue" aria-label="Abyss — blue" title="Abyss"><span></span></button>
+    </div>
   </div>
 
   <header class="cv">
@@ -221,16 +245,33 @@
 <script>
 (function(){
   var root = document.documentElement;
-  var btn = document.getElementById('toggle');
-  function system(){ return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
-  function current(){ return root.getAttribute('data-theme') || system(); }
-  function paint(){ var t = current(); btn.textContent = t === 'dark' ? '☀' : '☾'; btn.setAttribute('aria-label', 'Switch to ' + (t === 'dark' ? 'light' : 'dark') + ' theme'); }
-  btn.addEventListener('click', function(){
-    var t = current() === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', t);
-    try { localStorage.setItem('cv-theme', t); } catch (e) {}
-    paint();
+  var DMETA = { dark:'#0b1f2a', light:'#f6f1e7', green:'#1a160d', blue:'#04121c' };
+  var meta = document.getElementById('theme-color');
+  var picker = document.querySelector('.theme-picker');
+  var sw = picker ? [].slice.call(picker.querySelectorAll('.swatch')) : [];
+  var current = function(){ return root.getAttribute('data-theme') || 'light'; };
+  function paint(){
+    var t = current();
+    if (meta) meta.setAttribute('content', DMETA[t]);
+    sw.forEach(function(b){
+      var on = b.getAttribute('data-theme-choice') === t;
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.setAttribute('tabindex', on ? '0' : '-1');
+    });
+  }
+  function set(t){ root.setAttribute('data-theme', t); try { localStorage.setItem('site-theme', t); } catch(e){} paint(); }
+  sw.forEach(function(b, idx){
+    b.addEventListener('click', function(){ set(b.getAttribute('data-theme-choice')); b.focus(); });
+    b.addEventListener('keydown', function(e){
+      var n = -1;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (idx + 1) % sw.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (idx - 1 + sw.length) % sw.length;
+      else if (e.key === ' ' || e.key === 'Enter') { set(sw[idx].getAttribute('data-theme-choice')); e.preventDefault(); return; }
+      if (n >= 0){ e.preventDefault(); sw[n].focus(); set(sw[n].getAttribute('data-theme-choice')); }
+    });
   });
+  // follow the homepage when it changes theme in another tab
+  window.addEventListener('storage', function(e){ if (e.key === 'site-theme' && e.newValue){ root.setAttribute('data-theme', e.newValue); paint(); } });
   paint();
   document.getElementById('year').textContent = new Date().getFullYear();
 })();
