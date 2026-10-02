@@ -1248,10 +1248,11 @@
   var Input = {
     x: innerWidth / 2, y: innerHeight / 2, px: innerWidth / 2, py: innerHeight / 2, vx: 0, vy: 0,
     down: false, clicked: false, dbl: false, scroll: 0, keys: Object.create(null),
+    pointerIdle: 99,
     reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
     isUI: function (el) { return !!(el && el.closest && el.closest('a,button,input,select,textarea,label,summary,[role="radio"],.scene-lab')); }
   };
-  window.addEventListener('pointermove', function (e) { Input.x = e.clientX; Input.y = e.clientY; }, { passive: true });
+  window.addEventListener('pointermove', function (e) { Input.x = e.clientX; Input.y = e.clientY; Input.pointerIdle = 0; }, { passive: true });
   window.addEventListener('pointerdown', function (e) { Input.down = true; if (!Input.isUI(e.target)) Input.clicked = true; }, { passive: true });
   window.addEventListener('pointerup', function () { Input.down = false; }, { passive: true });
   window.addEventListener('dblclick', function (e) { if (!Input.isUI(e.target)) Input.dbl = true; }, true);
@@ -1378,11 +1379,10 @@
     function update(dt) {
       if (!ready) return;
       t += dt; rippleT -= dt;
-      var cx = W / 2, cy = H / 2, R = Math.min(W, H) * CONFIG.orbitR;
       var pv = Math.hypot(Input.vx, Input.vy);
       var fast = pv > CONFIG.veerThresh;
 
-      // slow breathing of the orbit so the Taiji appears to rotate
+      // slow breathing of the path so the Taiji appears to rotate
       var breath = 1 + CONFIG.breathe * Math.sin(t * 0.5);
 
       for (var k = 0; k < koi.length; k++) {
@@ -1409,17 +1409,16 @@
           }
         } else if (f.state === 'return') {
           f.phase += f.dir * CONFIG.speed * breath * dt;
-          var ot = orbitTarget(f, cx, cy, R, side);
+          var ot = orbitTarget(f, W, H, side);
           var h2 = f.pts[0];
-          if (Math.hypot(ot.x - h2.x, ot.y - h2.y) < 12) f.state = 'orbit';
+          if (Math.hypot(ot.x - h2.x, ot.y - h2.y) < 14) f.state = 'orbit';
         }
 
         // --- pick a target for the head
         var tgt;
         if (f.state === 'seek' && f.food) tgt = { x: f.food.x, y: f.food.y };
-        else tgt = orbitTarget(f, cx, cy, R, side);
-        if (fast) { var dx = h2safe(f) - 0; }
-        // gentle veer away from fast pointer
+        else tgt = orbitTarget(f, W, H, side);
+        // gentle veer away from a fast pointer
         if (fast) { tgt.x += (tgt.x - Input.x) * 0.4 * f.avoid; tgt.y += (tgt.y - Input.y) * 0.4 * f.avoid; }
 
         var head = f.pts[0];
@@ -1450,7 +1449,7 @@
       }
       for (var li = 0; li < lotus.length; li++) lotus[li].ph += dt * 0.8;
       dragonfly.t -= dt;
-      if (!dragonfly.on && dragonfly.t <= 0) { dragonfly.on = true; dragonfly.x = -30; dragonfly.y = cy + (rand() - 0.5) * R; dragonfly.dt2 = 0; }
+      if (!dragonfly.on && dragonfly.t <= 0) { dragonfly.on = true; dragonfly.x = -30; dragonfly.y = H / 2 + (rand() - 0.5) * H * 0.3; dragonfly.dt2 = 0; }
       if (dragonfly.on) {
         dragonfly.dt2 += dt; dragonfly.x += dt * 220;
         if (dragonfly.dt2 > 0.9 && dragonfly.dt2 < 1.0) splashAt(dragonfly.x, dragonfly.y, 0.5);
@@ -1461,11 +1460,16 @@
       for (var dr = drops.length - 1; dr >= 0; dr--) { var drp = drops[dr]; drp.x += drp.vx * dt; drp.y += drp.vy * dt; drp.vy += 500 * dt; drp.life -= dt; if (drp.life <= 0 || drp.y > H) drops.splice(dr, 1); }
     }
     function h2safe(f) { return f.pts[0].x; }
-    function orbitTarget(f, cx, cy, R, side) {
+    function orbitTarget(f, VW, VH, side) {
       var a = f.phase;
-      // radius modulates with angle so the two koi trace the S of the Taiji
-      var rr = R * (1 + 0.28 * Math.sin(a * 2));
-      return { x: cx + Math.cos(a) * rr, y: cy + Math.sin(a) * rr * 0.72 };
+      var m = 46;                                   // margin so bodies stay on screen
+      var rx = Math.max(40, VW / 2 - m), ry = Math.max(40, VH / 2 - m);
+      var x = Math.cos(a) * rx + VW / 2;
+      var y = Math.sin(a * 1.6 + 0.6) * ry * 0.9 + VH / 2;
+      // radius breathes slightly for the Taiji pinch
+      var pinch = 1 + 0.16 * Math.sin(a * 2);
+      x = VW / 2 + (x - VW / 2) * pinch;
+      return { x: x, y: y };
     }
     function nearestFood(f) {
       var head = f.pts[0], best = null, bd = 1e9;
@@ -1493,40 +1497,67 @@
       }
       sctx.save();
       sctx.translate(0, leap);
-      sctx.globalAlpha = 0.96;
-      // body
+
+      // soft cast shadow on the pond floor (offset + blurred) for depth
+      sctx.save();
+      sctx.globalAlpha = 0.16; sctx.translate(6, 12); sctx.filter = 'blur(4px)';
       sctx.beginPath(); curve(L, true); curve(Rt.slice().reverse(), false); sctx.closePath();
-      var bg = sctx.createLinearGradient(pts[0].x, pts[0].y, pts[n - 1].x, pts[n - 1].y);
-      bg.addColorStop(0, f.body); bg.addColorStop(1, shade(f.body, -0.18));
-      sctx.fillStyle = bg; sctx.fill();
-      sctx.strokeStyle = 'rgba(20,15,10,0.35)'; sctx.lineWidth = 1; sctx.stroke();
-      // pattern blotches (clipped to the body so they stay attached)
+      sctx.fillStyle = '#1a1410'; sctx.fill();
+      sctx.restore();
+
+      sctx.globalAlpha = 0.97;
+      // body: dorsal (top) darker, belly lighter, via perpendicular gradient
+      sctx.beginPath(); curve(L, true); curve(Rt.slice().reverse(), false); sctx.closePath();
+      var bodyGrad = sctx.createLinearGradient(pts[0].x, pts[0].y - 16, pts[n - 1].x, pts[n - 1].y + 16);
+      bodyGrad.addColorStop(0, shade(f.body, -0.22));   // dark back
+      bodyGrad.addColorStop(0.5, f.body);                // mid tone
+      bodyGrad.addColorStop(1, shade(f.body, 0.28));     // pale belly
+      sctx.fillStyle = bodyGrad; sctx.fill();
+      // soft top-light sheen
       sctx.save(); sctx.clip();
+      var sheen = sctx.createLinearGradient(pts[0].x, pts[0].y - 18, pts[0].x, pts[0].y + 6);
+      sheen.addColorStop(0, 'rgba(255,255,255,0.34)'); sheen.addColorStop(1, 'rgba(255,255,255,0)');
+      sctx.fillStyle = sheen; sctx.fillRect(-W, -H, W * 3, H * 3);
+      // pattern blotches (clipped to the body so they stay attached)
       sctx.fillStyle = f.patch;
-      [3, 6, 9, 12].forEach(function (idx, j) {
+      [3, 6, 9, 12].forEach(function (idx) {
         var p = pts[idx]; var aa = Math.atan2(pts[idx + 1].y - pts[idx - 1].y, pts[idx + 1].x - pts[idx - 1].x);
         sctx.beginPath(); sctx.ellipse(p.x, p.y, widthAt(idx) * 0.85, widthAt(idx) * 0.6, aa, 0, 6.2832); sctx.fill();
       });
+      // scale texture: faint arcs along the flank
+      sctx.strokeStyle = 'rgba(0,0,0,0.06)'; sctx.lineWidth = 1;
+      for (var sc = 3; sc < n - 2; sc += 2) {
+        var sp2 = pts[sc], sr = widthAt(sc) * 0.8;
+        sctx.beginPath(); sctx.arc(sp2.x, sp2.y, sr, 0, 6.2832); sctx.stroke();
+      }
       sctx.restore();
-      // pectoral fins
+      sctx.strokeStyle = 'rgba(20,15,10,0.4)'; sctx.lineWidth = 1; sctx.stroke(); // outline on top
+
+      // pectoral fins (translucent, ribbed)
       for (var sgn = -1; sgn <= 1; sgn += 2) {
         var fp = pts[4], fa = Math.atan2(pts[3].y - pts[5].y, pts[3].x - pts[5].x);
         var flut = Math.sin(t * 6 + f.finT) * 0.35;
         sctx.save(); sctx.translate(fp.x, fp.y); sctx.rotate(fa + sgn * (1.15 + flut));
-        sctx.beginPath(); sctx.moveTo(0, 0); sctx.quadraticCurveTo(6, 6, 16, 12); sctx.quadraticCurveTo(6, 10, -2, 4); sctx.closePath();
-        sctx.fillStyle = f.body; sctx.globalAlpha = 0.85; sctx.fill(); sctx.strokeStyle = 'rgba(20,15,10,0.3)'; sctx.stroke();
+        sctx.beginPath(); sctx.moveTo(0, 0); sctx.quadraticCurveTo(7, 6, 18, 13); sctx.quadraticCurveTo(7, 11, -2, 4); sctx.closePath();
+        sctx.fillStyle = shade(f.body, 0.2); sctx.globalAlpha = 0.7; sctx.fill();
+        sctx.strokeStyle = 'rgba(20,15,10,0.25)'; sctx.lineWidth = 0.8; sctx.stroke();
+        // fin rays
+        sctx.globalAlpha = 0.28; sctx.lineWidth = 0.6;
+        for (var fr = 1; fr <= 3; fr++) { sctx.beginPath(); sctx.moveTo(0, 0); sctx.lineTo(fr * 5, fr * 4); sctx.stroke(); }
         sctx.restore();
       }
       sctx.globalAlpha = 1;
-      // two-lobed tail with lagged sine
+      // two-lobed tail with lagged sine, translucent membrane
       var tip = pts[n - 1], ta = Math.atan2(pts[n - 1].y - pts[n - 2].y, pts[n - 1].x - pts[n - 2].x);
       var sw = Math.sin(t * 5.5 + f.tailT - n * 0.35) * 0.9;
       for (var ls = -1; ls <= 1; ls += 2) {
         sctx.save(); sctx.translate(tip.x, tip.y); sctx.rotate(ta + ls * 0.55 + sw * 0.3);
-        sctx.beginPath(); sctx.moveTo(0, 0); sctx.quadraticCurveTo(14, ls * 2, 30, ls * 12); sctx.quadraticCurveTo(12, ls * 6, 2, 0); sctx.closePath();
-        sctx.fillStyle = shade(f.body, 0.06); sctx.fill(); sctx.strokeStyle = 'rgba(20,15,10,0.3)'; sctx.stroke();
+        sctx.beginPath(); sctx.moveTo(0, 0); sctx.quadraticCurveTo(16, ls * 2, 34, ls * 14); sctx.quadraticCurveTo(13, ls * 7, 2, 0); sctx.closePath();
+        sctx.fillStyle = shade(f.body, 0.16); sctx.globalAlpha = 0.82; sctx.fill();
+        sctx.strokeStyle = 'rgba(20,15,10,0.3)'; sctx.lineWidth = 0.9; sctx.stroke();
         sctx.restore();
       }
+      sctx.globalAlpha = 1;
       // head eye + mouth
       var hh = pts[0];
       var ha = Math.atan2(hh.y - pts[1].y, hh.x - pts[1].x);
@@ -1549,16 +1580,19 @@
     function draw() {
       var ctx2 = sctx;
       if (paper) ctx2.drawImage(paper, 0, 0);
-      var cx = W / 2, cy = H / 2, R = Math.min(W, H) * (CONFIG.orbitR + 0.06);
-      // pond: pale celadon -> jade centre
-      var g = ctx2.createRadialGradient(cx, cy, R * 0.1, cx, cy, R);
-      g.addColorStop(0, 'rgba(140,175,150,0.34)'); g.addColorStop(0.7, 'rgba(120,160,140,0.20)'); g.addColorStop(1, 'rgba(120,160,140,0)');
-      ctx2.fillStyle = g; ctx2.fillRect(cx - R, cy - R, R * 2, R * 2);
-      // hand-inked rim
-      ctx2.strokeStyle = 'rgba(34,31,26,0.4)'; ctx2.lineWidth = 2.2;
-      ctx2.beginPath(); ctx2.ellipse(cx, cy, R, R * 0.72, 0, 0, 6.2832); ctx2.stroke();
-      ctx2.strokeStyle = 'rgba(34,31,26,0.18)'; ctx2.lineWidth = 4;
-      ctx2.beginPath(); ctx2.ellipse(cx, cy, R + 3, R * 0.72 + 3, 0, 0, 6.2832); ctx2.stroke();
+      var cx = W / 2, cy = H / 2;
+      // The pond fills the whole canvas: pale celadon at the rim deepening to jade,
+      // so the koi can roam anywhere and still be "in water". Ink rim is a subtle
+      // vignette rather than a hard ellipse (they no longer live in a small pool).
+      var g = ctx2.createRadialGradient(cx, cy, Math.min(W, H) * 0.05, cx, cy, Math.max(W, H) * 0.72);
+      g.addColorStop(0, 'rgba(120,165,145,0.30)');
+      g.addColorStop(0.6, 'rgba(110,155,140,0.20)');
+      g.addColorStop(1, 'rgba(90,135,130,0.10)');
+      ctx2.fillStyle = g; ctx2.fillRect(0, 0, W, H);
+      // soft ink edge (vignette) rather than a bounded rim
+      var rim = ctx2.createRadialGradient(cx, cy, Math.min(W, H) * 0.55, cx, cy, Math.max(W, H) * 0.78);
+      rim.addColorStop(0, 'rgba(34,31,26,0)'); rim.addColorStop(1, 'rgba(34,31,26,0.22)');
+      ctx2.fillStyle = rim; ctx2.fillRect(0, 0, W, H);
       // caustics
       renderWaves(ctx2);
       // lotus leaves bob on ripples
@@ -1573,12 +1607,13 @@
       // the two koi
       for (var k = 0; k < koi.length; k++) drawKoi(koi[k]);
       // Taiji dots: lily in the dark half, stone in the ivory half
+      var dotR = Math.min(W, H) * 0.36;
       ctx2.fillStyle = '#efe7d6';
-      ctx2.beginPath(); ctx2.arc(cx, cy - R * 0.36, 7, 0, 6.2832); ctx2.fill();
-      ctx2.strokeStyle = 'rgba(60,80,60,0.7)'; ctx2.lineWidth = 1; ctx2.beginPath(); ctx2.arc(cx, cy - R * 0.36, 7, 0, 6.2832); ctx2.stroke();
-      for (var pe = 0; pe < 6; pe++) { ctx2.strokeStyle = '#e8f0e2'; ctx2.beginPath(); ctx2.arc(cx + Math.cos(pe * 1.047) * 4, cy - R * 0.36 + Math.sin(pe * 1.047) * 4, 3, 0, 6.2832); ctx2.stroke(); }
-      ctx2.fillStyle = '#20211d'; ctx2.beginPath(); ctx2.arc(cx, cy + R * 0.36, 7, 0, 6.2832); ctx2.fill();
-      ctx2.fillStyle = 'rgba(255,255,255,0.25)'; ctx2.beginPath(); ctx2.arc(cx - 2, cy + R * 0.36 - 2, 2.4, 0, 6.2832); ctx2.fill();
+      ctx2.beginPath(); ctx2.arc(cx, cy - dotR, 7, 0, 6.2832); ctx2.fill();
+      ctx2.strokeStyle = 'rgba(60,80,60,0.7)'; ctx2.lineWidth = 1; ctx2.beginPath(); ctx2.arc(cx, cy - dotR, 7, 0, 6.2832); ctx2.stroke();
+      for (var pe = 0; pe < 6; pe++) { ctx2.strokeStyle = '#e8f0e2'; ctx2.beginPath(); ctx2.arc(cx + Math.cos(pe * 1.047) * 4, cy - dotR + Math.sin(pe * 1.047) * 4, 3, 0, 6.2832); ctx2.stroke(); }
+      ctx2.fillStyle = '#20211d'; ctx2.beginPath(); ctx2.arc(cx, cy + dotR, 7, 0, 6.2832); ctx2.fill();
+      ctx2.fillStyle = 'rgba(255,255,255,0.25)'; ctx2.beginPath(); ctx2.arc(cx - 2, cy + dotR - 2, 2.4, 0, 6.2832); ctx2.fill();
       // ripples
       for (var r = 0; r < ripples.length; r++) { ctx2.globalAlpha = Math.max(0, ripples[r].life); ctx2.strokeStyle = 'rgba(60,70,60,0.5)'; ctx2.lineWidth = 1.4; ctx2.beginPath(); ctx2.arc(ripples[r].x, ripples[r].y, ripples[r].r, 0, 6.2832); ctx2.stroke(); }
       ctx2.globalAlpha = 1;
@@ -1961,6 +1996,23 @@
       g.addColorStop(0, sky.top); g.addColorStop(0.62, sky.bot); g.addColorStop(1, '#1a160d');
       c2.fillStyle = g; c2.fillRect(0, 0, W, H);
 
+      // sun disc + bloom (golden/noon), low on the horizon
+      if (tt > 0.55 && tt < 0.92) {
+        var sunX = W * 0.76, sunY = H * (0.30 - (tt - 0.55) * 0.5);
+        var bloom = c2.createRadialGradient(sunX, sunY, 0, sunX, sunY, 220);
+        bloom.addColorStop(0, 'rgba(255,236,180,0.55)'); bloom.addColorStop(1, 'rgba(255,236,180,0)');
+        c2.fillStyle = bloom; c2.beginPath(); c2.arc(sunX, sunY, 220, 0, 6.2832); c2.fill();
+        c2.fillStyle = 'rgba(255,248,220,0.95)'; c2.beginPath(); c2.arc(sunX, sunY, 26, 0, 6.2832); c2.fill();
+      }
+
+      // drifting clouds (parallax, soft)
+      c2.fillStyle = 'rgba(255,255,255,' + (0.10 + (tt > 0.6 && tt < 0.92 ? 0.14 : 0.06)) + ')';
+      for (var cl = 0; cl < 5; cl++) {
+        var cxx = ((cl * 340 + t * (8 + cl * 3)) % (W + 300)) - 150, cyy = H * (0.08 + cl * 0.05);
+        c2.beginPath(); c2.ellipse(cxx, cyy, 70, 18, 0, 0, 6.2832); c2.fill();
+        c2.beginPath(); c2.ellipse(cxx + 40, cyy + 5, 50, 14, 0, 0, 6.2832); c2.fill();
+      }
+
       // god-rays through the canopy (additive, stronger at golden hour)
       if (tt > 0.68 && tt < 0.9) {
         c2.save(); c2.globalCompositeOperation = 'lighter';
@@ -2113,7 +2165,7 @@
       for (i = 0; i < (isMobile() ? 50 : 110); i++) snow.push({ x: rand() * innerWidth, y: rand() * innerHeight, s: 0.4 + rand() * 1.8, sp: 6 + rand() * 22, depth: 0.4 + rand() * 0.6 });
       whale = { x: W + 500, y: H * 0.5, dir: -1, t: 0, active: false, cooldown: 8, sang: false };
       angler = { x: 0, y: 0, ph: 0 };
-      rov = { x: W / 2, y: H / 2, vx: 0, vy: 0, ang: 0, prop: 0 };
+      rov = { x: W / 2, y: H / 2, vx: 0, vy: 0, ang: 0, prop: 0, target: { x: W / 2, y: H / 2 } };
       buildGlow();
       ready = true;
     }
@@ -2125,14 +2177,32 @@
       t += dt;
       var z = zone(), inTwilight = Input.scroll >= 0.15 && Input.scroll < 0.5;
 
-      // --- ROV physics: chase pointer with inertia, or WASD/arrows; Shift=boost
+      // --- ROV steering: eased seek toward a target.
+      // The target is the pointer when the pointer is actually being used, otherwise
+      // keyboard input. Proportional gain with a dead zone + normalised fallback so the
+      // ROV eases to a stop near the pointer instead of oscillating around it.
+      var kx = (Input.keys['arrowleft'] || Input.keys['a'] ? -1 : 0) + (Input.keys['arrowright'] || Input.keys['d'] ? 1 : 0);
+      var ky = (Input.keys['arrowup'] || Input.keys['w'] ? -1 : 0) + (Input.keys['arrowdown'] || Input.keys['s'] ? 1 : 0);
+      var pointerActive = Input.pointerIdle < 2.0;      // recently moved pointer?
+      var target = rov.target;
+      if (kx || ky) {                                   // keyboard wins; target follows the keys
+        target.x = clamp(rov.x + kx * 220, 36, W - 36);
+        target.y = clamp(rov.y + ky * 220, 36, H - 30);
+      } else if (pointerActive) {
+        target.x = Input.x; target.y = Input.y;
+      }
+      // proportional steering with dead zone (px) and soft-clamped gain
+      var sdx = target.x - rov.x, sdy = target.y - rov.y, sdist = Math.hypot(sdx, sdy);
+      var DEAD = 8, GAIN = 0.55;
       var ax = 0, ay = 0;
-      if (Input.keys['arrowleft'] || Input.keys['a']) ax -= 1;
-      if (Input.keys['arrowright'] || Input.keys['d']) ax += 1;
-      if (Input.keys['arrowup'] || Input.keys['w']) ay -= 1;
-      if (Input.keys['arrowdown'] || Input.keys['s']) ay += 1;
-      if (ax === 0 && ay === 0) { ax = (Input.x - rov.x) / 130; ay = (Input.y - rov.y) / 130; }
-      var len = Math.hypot(ax, ay) || 1; ax /= len; ay /= len;
+      if (sdist > DEAD) {
+        var mag = Math.min(1, (sdist - DEAD) / 140);     // 0..1 ramp, no snap
+        ax = (sdx / sdist) * mag; ay = (sdy / sdist) * mag;
+      }
+      // fold in keyboard as a direct nudge so keys feel crisp even when parked
+      if (kx || ky) { ax += kx * 0.6; ay += ky * 0.6; }
+      var len = Math.hypot(ax, ay);
+      if (len > 1) { ax /= len; ay /= len; }
       var boosting = (Input.keys['shift'] && energy > 2);
       var thrust = CONFIG.accel * (boosting ? CONFIG.boost : 1) * CONFIG.rovSpeed;
       rov.vx += ax * thrust * dt; rov.vy += ay * thrust * dt;
@@ -2141,7 +2211,8 @@
       var sp = Math.hypot(rov.vx, rov.vy), cap = CONFIG.maxSpeed * (boosting ? CONFIG.boost : 1);
       if (sp > cap) { rov.vx *= cap / sp; rov.vy *= cap / sp; }
       rov.x = clamp(rov.x + rov.vx * dt, 36, W - 36); rov.y = clamp(rov.y + rov.vy * dt, 36, H - 30);
-      rov.ang = lerp(rov.ang, Math.atan2(rov.vy, rov.vx) * 0.35, Math.min(1, dt * 5));
+      // face the direction of travel (bank slightly), damped
+      if (sp > 6) rov.ang = lerp(rov.ang, Math.atan2(rov.vy, rov.vx), Math.min(1, dt * 5));
       rov.prop += dt * (3 + sp * 0.05 + (boosting ? 12 : 0));
       energy = clamp(energy + (boosting ? -CONFIG.boostCost : CONFIG.boostRegen) * dt, 0, 100);
       battery = clamp(battery - (CONFIG.lamp ? 0.4 : 0) * dt, 20, 100);
@@ -2573,6 +2644,7 @@
     mgr.raf = requestAnimationFrame(frame);
     var dt = Math.min(0.05, mgr.last ? (ts - mgr.last) / 1000 : 0); mgr.last = ts;
     Input.vx = Input.x - Input.px; Input.vy = Input.y - Input.py; Input.px = Input.x; Input.py = Input.y;
+    Input.pointerIdle += dt;
     if (!mgr.scene || mgr.paused || mgr.labPaused) { Input.clicked = Input.dbl = false; return; }
     mgr.scene.update(dt * mgr.speed, Input);
     sctx.setTransform(mgr.dpr, 0, 0, mgr.dpr, 0, 0);
