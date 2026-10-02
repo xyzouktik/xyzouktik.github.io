@@ -165,6 +165,17 @@
   .lab-btn:hover{color:var(--accent); border-color:var(--accent)}
   .lab-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
   .lab-hint{font-size:.62rem; line-height:1.5; color:var(--muted); margin:.5rem 0 0; opacity:.8}
+  /* ── ABYSS HUD (bottom-left, DOM overlay on the WebGL scene) ── */
+  .abyss-hud{position:fixed; left:1rem; bottom:1rem; z-index:3; pointer-events:none;
+    font-family:var(--mono); font-size:.72rem; line-height:1.5; color:var(--fg);
+    background:var(--card); border:1px solid var(--card-border); border-radius:8px;
+    padding:.7rem .9rem; backdrop-filter:blur(8px); max-width:280px}
+  .abyss-hud .hud-depth{font-size:1.4rem; font-weight:600; color:var(--accent); margin:0 0 .15rem; line-height:1.1}
+  .abyss-hud .hud-zone{font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 .4rem}
+  .abyss-hud .hud-row{color:var(--muted); margin:0 0 .15rem}
+  .abyss-hud .hud-log-title{font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin:.5rem 0 .2rem; border-top:1px solid var(--card-border); padding-top:.4rem}
+  .abyss-hud .hud-log{color:var(--muted); margin:0 0 .1rem; font-size:.64rem}
+  @media (max-width:560px){ .abyss-hud{left:.5rem; bottom:.5rem; padding:.5rem .6rem; max-width:220px} .abyss-hud .hud-depth{font-size:1.1rem} }
   @media (max-width:560px){ .lab-panel{right:-.2rem; width:min(18rem,88vw)} }
 </style>
 <script type="application/ld+json">
@@ -2106,504 +2117,605 @@
      (murk is punched out with destination-out). The key 'L' is reserved
      for the Scene Lab on every theme.
      =================================================================== */
+    /* ===================================================================
+     BLUE — "ABYSS-1: Descent" (WebGL / Three.js)
+     A full 3D ocean descent. Three.js renders the water column with
+     exponential fog that deepens with scroll, god rays in the shallows,
+     a 3D ROV with headlamp, a school of vertex-displaced mantas,
+     a whale pass, and marine snow — all procedural geometry.
+     =================================================================== */
   var AbyssScene = (function () {
     var CONFIG = {
-      accel: 900, drag: 2.4, maxSpeed: 340, boost: 2.1, boostCost: 40, boostRegen: 22,
-      lampRadius: 210, mantaCount: 12, trail: 16, glow: 1, current: 0.15, rovSpeed: 1,
+      accel: 900, drag: 2.4, maxSpeed: 340, boost: 2.1,
+      boostCost: 40, boostRegen: 22, lampRadius: 210,
+      mantaCount: 12, glow: 1, current: 0.15, rovSpeed: 1,
       lamp: true, restore: true, sonarCost: 12
     };
-    var W = 0, H = 0, dpr = 1, t = 0, ready = false;
-    var rov = null, mantas = [], dolphins = [], whale = null, jellies = [], fish = [], angler = null, snow = [];
-    var rings = [], bubbles = [], log = [], spark = [];
-    var glowSprite = null;
-    var perf = { acc: 0, n: 0, slow: 0 };
+    var W = 0, H = 0, ready = false, t = 0;
+    var three = null; /* THREE namespace once loaded */
+    var glCanvas = null, renderer = null, scene3 = null, camera3 = null;
+    var rovMesh = null, rovLight = null, propMesh = null;
+    var mantas = [], dolphins = [], whaleMesh = null, jellies = [];
+    var snowPoints = null, rays = [], bubbles = [];
+    var log = [], rings = [];
     var energy = 100, battery = 100;
-    var zones = [
-      { max: 0.15, name: 'SUNLIT SHALLOWS', top: '#2aa6c7', bot: '#0b6a86' },
-      { max: 0.5, name: 'TWILIGHT', top: '#0b3f63', bot: '#031a2e' },
-      { max: 1.01, name: 'MIDNIGHT', top: '#03101a', bot: '#01060b' }
-    ];
+    var fogColor = null, sunLight = null, ambientLight = null;
+    var depthCur = 0, depthTarget = 0;
     var GENERA = ['Profundulus', 'Abyssoraja', 'Luminaster', 'Tenebrisquid', 'Pelagica'];
+    var ZONES = [
+      { max: 0.15, name: 'SUNLIT SHALLOWS', fog: 0x2aa6c7, density: 0.003 },
+      { max: 0.5,  name: 'TWILIGHT',        fog: 0x0b3f63, density: 0.008 },
+      { max: 1.01, name: 'MIDNIGHT',        fog: 0x03101a, density: 0.016 }
+    ];
 
     function lerp(a, b, k) { return a + (b - a) * k; }
     function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-    function lerpC(c1, c2, k) {
-      var a = parseInt(c1.slice(1), 16), b = parseInt(c2.slice(1), 16);
-      var r = Math.round(lerp((a >> 16) & 255, (b >> 16) & 255, k)), g = Math.round(lerp((a >> 8) & 255, (b >> 8) & 255, k)), bl = Math.round(lerp(a & 255, b & 255, k));
-      return 'rgb(' + r + ',' + g + ',' + bl + ')';
-    }
-    function depthM() { return Math.round(Input.scroll * 1000); }
-    function zone() { var d = Input.scroll; for (var i = 0; i < zones.length; i++) if (d < zones[i].max) return zones[i]; return zones[2]; }
+    function depthM() { return Math.round(depthCur * 1000); }
+    function zoneOf() { var d = depthCur; for (var i = 0; i < ZONES.length; i++) if (d < ZONES[i].max) return ZONES[i]; return ZONES[2]; }
 
-    /* ---- glow sprite (prerendered once) for cheap additive halos ---- */
-    function buildGlow() {
-      glowSprite = document.createElement('canvas'); glowSprite.width = glowSprite.height = 64;
-      var g = glowSprite.getContext('2d');
-      var rg = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-      rg.addColorStop(0, 'rgba(140,240,255,0.9)'); rg.addColorStop(0.4, 'rgba(60,180,220,0.35)'); rg.addColorStop(1, 'rgba(60,180,220,0)');
-      g.fillStyle = rg; g.fillRect(0, 0, 64, 64);
+    /* ---- load Three.js from CDN (lazy, only when this scene activates) ---- */
+    function loadThree(cb) {
+      if (window.THREE) { cb(); return; }
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      s.onload = function () { cb(); };
+      s.onerror = function () { /* fall back silently */ };
+      (document.head || document.body).appendChild(s);
     }
 
-    function mkManta(i) {
-      return {
-        x: rand() * W, y: rand() * H, vx: (rand() - 0.5) * 30, vy: (rand() - 0.5) * 30,
-        size: 16 + rand() * 14, ph: rand() * 6.28, roll: 0, glow: 0.6 + rand() * 0.4,
-        trail: [], trI: 0, leader: i === 0, flash: 0, scatter: 0
-      };
+    /* ---- world helpers ---- */
+    function screenToWorld(px, py) {
+      /* map client coords to a plane at z=0 given the camera */
+      var v = new three.Vector3((px / W) * 2 - 1, -(py / H) * 2 + 1, 0.5);
+      v.unproject(camera3);
+      var dir = v.sub(camera3.position).normalize();
+      var dist = -camera3.position.z / dir.z;
+      return camera3.position.clone().add(dir.multiplyScalar(dist));
     }
-    function mkDolphin(i) { return { x: rand() * W, y: 60 + rand() * 80, vx: 60 + rand() * 40, ph: rand() * 6.28, breach: 0, t: 0 }; }
-    function mkJelly(i) { return { x: rand() * W, y: rand() * H, r: 8 + rand() * 12, ph: rand() * 6.28, tent: mkTent() }; }
-    function mkTent() { var a = []; for (var i = 0; i < 6; i++) a.push({ x: 0, y: 0 }); return a; }
 
+    /* ---- ROV: a chunky diver-scooter from primitives ---- */
+    function buildROV() {
+      var g = new three.Group();
+      /* body capsule: safety orange with thick outline feel */
+      var bodyGeo = new three.SphereGeometry(14, 24, 16);
+      bodyGeo.scale(1.9, 1, 1);
+      var bodyMat = new three.MeshStandardMaterial({ color: 0xe8802a, roughness: 0.35, metalness: 0.5 });
+      var body = new three.Mesh(bodyGeo, bodyMat);
+      g.add(body);
+      /* cream stripe */
+      var stripeGeo = new three.SphereGeometry(13, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
+      stripeGeo.scale(1.8, 0.7, 0.8);
+      var stripe = new three.Mesh(stripeGeo, new three.MeshStandardMaterial({ color: 0xf3e7cf, roughness: 0.4 }));
+      stripe.position.y = -5;
+      g.add(stripe);
+      /* glass dome canopy */
+      var dome = new three.Mesh(
+        new three.SphereGeometry(7, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.55),
+        new three.MeshPhysicalMaterial({ color: 0x9fe0f0, transparent: true, opacity: 0.45, roughness: 0.05, metalness: 0.1 })
+      );
+      dome.position.set(3, 10, 0);
+      g.add(dome);
+      /* blinking status light */
+      var status = new three.Mesh(new three.SphereGeometry(1.5, 8, 8),
+        new three.MeshBasicMaterial({ color: 0xff4040 }));
+      status.position.set(6, 16, 0);
+      g.add(status);
+      g.userData.status = status;
+      /* headlamp (glowing sphere + point light) */
+      var lamp = new three.Mesh(new three.SphereGeometry(4, 12, 12),
+        new three.MeshBasicMaterial({ color: 0xfff7d0 }));
+      lamp.position.set(26, 0, 0);
+      g.add(lamp);
+      /* rear propeller (ring + 4 blades, spins with thrust) */
+      var propGroup = new three.Group();
+      var ring = new three.Mesh(new three.TorusGeometry(7, 1.4, 8, 20),
+        new three.MeshStandardMaterial({ color: 0x2a1a0c, roughness: 0.6 }));
+      propGroup.add(ring);
+      for (var b = 0; b < 4; b++) {
+        var blade = new three.Mesh(new three.BoxGeometry(1.2, 10, 0.6),
+          new three.MeshStandardMaterial({ color: 0x8ab8c8, metalness: 0.7, roughness: 0.3 }));
+        blade.rotation.z = b * Math.PI / 2;
+        propGroup.add(blade);
+      }
+      propGroup.position.set(-28, 0, 0);
+      propGroup.rotation.y = Math.PI / 2;
+      g.add(propGroup);
+      g.userData.prop = propGroup;
+      /* side fins */
+      for (var sgn = -1; sgn <= 1; sgn += 2) {
+        var fin = new three.Mesh(new three.BoxGeometry(10, 1.2, 6),
+          new three.MeshStandardMaterial({ color: 0xc96a1e, roughness: 0.5 }));
+        fin.position.set(-4, 0, sgn * 13);
+        fin.rotation.x = sgn * 0.35;
+        g.add(fin);
+      }
+      /* grab rail */
+      var rail = new three.Mesh(new three.TorusGeometry(9, 0.8, 8, 16, Math.PI),
+        new three.MeshStandardMaterial({ color: 0x2a1a0c }));
+      rail.position.set(-3, 4, 0);
+      rail.rotation.z = Math.PI;
+      g.add(rail);
+      /* antenna + sonar dot */
+      var antenna = new three.Mesh(new three.CylinderGeometry(0.4, 0.4, 10, 6),
+        new three.MeshStandardMaterial({ color: 0x2a1a0c }));
+      antenna.position.set(10, 20, 0);
+      antenna.rotation.z = -0.4;
+      g.add(antenna);
+      var sonarDot = new three.Mesh(new three.SphereGeometry(1.2, 8, 8),
+        new three.MeshBasicMaterial({ color: 0x7ff3ff }));
+      sonarDot.position.set(14, 24, 0);
+      g.add(sonarDot);
+      g.userData.sonar = sonarDot;
+      return g;
+    }
+
+    /* ---- manta: a diamond plane deformed per-frame for wing undulation ---- */
+    function buildManta(size) {
+      var geo = new three.PlaneGeometry(size * 2.6, size * 1.4, 14, 8);
+      /* tuck the plane into a manta silhouette: wider at front, tapering to tail */
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var x = pos.getX(i), y = pos.getY(i);
+        var u = (x / (size * 1.3) + 1) / 2;   /* 0 = tail, 1 = nose */
+        pos.setY(i, y * (0.4 + 0.6 * u));      /* shoulders wider than tail */
+      }
+      var mat = new three.MeshStandardMaterial({
+        color: 0x1c2f4a, roughness: 0.6, metalness: 0.1,
+        emissive: 0x0a2a3a, emissiveIntensity: 0.4,
+        side: three.DoubleSide, transparent: true, opacity: 0.92
+      });
+      var mesh = new three.Mesh(geo, mat);
+      return mesh;
+    }
+    function animateManta(mesh, time, ph, speed) {
+      /* wing undulation: travelling sine from body centre to wingtips */
+      var geo = mesh.geometry, pos = geo.attributes.position;
+      var size = mesh.userData.size || 16;
+      for (var i = 0; i < pos.count; i++) {
+        var x = pos.getX(i), y = pos.getY(i);
+        /* dist from centre along the wing span (0..1) */
+        var d = Math.abs(y) / (size * 0.7);
+        /* travelling wave: phase delayed toward the tips */
+        var z = Math.sin(time * 3 + ph - d * 2.4) * size * 0.14 * (0.25 + d * 0.75);
+        pos.setZ(i, z);
+      }
+      pos.needsUpdate = true;
+      geo.computeVertexNormals();
+    }
+
+    /* ---- whale: a huge dark silhouette ---- */
+    function buildWhale() {
+      var g = new three.Group();
+      var bodyGeo = new three.SphereGeometry(1, 24, 16);
+      bodyGeo.scale(260, 70, 90);
+      var body = new three.Mesh(bodyGeo, new three.MeshStandardMaterial({
+        color: 0x071c2c, roughness: 0.9, metalness: 0.05
+      }));
+      g.add(body);
+      /* tail flukes */
+      var tail = new three.Mesh(new three.BoxGeometry(60, 6, 140),
+        new three.MeshStandardMaterial({ color: 0x071c2c, roughness: 0.9 }));
+      tail.position.x = 250;
+      g.add(tail);
+      /* pectoral flipper */
+      var flip = new three.Mesh(new three.BoxGeometry(100, 6, 30),
+        new three.MeshStandardMaterial({ color: 0x0a2436, roughness: 0.9 }));
+      flip.position.set(-40, -20, 80);
+      flip.rotation.z = 0.3;
+      g.add(flip);
+      return g;
+    }
+
+    /* ---- dolphin: sleek procedural body ---- */
+    function buildDolphin() {
+      var g = new three.Group();
+      var bodyGeo = new three.SphereGeometry(1, 16, 12);
+      bodyGeo.scale(24, 8, 7);
+      var body = new three.Mesh(bodyGeo, new three.MeshStandardMaterial({
+        color: 0x3a5f7a, roughness: 0.3, metalness: 0.2
+      }));
+      g.add(body);
+      /* dorsal fin */
+      var dorsal = new three.Mesh(new three.ConeGeometry(3, 8, 4),
+        new three.MeshStandardMaterial({ color: 0x2a4a5f }));
+      dorsal.position.set(0, 8, 0);
+      dorsal.rotation.x = Math.PI;
+      g.add(dorsal);
+      /* tail flukes */
+      var tail = new three.Mesh(new three.BoxGeometry(6, 1.5, 12),
+        new three.MeshStandardMaterial({ color: 0x2a4a5f }));
+      tail.position.x = -24;
+      g.add(tail);
+      return g;
+    }
+
+    /* ---- jellyfish: translucent dome + tentacle lines ---- */
+    function buildJelly(r) {
+      var g = new three.Group();
+      var dome = new three.Mesh(
+        new three.SphereGeometry(r, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.55),
+        new three.MeshPhysicalMaterial({ color: 0x9ad2e0, transparent: true, opacity: 0.28, roughness: 0.1 })
+      );
+      g.add(dome);
+      /* simple tentacle lines */
+      var tentMat = new three.LineBasicMaterial({ color: 0x9ad2e0, transparent: true, opacity: 0.4 });
+      for (var j = 0; j < 5; j++) {
+        var pts = [];
+        for (var s = 0; s < 6; s++) pts.push(new three.Vector3(
+          Math.sin(j + s * 0.5) * 3, -s * r * 0.5, Math.cos(j * 1.3 + s * 0.4) * 3
+        ));
+        var line = new three.Line(new three.BufferGeometry().setFromPoints(pts), tentMat);
+        line.position.x = (j - 2) * r * 0.3;
+        g.add(line);
+      }
+      return g;
+    }
+
+    /* ---- god rays: additive planes near the surface ---- */
+    function buildRays() {
+      rays = [];
+      for (var i = 0; i < 6; i++) {
+        var w = 26 + rand() * 30;
+        var geo = new three.PlaneGeometry(w, 400, 1, 1);
+        var mat = new three.MeshBasicMaterial({
+          color: 0xbfe8ff, transparent: true, opacity: 0.06,
+          blending: three.AdditiveBlending, side: three.DoubleSide, depthWrite: false
+        });
+        var m = new three.Mesh(geo, mat);
+        m.position.set((rand() - 0.5) * 600, -100, -80 - rand() * 120);
+        m.rotation.z = (rand() - 0.5) * 0.3;
+        m.rotation.y = (rand() - 0.5) * 0.4;
+        scene3.add(m);
+        rays.push(m);
+      }
+    }
+
+    /* ---- marine snow: THREE.Points ---- */
+    function buildSnow() {
+      var n = isMobile() ? 300 : 800;
+      var geo = new three.BufferGeometry();
+      var positions = new Float32Array(n * 3);
+      for (var i = 0; i < n; i++) {
+        positions[i * 3] = (rand() - 0.5) * 800;
+        positions[i * 3 + 1] = (rand() - 0.5) * 600;
+        positions[i * 3 + 2] = (rand() - 0.5) * 600 - 100;
+      }
+      geo.setAttribute('position', new three.BufferAttribute(positions, 3));
+      var mat = new three.PointsMaterial({
+        color: 0xc8e6f0, size: 1.8, transparent: true, opacity: 0.35, sizeAttenuation: true
+      });
+      snowPoints = new three.Points(geo, mat);
+      scene3.add(snowPoints);
+    }
+
+    /* ---- HUD (DOM overlay, bottom-left) ---- */
+    var hudEl = null;
+    function buildHUD() {
+      if (hudEl) return;
+      hudEl = document.createElement('div');
+      hudEl.className = 'abyss-hud';
+      hudEl.setAttribute('aria-hidden', 'true');
+      var page = document.querySelector('.page') || document.body;
+      page.appendChild(hudEl);
+    }
+    function updateHUD() {
+      if (!hudEl) return;
+      var d = depthM(), press = (1 + d / 10).toFixed(1), temp = Math.max(2, 20 - d / 45).toFixed(1);
+      var z = zoneOf();
+      var html = '<p class="hud-depth">' + d + ' m</p>';
+      html += '<p class="hud-zone">' + z.name + '</p>';
+      html += '<p class="hud-row">PRESS ' + press + ' bar · TEMP ' + temp + '°C</p>';
+      html += '<p class="hud-row">BATT ' + Math.round(battery) + '% · BOOST ' + Math.round(energy) + '%</p>';
+      html += '<p class="hud-row">LAMP ' + (CONFIG.lamp ? 'ON' : 'OFF') + '</p>';
+      if (log.length) {
+        html += '<p class="hud-log-title">SPECIMEN LOG</p>';
+        var start = Math.max(0, log.length - 4);
+        for (var i = start; i < log.length; i++) html += '<p class="hud-log">' + log[i] + '</p>';
+      }
+      hudEl.innerHTML = html;
+    }
+
+    /* ---- init ---- */
     function init() {
-      seed(4104); t = 0; mantas = []; dolphins = []; jellies = []; fish = []; snow = []; rings = []; bubbles = []; log = []; spark = [];
-      var n = isMobile() ? 7 : CONFIG.mantaCount;
-      for (var i = 0; i < n; i++) { var m = mkManta(i); for (var j = 0; j < CONFIG.trail; j++) m.trail.push({ x: m.x, y: m.y }); mantas.push(m); }
-      for (i = 0; i < (isMobile() ? 3 : 4); i++) dolphins.push(mkDolphin(i));
-      for (i = 0; i < (isMobile() ? 3 : 5); i++) jellies.push(mkJelly(i));
-      for (i = 0; i < (isMobile() ? 14 : 30); i++) fish.push({ x: rand() * W, y: rand() * H * 0.4, vx: 40 + rand() * 30, s: 2 + rand() * 2, ph: rand() * 6.28 });
-      for (i = 0; i < (isMobile() ? 50 : 110); i++) snow.push({ x: rand() * innerWidth, y: rand() * innerHeight, s: 0.4 + rand() * 1.8, sp: 6 + rand() * 22, depth: 0.4 + rand() * 0.6 });
-      whale = { x: W + 500, y: H * 0.5, dir: -1, t: 0, active: false, cooldown: 8, sang: false };
-      angler = { x: 0, y: 0, ph: 0 };
-      rov = { x: W / 2, y: H / 2, vx: 0, vy: 0, ang: 0, prop: 0, target: { x: W / 2, y: H / 2 } };
-      buildGlow();
-      ready = true;
+      seed(4104); t = 0; energy = 100; battery = 100; log = []; rings = [];
+      loadThree(function () {
+        three = window.THREE;
+        if (!three) return;
+        /* dedicated WebGL canvas (a canvas cannot hold both 2D and WebGL contexts) */
+        glCanvas = document.createElement('canvas');
+        glCanvas.id = 'gl-canvas';
+        glCanvas.setAttribute('aria-hidden', 'true');
+        glCanvas.style.cssText = 'position:fixed;top:0;left:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .45s ease';
+        document.body.insertBefore(glCanvas, document.querySelector('.page'));
+        renderer = new three.WebGLRenderer({ canvas: glCanvas, alpha: true, antialias: true });
+        renderer.setPixelRatio(Math.min(dprCap(), window.devicePixelRatio || 1));
+        renderer.setSize(innerWidth, innerHeight);
+        /* scene + fog (depth-based, smooth) */
+        scene3 = new three.Scene();
+        fogColor = new three.Color(0x2aa6c7);
+        scene3.fog = new three.FogExp2(fogColor, 0.003);
+        /* camera: perspective, looking at the ROV plane */
+        camera3 = new three.PerspectiveCamera(60, innerWidth / innerHeight, 1, 2000);
+        camera3.position.set(0, 0, 200);
+        /* lights */
+        ambientLight = new three.AmbientLight(0x1a3a5a, 0.6);
+        scene3.add(ambientLight);
+        sunLight = new three.DirectionalLight(0xbfe8ff, 0.8);
+        sunLight.position.set(0, 300, 100);
+        scene3.add(sunLight);
+        /* ROV + headlamp light */
+        rovMesh = buildROV();
+        rovMesh.position.set(0, 0, 0);
+        scene3.add(rovMesh);
+        rovLight = new three.PointLight(0xfff7d0, CONFIG.lamp ? 1.8 : 0, CONFIG.lampRadius * 1.5, 2);
+        rovLight.position.set(30, 0, 0);
+        rovMesh.add(rovLight);
+        /* mantas */
+        mantas = [];
+        var n = isMobile() ? 7 : CONFIG.mantaCount;
+        for (var i = 0; i < n; i++) {
+          var size = 14 + rand() * 12;
+          var m = buildManta(size);
+          m.userData = { size: size, ph: rand() * 6.28, x: (rand() - 0.5) * 400, y: (rand() - 0.5) * 300, z: -rand() * 200,
+                         vx: (rand() - 0.5) * 40, vy: (rand() - 0.5) * 30, vz: (rand() - 0.5) * 20,
+                         leader: i === 0, flash: 0, scatter: 0 };
+          m.position.set(m.userData.x, m.userData.y, m.userData.z);
+          scene3.add(m);
+          mantas.push(m);
+        }
+        /* dolphins (shallows) */
+        dolphins = [];
+        for (i = 0; i < (isMobile() ? 2 : 4); i++) {
+          var d = buildDolphin();
+          d.userData = { x: (rand() - 0.5) * 500, y: 60 + rand() * 80, z: -rand() * 100,
+                         vx: 40 + rand() * 30, breach: 0, t: 0, ph: rand() * 6.28 };
+          d.position.set(d.userData.x, d.userData.y, d.userData.z);
+          scene3.add(d);
+          dolphins.push(d);
+        }
+        /* whale */
+        whaleMesh = buildWhale();
+        whaleMesh.position.set(600, 100, -400);
+        whaleMesh.visible = false;
+        scene3.add(whaleMesh);
+        /* jellies */
+        jellies = [];
+        for (i = 0; i < (isMobile() ? 3 : 5); i++) {
+          var jl = buildJelly(8 + rand() * 10);
+          jl.userData = { x: (rand() - 0.5) * 400, y: (rand() - 0.5) * 300, z: -rand() * 250, ph: rand() * 6.28 };
+          jl.position.set(jl.userData.x, jl.userData.y, jl.userData.z);
+          scene3.add(jl);
+          jellies.push(jl);
+        }
+        /* god rays + snow */
+        buildRays();
+        buildSnow();
+        buildHUD();
+        ready = true;
+      });
     }
-    function resize(w, h, d) { W = w; H = h; dpr = d; }
+    function resize(w, h, d) { W = w; H = h; if (renderer && camera3) { renderer.setSize(w, h, false); glCanvas.style.width = w + 'px'; glCanvas.style.height = h + 'px'; camera3.aspect = w / h; camera3.updateProjectionMatrix(); } }
 
-    /* ------------------ update ------------------ */
+    /* ---- update ---- */
+    var rovTarget = { x: 0, y: 0 };
     function update(dt) {
-      if (!ready) return;
+      if (!ready || !three) return;
       t += dt;
-      var z = zone(), inTwilight = Input.scroll >= 0.15 && Input.scroll < 0.5;
+      /* smooth depth: exponential approach to scroll target */
+      depthTarget = Input.scroll;
+      depthCur = lerp(depthCur, depthTarget, Math.min(1, dt * 2.5));
+      var zone = zoneOf();
+      /* fog + light interpolate with depth for a smooth WebGL transition */
+      var fogTarget = new three.Color(zone.fog);
+      fogColor.lerp(fogTarget, Math.min(1, dt * 1.8));
+      scene3.fog.color.copy(fogColor);
+      scene3.fog.density = lerp(scene3.fog.density, zone.density, Math.min(1, dt * 1.8));
+      var sunFade = Math.max(0, 1 - depthCur * 4);
+      sunLight.intensity = lerp(sunLight.intensity, 0.05 + sunFade * 0.9, Math.min(1, dt * 2));
+      ambientLight.intensity = lerp(ambientLight.intensity, 0.15 + sunFade * 0.55, Math.min(1, dt * 2));
+      /* god rays fade out with depth */
+      var rayA = Math.max(0, 1 - depthCur * 6) * 0.08;
+      for (var ri = 0; ri < rays.length; ri++) rays[ri].material.opacity = rayA;
 
-      // --- ROV steering: eased seek toward a target.
-      // The target is the pointer when the pointer is actually being used, otherwise
-      // keyboard input. Proportional gain with a dead zone + normalised fallback so the
-      // ROV eases to a stop near the pointer instead of oscillating around it.
+      /* --- ROV steering (eased seek with dead zone) --- */
       var kx = (Input.keys['arrowleft'] || Input.keys['a'] ? -1 : 0) + (Input.keys['arrowright'] || Input.keys['d'] ? 1 : 0);
       var ky = (Input.keys['arrowup'] || Input.keys['w'] ? -1 : 0) + (Input.keys['arrowdown'] || Input.keys['s'] ? 1 : 0);
-      var pointerActive = Input.pointerIdle < 2.0;      // recently moved pointer?
-      var target = rov.target;
-      if (kx || ky) {                                   // keyboard wins; target follows the keys
-        target.x = clamp(rov.x + kx * 220, 36, W - 36);
-        target.y = clamp(rov.y + ky * 220, 36, H - 30);
-      } else if (pointerActive) {
-        target.x = Input.x; target.y = Input.y;
+      var pointerActive = Input.pointerIdle < 2.0;
+      if (kx || ky) { rovTarget.x = clamp(rovMesh.position.x + kx * 80, -200, 200); rovTarget.y = clamp(rovMesh.position.y - ky * 60, -140, 140); }
+      else if (pointerActive) {
+        var wp = screenToWorld(Input.x, Input.y);
+        rovTarget.x = clamp(wp.x, -220, 220); rovTarget.y = clamp(wp.y, -140, 140);
       }
-      // proportional steering with dead zone (px) and soft-clamped gain
-      var sdx = target.x - rov.x, sdy = target.y - rov.y, sdist = Math.hypot(sdx, sdy);
-      var DEAD = 8, GAIN = 0.55;
-      var ax = 0, ay = 0;
-      if (sdist > DEAD) {
-        var mag = Math.min(1, (sdist - DEAD) / 140);     // 0..1 ramp, no snap
-        ax = (sdx / sdist) * mag; ay = (sdy / sdist) * mag;
-      }
-      // fold in keyboard as a direct nudge so keys feel crisp even when parked
-      if (kx || ky) { ax += kx * 0.6; ay += ky * 0.6; }
-      var len = Math.hypot(ax, ay);
-      if (len > 1) { ax /= len; ay /= len; }
+      var sdx = rovTarget.x - rovMesh.position.x, sdy = rovTarget.y - rovMesh.position.y;
+      var sdist = Math.hypot(sdx, sdy);
       var boosting = (Input.keys['shift'] && energy > 2);
-      var thrust = CONFIG.accel * (boosting ? CONFIG.boost : 1) * CONFIG.rovSpeed;
-      rov.vx += ax * thrust * dt; rov.vy += ay * thrust * dt;
-      rov.vx -= rov.vx * CONFIG.drag * dt; rov.vy -= rov.vy * CONFIG.drag * dt;
-      rov.vx += CONFIG.current * 10 * dt;
-      var sp = Math.hypot(rov.vx, rov.vy), cap = CONFIG.maxSpeed * (boosting ? CONFIG.boost : 1);
-      if (sp > cap) { rov.vx *= cap / sp; rov.vy *= cap / sp; }
-      rov.x = clamp(rov.x + rov.vx * dt, 36, W - 36); rov.y = clamp(rov.y + rov.vy * dt, 36, H - 30);
-      // face the direction of travel (bank slightly), damped
-      if (sp > 6) rov.ang = lerp(rov.ang, Math.atan2(rov.vy, rov.vx), Math.min(1, dt * 5));
-      rov.prop += dt * (3 + sp * 0.05 + (boosting ? 12 : 0));
-      energy = clamp(energy + (boosting ? -CONFIG.boostCost : CONFIG.boostRegen) * dt, 0, 100);
-      battery = clamp(battery - (CONFIG.lamp ? 0.4 : 0) * dt, 20, 100);
+      if (sdist > 6) {
+        var mag = Math.min(1, (sdist - 6) / 80) * CONFIG.rovSpeed * (boosting ? CONFIG.boost : 1);
+        rovMesh.position.x += (sdx / sdist) * mag * 260 * dt;
+        rovMesh.position.y += (sdy / sdist) * mag * 260 * dt;
+      }
+      /* bank into turns, gentle wobble */
+      var bank = clamp(sdist > 20 ? (sdx / sdist) * 0.25 : 0, -0.25, 0.25);
+      rovMesh.rotation.z = lerp(rovMesh.rotation.z, -bank, Math.min(1, dt * 4));
+      rovMesh.rotation.y = lerp(rovMesh.rotation.y, 0, Math.min(1, dt * 3));
+      rovMesh.position.y += Math.sin(t * 1.8) * 1.2 * dt; /* idle bob */
+      /* propeller spins with speed */
+      var spMag = Math.min(1, sdist / 60);
+      if (rovMesh.userData.prop) rovMesh.userData.prop.rotation.x += dt * (4 + spMag * 20 + (boosting ? 18 : 0));
+      /* status blink + sonar dot pulse */
+      if (rovMesh.userData.status) rovMesh.userData.status.material.color.setHex(Math.sin(t * 4) > 0 ? 0xff4040 : 0x7a1f12);
+      if (rovMesh.userData.sonar) rovMesh.userData.sonar.scale.setScalar(1 + Math.sin(t * 5) * 0.25);
+      /* lamp */
+      rovLight.intensity = CONFIG.lamp ? 1.8 * CONFIG.glow : 0;
+      rovLight.distance = CONFIG.lampRadius * 1.5;
       if (Input.keys['f']) { CONFIG.lamp = !CONFIG.lamp; Input.keys['f'] = false; }
-      // idle bubble puffs
-      if (Math.random() < (boosting ? 0.6 : 0.06)) bubbles.push({ x: rov.x - 22 * Math.cos(rov.ang), y: rov.y - 6, vy: -30 - rand() * 30, r: 1.4 + rand() * 2.2, life: 1.6 });
-      for (var b = bubbles.length - 1; b >= 0; b--) { var bb = bubbles[b]; bb.y += bb.vy * dt; bb.x += CONFIG.current * 12 * dt; bb.life -= dt * 0.6; if (bb.life <= 0 || bb.y < 0) bubbles.splice(b, 1); }
+      energy = clamp(energy + (boosting ? -CONFIG.boostCost : CONFIG.boostRegen) * dt, 0, 100);
+      battery = clamp(battery - (CONFIG.lamp ? 0.3 : 0) * dt, 15, 100);
+      /* camera gently follows the ROV for depth */
+      camera3.position.x = lerp(camera3.position.x, rovMesh.position.x * 0.15, Math.min(1, dt * 2));
+      camera3.position.y = lerp(camera3.position.y, rovMesh.position.y * 0.15, Math.min(1, dt * 2));
+      camera3.lookAt(0, 0, -50);
 
-      // --- marine snow parallax (sinks faster with depth)
-      for (var i = 0; i < snow.length; i++) { var sn = snow[i]; sn.y += sn.sp * dt * (1 + Input.scroll * 2.4); sn.x += CONFIG.current * sn.depth * 18 * dt; if (sn.y > H) { sn.y = -3; sn.x = rand() * W; } }
-
-      // --- MANTA SCHOOL: boids + leader figure-8 + wing undulation + glow
+      /* --- MANTA SCHOOL: boids in 3D + wing undulation + bioluminescence --- */
       var leader = mantas[0];
       if (leader) {
-        var lang = t * 0.4;
-        leader.vx = Math.cos(lang * 2) * 60; leader.vy = Math.sin(lang) * 44;
+        var lang = t * 0.35;
+        leader.userData.vx = Math.cos(lang * 2) * 55;
+        leader.userData.vy = Math.sin(lang) * 35;
+        leader.userData.vz = Math.sin(lang * 0.7) * 18;
       }
-      var mx = 0, my = 0, mvx = 0, mvy = 0, cnt = 0;
-      for (i = 0; i < mantas.length; i++) { mx += mantas[i].x; my += mantas[i].y; mvx += mantas[i].vx; mvy += mantas[i].vy; cnt++; }
-      mx /= cnt; my /= cnt; mvx /= cnt; mvy /= cnt;
-      var lampNear = CONFIG.lamp && Math.hypot(Input.x - mx, Input.y - my) < 320;
-      for (i = 0; i < mantas.length; i++) {
-        var m = mantas[i];
-        if (!m.leader) {
-          var sepX = 0, sepY = 0, near = 0;
-          for (var j = 0; j < mantas.length; j++) {
-            if (j === i) continue;
-            var dx = m.x - mantas[j].x, dy = m.y - mantas[j].y, dd = dx * dx + dy * dy;
-            if (dd < 4200) { sepX += dx / dd; sepY += dy / dd; near++; }
+      var mx = 0, my = 0, mz = 0, mvx = 0, mvy = 0, mvz = 0, cnt = 0;
+      for (var mi = 0; mi < mantas.length; mi++) {
+        mx += mantas[mi].userData.x; my += mantas[mi].userData.y; mz += mantas[mi].userData.z;
+        mvx += mantas[mi].userData.vx; mvy += mantas[mi].userData.vy; mvz += mantas[mi].userData.vz; cnt++;
+      }
+      mx /= cnt; my /= cnt; mz /= cnt; mvx /= cnt; mvy /= cnt; mvz /= cnt;
+      for (mi = 0; mi < mantas.length; mi++) {
+        var m = mantas[mi], ud = m.userData;
+        if (!ud.leader) {
+          var sepX = 0, sepY = 0, sepZ = 0, near = 0;
+          for (var mj = 0; mj < mantas.length; mj++) {
+            if (mj === mi) continue;
+            var ddx = ud.x - mantas[mj].userData.x, ddy = ud.y - mantas[mj].userData.y, ddz = ud.z - mantas[mj].userData.z;
+            var dd = ddx * ddx + ddy * ddy + ddz * ddz;
+            if (dd < 9000) { var inv = 1 / Math.max(dd, 1); sepX += ddx * inv; sepY += ddy * inv; sepZ += ddz * inv; near++; }
           }
-          m.vx += ((mvx - m.vx) * 0.06 + (mx - m.x) * 0.004 + sepX * 900) * dt * 8;
-          m.vy += ((mvy - m.vy) * 0.06 + (my - m.y) * 0.004 + sepY * 900) * dt * 8;
-          // follow the leader loosely
-          m.vx += (leader.x + Math.cos(i) * 40 - m.x) * 0.02 * dt * 8;
-          m.vy += (leader.y + Math.sin(i) * 30 - m.y) * 0.02 * dt * 8;
+          ud.vx += ((mvx - ud.vx) * 0.05 + (mx - ud.x) * 0.003 + sepX * 300) * dt * 6;
+          ud.vy += ((mvy - ud.vy) * 0.05 + (my - ud.y) * 0.003 + sepY * 300) * dt * 6;
+          ud.vz += ((mvz - ud.vz) * 0.05 + (mz - ud.z) * 0.003 + sepZ * 300) * dt * 6;
+          /* follow the leader loosely */
+          ud.vx += (leader.userData.x - ud.x) * 0.002 * dt * 6;
+          ud.vy += (leader.userData.y - ud.y) * 0.002 * dt * 6;
         }
-        // ROV relationship: curious escort when lamp on + slow; scatter when fast
-        var sp2 = Math.hypot(rov.vx, rov.vy);
-        if (CONFIG.lamp && sp2 < 120) { m.vx += (rov.x - m.x) * 0.01 * dt * 8; m.vy += (rov.y - m.y) * 0.01 * dt * 8; }
-        else if (sp2 > 340) { var fx = m.x - rov.x, fy = m.y - rov.y, fl = Math.hypot(fx, fy) || 1; m.vx += (fx / fl) * 600 * dt; m.vy += (fy / fl) * 600 * dt; m.scatter = 1; }
-        // gentle scatter decay
-        if (m.scatter > 0) m.scatter = Math.max(0, m.scatter - dt * 0.3);
-        // current + bounds + integrate
-        m.vx += CONFIG.current * 12 * dt;
-        m.vx *= (1 - 0.6 * dt); m.vy *= (1 - 0.6 * dt);
-        var msp = Math.hypot(m.vx, m.vy), mcap = m.leader ? 90 : 110;
-        if (msp > mcap) { m.vx *= mcap / msp; m.vy *= mcap / msp; }
-        m.x += m.vx * dt; m.y += m.vy * dt;
-        if (m.x < -60) m.x = W + 60; if (m.x > W + 60) m.x = -60;
-        if (m.y < 30) m.vy += 60 * dt; if (m.y > H - 30) m.vy -= 60 * dt;
-        // bank into turns
-        var turn = (m.vx * (m.vy - (m.pvy || 0))) ;
-        m.roll = lerp(m.roll, clamp((m.vx - (m.pvx || 0)) * 0.02, -0.6, 0.6), dt * 4);
-        m.pvx = m.vx; m.pvy = m.vy;
-        m.ph += dt * (1.6 + sp2 * 0.004);
-        // glow pulse, brighter near lamp/sonar
-        var lampD = CONFIG.lamp ? Math.hypot(m.x - rov.x, m.y - rov.y) : 9999;
-        m.glow = lerp(m.glow, 0.55 + (lampD < CONFIG.lampRadius ? 0.5 : 0) + m.flash, Math.min(1, dt * 3));
-        m.flash = Math.max(0, m.flash - dt * 1.4);
-        // trail ring buffer (no per-frame allocation)
-        m.trail[m.trI].x = m.x; m.trail[m.trI].y = m.y; m.trI = (m.trI + 1) % m.trail.length;
+        /* curious escort when lamp on + slow; scatter when fast */
+        var rdx = rovMesh.position.x - ud.x, rdy = rovMesh.position.y - ud.y, rdz = rovMesh.position.z - ud.z;
+        var rdist = Math.sqrt(rdx * rdx + rdy * rdy + rdz * rdz);
+        if (CONFIG.lamp && spMag < 0.4 && rdist < 250) {
+          ud.vx += rdx * 0.008 * dt * 6; ud.vy += rdy * 0.008 * dt * 6; ud.vz += rdz * 0.008 * dt * 6;
+        } else if (boosting || spMag > 0.9) {
+          if (rdist < 200) { ud.vx -= rdx * 0.06 * dt; ud.vy -= rdy * 0.06 * dt; ud.scatter = 1; }
+        }
+        if (ud.scatter > 0) ud.scatter = Math.max(0, ud.scatter - dt * 0.25);
+        /* integrate + bounds */
+        ud.vx += CONFIG.current * 10 * dt; ud.vx *= (1 - 0.5 * dt); ud.vy *= (1 - 0.5 * dt); ud.vz *= (1 - 0.5 * dt);
+        var msp = Math.sqrt(ud.vx * ud.vx + ud.vy * ud.vy + ud.vz * ud.vz), mcap = ud.leader ? 80 : 100;
+        if (msp > mcap) { ud.vx *= mcap / msp; ud.vy *= mcap / msp; ud.vz *= mcap / msp; }
+        ud.x += ud.vx * dt; ud.y += ud.vy * dt; ud.z += ud.vz * dt;
+        ud.x = clamp(ud.x, -260, 260); ud.y = clamp(ud.y, -160, 160); ud.z = clamp(ud.z, -350, 50);
+        m.position.set(ud.x, ud.y, ud.z);
+        /* face the direction of travel, banking */
+        if (msp > 2) {
+          m.rotation.y = Math.atan2(ud.vx, ud.vz);
+          m.rotation.z = lerp(m.rotation.z, clamp(-ud.vx * 0.005, -0.5, 0.5), Math.min(1, dt * 3));
+        }
+        /* wing undulation + glow */
+        animateManta(m, t, ud.ph, msp);
+        var lampD = CONFIG.lamp ? rdist : 9999;
+        var glowI = (0.4 + (lampD < CONFIG.lampRadius ? 0.5 : 0) + ud.flash) * CONFIG.glow;
+        m.material.emissiveIntensity = lerp(m.material.emissiveIntensity, glowI, Math.min(1, dt * 3));
+        ud.flash = Math.max(0, ud.flash - dt * 1.4);
+        /* sonar flash */
+        for (var rg2 = 0; rg2 < rings.length; rg2++) {
+          if (rings[rg2].t < 0.1) {
+            var rd = Math.sqrt((ud.x - rings[rg2].x) ** 2 + (ud.y - rings[rg2].y) ** 2 + (ud.z - rings[rg2].z) ** 2);
+            if (Math.abs(rd - rings[rg2].r) < 30) ud.flash = 1;
+          }
+        }
       }
 
-      // --- DOLPHINS in the shallows: cruise + breach arcs, ride the bow wave
-      for (i = 0; i < dolphins.length; i++) {
-        var dl = dolphins[i]; dl.t += dt; dl.ph += dt * 4;
-        dl.x += dl.vx * dt;
-        if (dl.x > W + 60) { dl.x = -60; dl.y = 50 + rand() * 90; }
-        if (dl.breach <= 0 && Math.random() < 0.0018) dl.breach = 1.2;
-        if (dl.breach > 0) dl.breach -= dt;
-        // ride the ROV's bow wave when close
-        var bdx = rov.x - dl.x, bdy = rov.y - dl.y, bdist = Math.hypot(bdx, bdy);
-        if (bdist < 160 && Input.scroll < 0.15) { dl.y += (rov.y - dl.y) * dt * 0.4; dl.vx = 60 + sp * 0.3; }
+      /* --- dolphins (shallows only): cruise + breach --- */
+      var showDol = depthCur < 0.18;
+      for (var di = 0; di < dolphins.length; di++) {
+        var dl = dolphins[di], dud = dl.userData;
+        dl.visible = showDol;
+        if (!showDol) continue;
+        dud.t += dt;
+        dud.x += dud.vx * dt;
+        if (dud.x > 280) { dud.x = -280; dud.y = 50 + rand() * 60; }
+        if (dud.breach <= 0 && Math.random() < 0.0015) dud.breach = 1.2;
+        if (dud.breach > 0) dud.breach -= dt;
+        var br = dud.breach > 0 ? Math.sin((dud.breach / 1.2) * Math.PI) : 0;
+        dl.position.set(dud.x, dud.y + br * 60, dud.z);
+        dl.rotation.z = br * -0.5 + Math.sin(t * 3 + dud.ph) * 0.04;
       }
 
-      // --- WHALE: one slow pass per descent, singing rings
-      whale.cooldown -= dt;
-      if (!whale.active && whale.cooldown <= 0 && Input.scroll > 0.55) { whale.active = true; whale.x = W + 520; whale.y = H * 0.5; whale.sang = false; }
-      if (whale.active) {
-        whale.x -= 24 * dt; whale.t += dt;
-        if (!whale.sang && whale.x < W * 0.6) { whale.sang = true; rings.push({ x: whale.x, y: whale.y, r: 20, life: 1.6, wide: true }); }
-        if (whale.x < -560) { whale.active = false; whale.cooldown = 20 + rand() * 20; }
+      /* --- whale: one slow pass per descent --- */
+      var showWhale = depthCur > 0.5;
+      if (showWhale && !whaleMesh.userData.active) {
+        whaleMesh.userData.active = true; whaleMesh.position.x = 600; whaleMesh.visible = true;
+      }
+      if (whaleMesh.userData.active) {
+        whaleMesh.position.x -= 22 * dt;
+        whaleMesh.rotation.y = Math.PI; /* face left */
+        if (whaleMesh.position.x < -700) { whaleMesh.userData.active = false; whaleMesh.visible = false; }
+      } else whaleMesh.visible = false;
+
+      /* --- jellyfish bob --- */
+      for (var ji = 0; ji < jellies.length; ji++) {
+        var jf = jellies[ji], jud = jf.userData;
+        jud.ph += dt;
+        jf.position.set(jud.x + Math.sin(jud.ph * 0.5) * 8, jud.y + Math.sin(jud.ph * 0.7) * 6, jud.z);
+        jf.rotation.y = jud.ph * 0.3;
       }
 
-      // --- jellyfish tentacles (verlet-ish) + reef fish scatter from lamp
-      for (i = 0; i < jellies.length; i++) {
-        var jl = jellies[i]; jl.ph += dt; jl.y += Math.sin(jl.ph * 0.7) * 6 * dt + 6 * dt;
-        if (jl.y > H + 40) { jl.y = -40; jl.x = rand() * W; }
-        for (var s = 0; s < jl.tent.length; s++) { jl.tent[s].x = Math.sin(t * 2 + s + jl.ph) * (4 + s * 2); jl.tent[s].y = s * 8; }
-      }
-      for (i = 0; i < fish.length; i++) {
-        var ff = fish[i]; ff.ph += dt * 6; ff.x += ff.vx * dt;
-        if (ff.x > W + 20) ff.x = -20;
-        if (CONFIG.lamp && Math.hypot(ff.x - rov.x, ff.y - rov.y) < CONFIG.lampRadius) ff.vx = (ff.x < rov.x ? -1 : 1) * 90;
-      }
-
-      // sonar rings decay + nudge plankton/bubbles
-      for (i = rings.length - 1; i >= 0; i--) {
-        var rg = rings[i]; rg.r += dt * (rg.wide ? 300 : 480); rg.life -= dt * 0.5;
-        // pinged mantas flash in order
-        if (!rg.wide) for (var k = 0; k < mantas.length; k++) { var md = Math.hypot(mantas[k].x - rg.x, mantas[k].y - rg.y); if (Math.abs(md - rg.r) < 26) mantas[k].flash = 1; }
-        if (rg.life <= 0) rings.splice(i, 1);
+      /* --- marine snow sinks with depth --- */
+      if (snowPoints) {
+        var pos2 = snowPoints.geometry.attributes.position;
+        var fall = 12 + depthCur * 30;
+        for (var si = 0; si < pos2.count; si++) {
+          var sy = pos2.getY(si) - fall * dt;
+          if (sy < -320) sy = 320;
+          pos2.setY(si, sy);
+        }
+        pos2.needsUpdate = true;
+        snowPoints.material.opacity = 0.2 + depthCur * 0.25;
       }
 
-      // --- performance monitor: degrade gracefully on slow frames
-      perf.acc += dt; perf.n++;
-      if (perf.n > 40) {
-        var avg = perf.acc / perf.n; perf.acc = 0; perf.n = 0;
-        if (avg > 0.02 && perf.slow < 2) { perf.slow++; degrade(); }
-        else if (avg < 0.016 && perf.slow > 0) perf.slow--;
+      /* --- sonar rings: expanding in 3D --- */
+      for (var rgi = rings.length - 1; rgi >= 0; rgi--) {
+        var rg = rings[rgi];
+        rg.r += dt * 300; rg.t += dt; rg.life -= dt * 0.4;
+        if (rg.life <= 0) rings.splice(rgi, 1);
       }
-    }
-    function degrade() { CONFIG.mantaCount = Math.max(6, CONFIG.mantaCount - 2); CONFIG.trail = Math.max(8, CONFIG.trail - 4); }
 
-    /* ------------------ draw ------------------ */
-    function drawROV() {
-      var c2 = sctx;
-      c2.save(); c2.translate(rov.x, rov.y);
-      c2.rotate(rov.ang + Math.sin(t * 2) * 0.03);
-      // nose dip on descent + squash when boosting
-      var sq = 1 + Math.min(0.12, Math.hypot(rov.vx, rov.vy) / 2400);
-      c2.scale(sq, 2 - sq);
-      // rear ducted propeller (spins with thrust)
-      c2.strokeStyle = '#2a1a0c'; c2.lineWidth = 2;
-      c2.strokeRect(-30, -7, 8, 14);
-      c2.save(); c2.translate(-33, 0); c2.rotate(rov.prop);
-      c2.strokeStyle = 'rgba(180,220,235,0.8)';
-      for (var b = 0; b < 4; b++) { c2.rotate(1.5708); c2.beginPath(); c2.moveTo(0, 0); c2.lineTo(0, 8); c2.stroke(); }
-      c2.restore();
-      // body: toy-like capsule, two-tone safety orange + cream, thick outline
-      c2.fillStyle = '#e8802a'; c2.strokeStyle = '#2a1a0c'; c2.lineWidth = 2.6;
-      c2.beginPath(); c2.ellipse(0, 0, 27, 15, 0, 0, 6.2832); c2.fill(); c2.stroke();
-      c2.fillStyle = '#f3e7cf'; c2.beginPath(); c2.ellipse(-3, -2, 13, 7.5, 0, 0, 6.2832); c2.fill();
-      // glass dome canopy + blinking status light
-      c2.fillStyle = 'rgba(160,225,245,0.9)'; c2.beginPath(); c2.arc(4, -9, 7.4, 3.14, 6.2832); c2.fill(); c2.stroke();
-      c2.fillStyle = (Math.sin(t * 4) > 0) ? '#ff4040' : '#7a1f12';
-      c2.beginPath(); c2.arc(8, -15, 2, 0, 6.2832); c2.fill();
-      // headlamp with glint
-      c2.fillStyle = '#fff7d0'; c2.beginPath(); c2.arc(25, 0, 4.4, 0, 6.2832); c2.fill(); c2.stroke();
-      c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(24, -1.4, 1.3, 0, 6.2832); c2.fill();
-      // manipulator nubs
-      c2.strokeStyle = '#e8802a'; c2.lineWidth = 3;
-      c2.beginPath(); c2.moveTo(18, 8); c2.lineTo(24, 13); c2.stroke();
-      c2.beginPath(); c2.moveTo(18, 8); c2.lineTo(26, 9); c2.stroke();
-      // stubby side fins tilt with steering
-      var tilt = clamp(rov.vy * 0.002, -0.4, 0.4);
-      c2.fillStyle = '#c96a1e';
-      c2.save(); c2.translate(-6, 12); c2.rotate(0.4 + tilt); c2.beginPath(); c2.moveTo(0, 0); c2.lineTo(12, 8); c2.lineTo(-6, 9); c2.closePath(); c2.fill(); c2.restore();
-      c2.save(); c2.translate(-6, -12); c2.rotate(-0.4 - tilt); c2.beginPath(); c2.moveTo(0, 0); c2.lineTo(12, -8); c2.lineTo(-6, -9); c2.closePath(); c2.fill(); c2.restore();
-      // grab rail + antenna with sonar dot
-      c2.strokeStyle = '#2a1a0c'; c2.lineWidth = 2; c2.beginPath(); c2.arc(-2, -6, 10, 3.4, 5.9); c2.stroke();
-      c2.beginPath(); c2.moveTo(12, -14); c2.lineTo(20, -24); c2.stroke();
-      c2.fillStyle = '#7ff3ff'; c2.beginPath(); c2.arc(20, -24, 1.6 + Math.sin(t * 5) * 0.5, 0, 6.2832); c2.fill();
-      c2.restore();
+      updateHUD();
     }
 
-    function drawManta(m) {
-      var c2 = sctx;
-      c2.save(); c2.translate(m.x, m.y);
-      var heading = Math.atan2(m.vy, m.vx);
-      c2.rotate(heading); c2.scale(1, Math.max(0.25, 1 - Math.abs(m.roll)));
-      var s = m.size;
-      // luminous trail (plankton ribbon) drawn from the ring buffer
-      c2.globalCompositeOperation = 'lighter';
-      for (var i = 0; i < m.trail.length; i++) {
-        var p = m.trail[(m.trI + i) % m.trail.length];
-        var a = (i / m.trail.length) * 0.18 * m.glow * CONFIG.glow;
-        c2.globalAlpha = a;
-        c2.fillStyle = '#5ad8e8';
-        var dx = p.x - m.x, dy = p.y - m.y;
-        c2.beginPath(); c2.arc(dx, dy, 2.4, 0, 6.2832); c2.fill();
-      }
-      // soft halo
-      c2.globalAlpha = 0.5 * m.glow * CONFIG.glow;
-      c2.drawImage(glowSprite, -s * 1.8, -s * 1.8, s * 3.6, s * 3.6);
-      c2.globalAlpha = 1; c2.globalCompositeOperation = 'source-over';
-      // body: broad diamond + pointed head, wings undulate with a travelling sine
-      var flap = m.ph;
-      c2.fillStyle = '#1c2f4a';
-      c2.beginPath();
-      // upper edge: nose -> left wingtip -> tail
-      wingEdge(c2, s, flap, 1);
-      wingEdge(c2, s, flap, -1);
-      c2.fill();
-      // lighter underside flash when banking hard
-      if (Math.abs(m.roll) > 0.4) { c2.fillStyle = 'rgba(120,190,210,0.35)'; c2.beginPath(); c2.ellipse(0, 2, s * 0.7, s * 0.2, 0, 0, 6.2832); c2.fill(); }
-      // whip tail
-      c2.strokeStyle = '#122a44'; c2.lineWidth = 1.6;
-      c2.beginPath(); c2.moveTo(-s * 0.9, 0); c2.quadraticCurveTo(-s * 1.5, Math.sin(flap) * 3, -s * 2.1, Math.sin(flap + 0.5) * 6); c2.stroke();
-      // cephalic horns
-      c2.strokeStyle = '#2a4a6a'; c2.lineWidth = 2;
-      c2.beginPath(); c2.moveTo(s * 0.5, -3); c2.quadraticCurveTo(s * 0.8, -6, s * 0.95, -4 - Math.sin(flap) * 2); c2.stroke();
-      c2.beginPath(); c2.moveTo(s * 0.5, 3); c2.quadraticCurveTo(s * 0.8, 6, s * 0.95, 4 + Math.sin(flap) * 2); c2.stroke();
-      // bioluminescent lines along spine + wing edges + spots
-      c2.globalCompositeOperation = 'lighter';
-      var glow = m.glow * CONFIG.glow * (0.7 + 0.3 * Math.sin(t * 2 + m.ph));
-      c2.globalAlpha = glow * 0.9;
-      c2.strokeStyle = '#6ff0ff'; c2.lineWidth = 1.6;
-      c2.beginPath(); c2.moveTo(s * 0.6, 0); c2.lineTo(-s * 0.8, 0); c2.stroke();
-      wingGlow(c2, s, flap, 1); wingGlow(c2, s, flap, -1);
-      c2.fillStyle = '#6ff0ff';
-      for (var sp = 0; sp < 4; sp++) { c2.beginPath(); c2.arc(s * (0.2 - sp * 0.2), (sp % 2 ? 1 : -1) * s * 0.18, 1.2, 0, 6.2832); c2.fill(); }
-      // sonar flash outline
-      if (m.flash > 0.01) {
-        c2.globalAlpha = m.flash; c2.strokeStyle = '#d8faff'; c2.lineWidth = 2;
-        c2.beginPath(); wingEdge(c2, s, flap, 1); wingEdge(c2, s, flap, -1); c2.stroke();
-      }
-      c2.globalAlpha = 1; c2.globalCompositeOperation = 'source-over';
-      c2.restore();
-    }
-    function wingEdge(c2, s, flap, sgn) {
-      // one wing from nose to wingtip with a travelling sine (phase delays to the tip)
-      var N = 6;
-      if (sgn === 1) c2.moveTo(s * 0.9, 0);
-      else c2.lineTo(s * 0.9, 0);
-      for (var i = 0; i <= N; i++) {
-        var u = i / N; // 0 at nose, 1 at wingtip
-        var x = s * (0.9 - u * 1.7);      // sweep back
-        var y = sgn * s * (u * 0.9) + Math.sin(flap * 2 - u * 2.4) * s * 0.14 * (0.3 + u);
-        c2.lineTo(x, y);
-      }
-      // tail edge
-      c2.lineTo(-s * 0.9, 0);
-    }
-    function wingGlow(c2, s, flap, sgn) {
-      c2.beginPath();
-      var N = 6;
-      for (var i = 0; i <= N; i++) {
-        var u = i / N, x = s * (0.9 - u * 1.7), y = sgn * s * (u * 0.9) + Math.sin(flap * 2 - u * 2.4) * s * 0.14 * (0.3 + u);
-        if (i === 0) c2.moveTo(x, y); else c2.lineTo(x, y);
-      }
-      c2.stroke();
-    }
-
-    function drawDolphin(dl) {
-      var c2 = sctx;
-      var br = dl.breach > 0 ? Math.sin(dl.breach / 1.2 * Math.PI) : 0;
-      var yy = dl.y - br * 46;
-      c2.save(); c2.translate(dl.x, yy); c2.rotate(br * -0.7 + Math.sin(dl.ph) * 0.06);
-      c2.fillStyle = '#3a5f7a'; c2.strokeStyle = '#20303f'; c2.lineWidth = 1.4;
-      c2.beginPath(); c2.ellipse(0, 0, 26, 9, 0, 0, 6.2832); c2.fill(); c2.stroke();
-      c2.beginPath(); c2.ellipse(20, -3, 8, 5, -0.2, 0, 6.2832); c2.fill();
-      // dorsal fin + tail fluke (vertical undulation)
-      c2.beginPath(); c2.moveTo(0, -9); c2.lineTo(-4, -18); c2.lineTo(-8, -8); c2.closePath(); c2.fill();
-      var fl = Math.sin(dl.ph * 2) * 6;
-      c2.beginPath(); c2.moveTo(-24, 0); c2.quadraticCurveTo(-30, fl, -34, fl - 4); c2.quadraticCurveTo(-28, 0, -24, 2); c2.closePath(); c2.fill();
-      // belly
-      c2.fillStyle = 'rgba(220,235,240,0.6)'; c2.beginPath(); c2.ellipse(2, 4, 18, 4, 0, 0, 6.2832); c2.fill();
-      c2.restore();
-      // breach splash + click arcs
-      if (br > 0.86) { rings.push({ x: dl.x, y: dl.y, r: 6, life: 0.6, wide: true }); }
-      if (Math.random() < 0.01) { c2.save(); c2.globalAlpha = 0.2; c2.strokeStyle = '#9fe0ef'; c2.beginPath(); c2.arc(dl.x, yy, 14, -0.6, 0.6); c2.stroke(); c2.restore(); }
-    }
-
-    function drawWhale() {
-      var c2 = sctx;
-      c2.save(); c2.translate(whale.x, whale.y);
-      // huge silhouette with a rim light and glowing barnacles
-      c2.fillStyle = '#071c2c';
-      c2.beginPath(); c2.ellipse(0, 0, 260, 70, 0, 0, 6.2832); c2.fill();
-      c2.beginPath(); c2.ellipse(-240, 0, 90, 26, 0, 0, 6.2832); c2.fill(); // head
-      // long pectoral flipper sweep + tail fluke swish
-      c2.save(); c2.translate(60, 40); c2.rotate(0.3 + Math.sin(whale.t * 0.6) * 0.25);
-      c2.beginPath(); c2.ellipse(0, 40, 12, 60, 0.1, 0, 6.2832); c2.fill(); c2.restore();
-      c2.save(); c2.translate(250, 0); c2.rotate(Math.sin(whale.t * 0.5) * 0.12);
-      c2.beginPath(); c2.moveTo(0, 0); c2.quadraticCurveTo(70, -26, 110, -34); c2.quadraticCurveTo(70, 0, 110, 34); c2.quadraticCurveTo(70, 20, 0, 8); c2.closePath(); c2.fill(); c2.restore();
-      // rim light
-      c2.strokeStyle = 'rgba(120,200,230,0.28)'; c2.lineWidth = 2;
-      c2.beginPath(); c2.ellipse(0, 0, 260, 70, 0, 3.4, 5.9); c2.stroke();
-      // barnacle spots glow
-      c2.globalCompositeOperation = 'lighter'; c2.fillStyle = 'rgba(140,220,240,0.5)';
-      for (var i = 0; i < 10; i++) { var bx = -220 + i * 46, by = Math.sin(i * 1.3) * 30 - 20; c2.globalAlpha = 0.25 + 0.2 * Math.sin(t + i); c2.beginPath(); c2.arc(bx, by, 3, 0, 6.2832); c2.fill(); }
-      c2.globalAlpha = 1; c2.globalCompositeOperation = 'source-over';
-      // calf follows
-      c2.fillStyle = '#0a2436'; c2.beginPath(); c2.ellipse(-60, 96, 90, 26, 0, 0, 6.2832); c2.fill();
-      c2.restore();
-    }
-
-    function drawJelly(jl) {
-      var c2 = sctx;
-      var glow = 0.5 + 0.5 * Math.sin(t * 1.4 + jl.ph);
-      c2.save(); c2.translate(jl.x, jl.y);
-      c2.globalCompositeOperation = 'lighter'; c2.globalAlpha = 0.4 + glow * 0.4;
-      c2.drawImage(glowSprite, -jl.r * 2, -jl.r * 2, jl.r * 4, jl.r * 4);
-      c2.globalCompositeOperation = 'source-over'; c2.globalAlpha = 1;
-      c2.fillStyle = 'rgba(150,210,230,' + (0.25 + glow * 0.3) + ')';
-      c2.beginPath(); c2.ellipse(0, 0, jl.r, jl.r * 0.8, 0, 3.14, 6.2832); c2.fill();
-      c2.strokeStyle = 'rgba(150,210,230,0.5)'; c2.lineWidth = 1.2;
-      for (var s = 0; s < jl.tent.length; s++) {
-        c2.beginPath(); c2.moveTo(-jl.r + s * (jl.r * 2 / jl.tent.length), 0);
-        c2.quadraticCurveTo(jl.tent[s].x, jl.tent[s].y, jl.tent[s].x * 1.4, jl.tent[s].y + 10);
-        c2.stroke();
-      }
-      c2.restore();
-    }
-
-    function drawHUD() {
-      var c2 = sctx, d = depthM(), press = (1 + d / 10).toFixed(1), temp = Math.max(2, (20 - d / 45)).toFixed(1);
-      var heading = (Math.round((Math.atan2(rov.vy, rov.vx) * 180 / Math.PI + 360) % 360));
-      c2.fillStyle = 'rgba(223,240,245,0.85)'; c2.font = '12px ui-monospace, Menlo, Consolas, monospace'; c2.textAlign = 'left';
-      c2.fillText('DEPTH ' + d + ' m   PRESS ' + press + ' bar   TEMP ' + temp + '°C', 16, 22);
-      c2.fillText('HDG ' + heading + '°   BATT ' + Math.round(battery) + '%   BOOST ' + Math.round(energy) + '%   ZONE ' + zone().name, 16, 40);
-      // specimen log
-      c2.textAlign = 'right'; c2.fillStyle = 'rgba(140,220,235,0.85)';
-      c2.fillText('SPECIMEN LOG ' + log.length, W - 16, 22);
-      var start = Math.max(0, log.length - 4);
-      for (var i = start; i < log.length; i++) c2.fillText(log[i], W - 16, 40 + (i - start) * 16);
-    }
-
+    /* ---- draw: Three.js renders ---- */
     function draw() {
-      var c2 = sctx, d = Input.scroll, z = zone();
-      var g = c2.createLinearGradient(0, 0, 0, H);
-      g.addColorStop(0, z.top); g.addColorStop(1, z.bot); c2.fillStyle = g; c2.fillRect(0, 0, W, H);
-      // absorb red with depth: deepen the cast
-      c2.fillStyle = 'rgba(0,10,20,' + (d * 0.35) + ')'; c2.fillRect(0, 0, W, H);
-      // light shafts in shallows
-      if (d < 0.2) {
-        c2.save(); c2.globalCompositeOperation = 'lighter';
-        for (var sh = 0; sh < 5; sh++) {
-          var gx = W * (0.12 + sh * 0.2), a = (1 - d * 5) * 0.1;
-          var lg = c2.createLinearGradient(gx, 0, gx + 40, H * 0.7);
-          lg.addColorStop(0, 'rgba(200,240,255,' + a + ')'); lg.addColorStop(1, 'rgba(200,240,255,0)');
-          c2.fillStyle = lg; c2.beginPath(); c2.moveTo(gx, 0); c2.lineTo(gx + 26, 0); c2.lineTo(gx + 90, H * 0.7); c2.lineTo(gx + 40, H * 0.7); c2.closePath(); c2.fill();
-        }
-        c2.restore();
-      }
-      // marine snow
-      c2.fillStyle = 'rgba(200,230,240,0.5)';
-      for (var i = 0; i < snow.length; i++) { c2.globalAlpha = 0.25 * snow[i].depth; c2.beginPath(); c2.arc(snow[i].x, snow[i].y, snow[i].s, 0, 6.2832); c2.fill(); }
-      c2.globalAlpha = 1;
-
-      // zone life
-      if (d < 0.2) { for (i = 0; i < dolphins.length; i++) drawDolphin(dolphins[i]); }
-      if (d < 0.3) { c2.fillStyle = '#7fa9c0'; for (i = 0; i < fish.length; i++) { var ff = fish[i]; c2.save(); c2.translate(ff.x, ff.y); c2.scale(ff.vx > 0 ? 1 : -1, 1); c2.beginPath(); c2.ellipse(0, 0, ff.s * 2.4, ff.s, 0, 0, 6.2832); c2.fill(); c2.restore(); } }
-      for (i = 0; i < jellies.length; i++) drawJelly(jellies[i]);
-      if (d >= 0.15) for (i = 0; i < mantas.length; i++) drawManta(mantas[i]);
-      if (d > 0.55 && whale.active) drawWhale();
-      if (d > 0.7) { // anglerfish with a swaying lure
-        angler.ph += 0; c2.save(); c2.translate(W * 0.82, H * 0.7);
-        c2.fillStyle = '#0d1f2c'; c2.beginPath(); c2.ellipse(0, 0, 20, 14, 0, 0, 6.2832); c2.fill();
-        c2.strokeStyle = '#0d1f2c'; c2.lineWidth = 2; c2.beginPath(); c2.moveTo(4, -12); c2.quadraticCurveTo(20, -26, 26, -18 + Math.sin(t * 2) * 3); c2.stroke();
-        c2.globalCompositeOperation = 'lighter'; c2.fillStyle = '#bff2ff'; c2.beginPath(); c2.arc(26, -18 + Math.sin(t * 2) * 3, 3.4, 0, 6.2832); c2.fill(); c2.globalCompositeOperation = 'source-over';
-        c2.fillStyle = '#1a3346'; c2.beginPath(); c2.arc(8, -3, 2.4, 0, 6.2832); c2.fill(); c2.restore();
-      }
-
-      // bubbles
-      for (i = bubbles.length - 1; i >= 0; i--) { var bb = bubbles[i]; c2.globalAlpha = bb.life * 0.5; c2.strokeStyle = 'rgba(180,225,240,0.8)'; c2.lineWidth = 1; c2.beginPath(); c2.arc(bb.x, bb.y, bb.r, 0, 6.2832); c2.stroke(); }
-      c2.globalAlpha = 1;
-
-      // sonar rings
-      for (i = 0; i < rings.length; i++) { var rg = rings[i]; c2.globalAlpha = Math.max(0, rg.life); c2.strokeStyle = rg.wide ? 'rgba(150,220,240,0.5)' : 'rgba(120,240,255,0.6)'; c2.lineWidth = rg.wide ? 3 : 2; c2.beginPath(); c2.arc(rg.x, rg.y, rg.r, 0, 6.2832); c2.stroke(); }
-      c2.globalAlpha = 1;
-
-      drawROV();
-
-      /* ---- SIGNATURE: restoration light. Murky everywhere except the lamp cone.
-         We punch the murk out with destination-out following the lamp direction.
-         Glow creatures are drawn additively so they shine through the murk. ---- */
-      if (CONFIG.restore) {
-        var murk = c2.createLinearGradient(0, 0, 0, H);
-        murk.addColorStop(0, 'rgba(2,20,30,0.0)'); murk.addColorStop(1, 'rgba(2,18,28,' + (0.18 + d * 0.3) + ')');
-        c2.save();
-        c2.fillStyle = murk; c2.fillRect(0, 0, W, H);
-        c2.restore();
-        if (CONFIG.lamp) {
-          // warm "restored" cone in front of the lamp
-          var dirx = Math.cos(rov.ang), diry = Math.sin(rov.ang);
-          var lx = rov.x + dirx * 60, ly = rov.y + diry * 60;
-          var rg2 = c2.createRadialGradient(lx, ly, 10, lx, ly, CONFIG.lampRadius);
-          rg2.addColorStop(0, 'rgba(255,244,200,0.28)'); rg2.addColorStop(0.6, 'rgba(255,244,200,0.12)'); rg2.addColorStop(1, 'rgba(255,244,200,0)');
-          c2.fillStyle = rg2; c2.beginPath(); c2.arc(lx, ly, CONFIG.lampRadius, 0, 6.2832); c2.fill();
-        }
-      }
-
-      drawHUD();
+      if (!ready || !renderer) return;
+      renderer.render(scene3, camera3);
     }
 
     return {
       id: 'blue', init: init, resize: resize, update: update, draw: draw,
-      start: function () {}, stop: function () {},
-      destroy: function () { mantas = []; dolphins = []; jellies = []; fish = []; snow = []; rings = []; bubbles = []; log = []; glowSprite = null; whale = null; rov = null; ready = false; this.__inited = false; },
+      start: function () {
+        if (glCanvas) {
+          glCanvas.style.opacity = '1';
+          sceneCanvas.style.opacity = '0'; /* the 2D canvas is idle while WebGL runs */
+        }
+      },
+      stop: function () { if (glCanvas) glCanvas.style.opacity = '0'; },
+      destroy: function () {
+        mantas = []; dolphins = []; jellies = []; rays = []; log = []; rings = [];
+        if (renderer) { renderer.dispose(); renderer = null; }
+        if (scene3) { scene3 = null; }
+        if (glCanvas) { glCanvas.remove(); glCanvas = null; }
+        if (hudEl) { hudEl.remove(); hudEl = null; }
+        snowPoints = null; whaleMesh = null; rovMesh = null; ready = false; this.__inited = false;
+      },
       CONFIG: CONFIG,
-      ping: function () { if (rov) { rings.push({ x: rov.x, y: rov.y, r: 10, life: 1.2 }); } },
-      callSchool: function () { for (var i = 0; i < mantas.length; i++) { mantas[i].vx += (rov.x - mantas[i].x) * 0.02; mantas[i].vy += (rov.y - mantas[i].y) * 0.02; } },
-      summonWhale: function () { if (whale) { whale.cooldown = 0; } },
-      dolphinBreach: function () { for (var i = 0; i < dolphins.length; i++) dolphins[i].breach = 1.2; },
+      ping: function () {
+        if (rovMesh) rings.push({ x: rovMesh.position.x, y: rovMesh.position.y, z: rovMesh.position.z, r: 10, life: 1.2, t: 0 });
+      },
+      callSchool: function () { for (var i = 0; i < mantas.length; i++) { mantas[i].userData.vx += (rovMesh.position.x - mantas[i].userData.x) * 0.02; mantas[i].userData.vy += (rovMesh.position.y - mantas[i].userData.y) * 0.02; } },
+      summonWhale: function () { if (whaleMesh) { whaleMesh.userData.active = true; whaleMesh.position.x = 600; whaleMesh.visible = true; } },
+      dolphinBreach: function () { for (var i = 0; i < dolphins.length; i++) dolphins[i].userData.breach = 1.2; },
       toggleRestore: function () { CONFIG.restore = !CONFIG.restore; },
       toggleLamp: function () { CONFIG.lamp = !CONFIG.lamp; },
-      logSpecimen: function (x, y) {
+      logSpecimen: function () {
         var gen = GENERA[(rand() * GENERA.length) | 0], sp = ['crypta', 'noctis', 'abyssi', 'miranda'][(rand() * 4) | 0];
-        log.push(gen + ' ' + sp + '  ·  ' + (60 + (rand() * 38 | 0)) + '%  ·  ' + depthM() + ' m  ·  ' + new Date().toLocaleTimeString());
+        log.push(gen + ' ' + sp + ' · ' + (60 + (rand() * 38 | 0)) + '% · ' + depthM() + ' m');
         if (log.length > 8) log.shift();
       }
     };
