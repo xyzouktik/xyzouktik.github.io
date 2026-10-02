@@ -165,17 +165,13 @@
   .lab-btn:hover{color:var(--accent); border-color:var(--accent)}
   .lab-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
   .lab-hint{font-size:.62rem; line-height:1.5; color:var(--muted); margin:.5rem 0 0; opacity:.8}
-  /* ── ABYSS HUD (bottom-left, DOM overlay on the WebGL scene) ── */
-  .abyss-hud{position:fixed; left:1rem; bottom:1rem; z-index:3; pointer-events:none;
-    font-family:var(--mono); font-size:.72rem; line-height:1.5; color:var(--fg);
-    background:var(--card); border:1px solid var(--card-border); border-radius:8px;
-    padding:.7rem .9rem; backdrop-filter:blur(8px); max-width:280px}
-  .abyss-hud .hud-depth{font-size:1.4rem; font-weight:600; color:var(--accent); margin:0 0 .15rem; line-height:1.1}
-  .abyss-hud .hud-zone{font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 .4rem}
-  .abyss-hud .hud-row{color:var(--muted); margin:0 0 .15rem}
-  .abyss-hud .hud-log-title{font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin:.5rem 0 .2rem; border-top:1px solid var(--card-border); padding-top:.4rem}
-  .abyss-hud .hud-log{color:var(--muted); margin:0 0 .1rem; font-size:.64rem}
-  @media (max-width:560px){ .abyss-hud{left:.5rem; bottom:.5rem; padding:.5rem .6rem; max-width:220px} .abyss-hud .hud-depth{font-size:1.1rem} }
+  /* ── ABYSS HUD (bottom-left, clean floating text) ── */
+  .abyss-hud{position:fixed; left:1.5rem; bottom:1.5rem; z-index:3; pointer-events:none; font-family:var(--mono); color:rgba(220,240,245,0.78)}
+  .abyss-hud .hud-depth{font-size:2.2rem; font-weight:300; line-height:1; margin:0; letter-spacing:.02em}
+  .abyss-hud .hud-zone{font-size:.65rem; letter-spacing:.25em; text-transform:uppercase; color:rgba(220,240,245,0.35); margin:.4rem 0 0; font-weight:400}
+  .abyss-hud .hud-log{margin-top:.8rem; font-size:.6rem; color:rgba(220,240,245,0.4); line-height:1.6}
+  .abyss-hud .hud-log p{margin:0 0 .15rem}
+  @media (max-width:560px){ .abyss-hud{left:1rem; bottom:1rem} .abyss-hud .hud-depth{font-size:1.6rem} }
   @media (max-width:560px){ .lab-panel{right:-.2rem; width:min(18rem,88vw)} }
 </style>
 <script type="application/ld+json">
@@ -2119,53 +2115,52 @@
      =================================================================== */
     /* ===================================================================
      BLUE — "ABYSS-1: Descent" (WebGL / Three.js)
-     A full 3D ocean descent. Three.js renders the water column with
-     exponential fog that deepens with scroll, god rays in the shallows,
-     a 3D ROV with headlamp, a school of vertex-displaced mantas,
-     a whale pass, and marine snow — all procedural geometry.
+     Minimal, dark, properly composed. A small 3D ROV is the focal
+     subject. Four mantas in the twilight zone with vertex-displaced
+     wing undulation, one distant whale silhouette in the midnight
+     zone, a single subtle jelly, 150 marine snow particles, and a real
+     SpotLight on the ROV that casts a faint additive beam through the
+     fog. No god-ray gimmicks, no crowded screen, no glowing disco —
+     just depth, fog, and a well-composed scene.
      =================================================================== */
   var AbyssScene = (function () {
     var CONFIG = {
       accel: 900, drag: 2.4, maxSpeed: 340, boost: 2.1,
-      boostCost: 40, boostRegen: 22, lampRadius: 210,
-      mantaCount: 12, glow: 1, current: 0.15, rovSpeed: 1,
-      lamp: true, restore: true, sonarCost: 12
+      mantaCount: 4, glow: 1, current: 0.12, rovSpeed: 1,
+      lamp: true, lampRadius: 180
     };
     var W = 0, H = 0, ready = false, t = 0;
-    var three = null; /* THREE namespace once loaded */
+    var three = null;
     var glCanvas = null, renderer = null, scene3 = null, camera3 = null;
-    var rovMesh = null, rovLight = null, propMesh = null;
-    var mantas = [], dolphins = [], whaleMesh = null, jellies = [];
-    var snowPoints = null, rays = [], bubbles = [];
-    var log = [], rings = [];
+    var rovGroup = null, lampSpot = null, beamMesh = null, lampMesh = null;
+    var mantaMat = null, mantas = [];
+    var whaleGroup = null, jellyGroup = null;
+    var snowPoints = null;
+    var rings = [], log = [];
     var energy = 100, battery = 100;
-    var fogColor = null, sunLight = null, ambientLight = null;
     var depthCur = 0, depthTarget = 0;
+    var sunLight = null;
+    var fogColor = null, fogDensity = 0.003;
     var GENERA = ['Profundulus', 'Abyssoraja', 'Luminaster', 'Tenebrisquid', 'Pelagica'];
     var ZONES = [
-      { max: 0.15, name: 'SUNLIT SHALLOWS', fog: 0x2aa6c7, density: 0.003 },
-      { max: 0.5,  name: 'TWILIGHT',        fog: 0x0b3f63, density: 0.008 },
-      { max: 1.01, name: 'MIDNIGHT',        fog: 0x03101a, density: 0.016 }
+      { max: 0.12, name: 'SUNLIT',   fog: 0x0d4a5e, density: 0.0035, sunI: 0.4 },
+      { max: 0.5,  name: 'TWILIGHT', fog: 0x061626, density: 0.009,  sunI: 0.05 },
+      { max: 1.01, name: 'MIDNIGHT', fog: 0x010408, density: 0.018,  sunI: 0 }
     ];
-
     function lerp(a, b, k) { return a + (b - a) * k; }
     function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
     function depthM() { return Math.round(depthCur * 1000); }
     function zoneOf() { var d = depthCur; for (var i = 0; i < ZONES.length; i++) if (d < ZONES[i].max) return ZONES[i]; return ZONES[2]; }
 
-    /* ---- load Three.js from CDN (lazy, only when this scene activates) ---- */
     function loadThree(cb) {
       if (window.THREE) { cb(); return; }
       var s = document.createElement('script');
       s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
       s.onload = function () { cb(); };
-      s.onerror = function () { /* fall back silently */ };
       (document.head || document.body).appendChild(s);
     }
 
-    /* ---- world helpers ---- */
     function screenToWorld(px, py) {
-      /* map client coords to a plane at z=0 given the camera */
       var v = new three.Vector3((px / W) * 2 - 1, -(py / H) * 2 + 1, 0.5);
       v.unproject(camera3);
       var dir = v.sub(camera3.position).normalize();
@@ -2173,244 +2168,188 @@
       return camera3.position.clone().add(dir.multiplyScalar(dist));
     }
 
-    /* ---- ROV: a chunky diver-scooter from primitives ---- */
+    /* ---- ROV: a proper diver-scooter from primitives ---- */
     function buildROV() {
       var g = new three.Group();
-      /* body capsule: safety orange with thick outline feel */
-      var bodyGeo = new three.SphereGeometry(14, 24, 16);
-      bodyGeo.scale(1.9, 1, 1);
-      var bodyMat = new three.MeshStandardMaterial({ color: 0xe8802a, roughness: 0.35, metalness: 0.5 });
-      var body = new three.Mesh(bodyGeo, bodyMat);
-      g.add(body);
-      /* cream stripe */
-      var stripeGeo = new three.SphereGeometry(13, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
-      stripeGeo.scale(1.8, 0.7, 0.8);
-      var stripe = new three.Mesh(stripeGeo, new three.MeshStandardMaterial({ color: 0xf3e7cf, roughness: 0.4 }));
-      stripe.position.y = -5;
-      g.add(stripe);
-      /* glass dome canopy */
-      var dome = new three.Mesh(
-        new three.SphereGeometry(7, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.55),
-        new three.MeshPhysicalMaterial({ color: 0x9fe0f0, transparent: true, opacity: 0.45, roughness: 0.05, metalness: 0.1 })
-      );
-      dome.position.set(3, 10, 0);
+      var bodyMat = new three.MeshStandardMaterial({ color: 0xe8802a, roughness: 0.4, metalness: 0.45 });
+      var darkMat = new three.MeshStandardMaterial({ color: 0x2a1a0c, roughness: 0.6, metalness: 0.3 });
+      var glassMat = new three.MeshPhysicalMaterial({ color: 0x9fe0f0, transparent: true, opacity: 0.4, roughness: 0.05, metalness: 0.1 });
+
+      // Hull: cylinder along X
+      var hullGeo = new three.CylinderGeometry(6, 6, 22, 20);
+      hullGeo.rotateZ(Math.PI / 2);
+      g.add(new three.Mesh(hullGeo, bodyMat));
+      // Nose: hemisphere pointing +X
+      var noseGeo = new three.SphereGeometry(6, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5);
+      noseGeo.rotateZ(-Math.PI / 2);
+      var nose = new three.Mesh(noseGeo, bodyMat);
+      nose.position.set(11, 0, 0);
+      g.add(nose);
+      // Tail: hemisphere pointing -X
+      var tailGeo = new three.SphereGeometry(6, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5);
+      tailGeo.rotateZ(Math.PI / 2);
+      var tail = new three.Mesh(tailGeo, bodyMat);
+      tail.position.set(-11, 0, 0);
+      g.add(tail);
+      // Conning tower / electronics pod
+      var pod = new three.Mesh(new three.BoxGeometry(7, 4, 4), darkMat);
+      pod.position.set(-2, 7, 0);
+      g.add(pod);
+      // Camera dome (glass hemisphere on the front)
+      var domeGeo = new three.SphereGeometry(3, 14, 8, 0, Math.PI * 2, 0, Math.PI * 0.5);
+      domeGeo.rotateZ(-Math.PI / 2);
+      var dome = new three.Mesh(domeGeo, glassMat);
+      dome.position.set(6, 4, 0);
       g.add(dome);
-      /* blinking status light */
-      var status = new three.Mesh(new three.SphereGeometry(1.5, 8, 8),
-        new three.MeshBasicMaterial({ color: 0xff4040 }));
-      status.position.set(6, 16, 0);
+      // Headlamp bulb
+      lampMesh = new three.Mesh(new three.SphereGeometry(2, 10, 8), new three.MeshBasicMaterial({ color: 0xfff7d0 }));
+      lampMesh.position.set(15, 0, 0);
+      g.add(lampMesh);
+      // Two thrusters at the back
+      for (var s2 = -1; s2 <= 1; s2 += 2) {
+        var thr = new three.Mesh(new three.CylinderGeometry(2.5, 2.5, 3, 10), darkMat);
+        thr.position.set(-12, 0, s2 * 5);
+        thr.rotation.x = Math.PI / 2;
+        g.add(thr);
+      }
+      // Manipulator arms (bottom front)
+      for (var s3 = -1; s3 <= 1; s3 += 2) {
+        var arm = new three.Mesh(new three.CylinderGeometry(0.6, 0.6, 5, 6), darkMat);
+        arm.position.set(7, -5, s3 * 3);
+        arm.rotation.z = Math.PI / 2;
+        g.add(arm);
+      }
+      // Antenna
+      var ant = new three.Mesh(new three.CylinderGeometry(0.3, 0.3, 8, 6), darkMat);
+      ant.position.set(-4, 13, 0);
+      g.add(ant);
+      // Status light
+      var status = new three.Mesh(new three.SphereGeometry(0.8, 8, 6), new three.MeshBasicMaterial({ color: 0xff4040 }));
+      status.position.set(0, 10, 2);
       g.add(status);
       g.userData.status = status;
-      /* headlamp (glowing sphere + point light) */
-      var lamp = new three.Mesh(new three.SphereGeometry(4, 12, 12),
-        new three.MeshBasicMaterial({ color: 0xfff7d0 }));
-      lamp.position.set(26, 0, 0);
-      g.add(lamp);
-      /* rear propeller (ring + 4 blades, spins with thrust) */
-      var propGroup = new three.Group();
-      var ring = new three.Mesh(new three.TorusGeometry(7, 1.4, 8, 20),
-        new three.MeshStandardMaterial({ color: 0x2a1a0c, roughness: 0.6 }));
-      propGroup.add(ring);
-      for (var b = 0; b < 4; b++) {
-        var blade = new three.Mesh(new three.BoxGeometry(1.2, 10, 0.6),
-          new three.MeshStandardMaterial({ color: 0x8ab8c8, metalness: 0.7, roughness: 0.3 }));
-        blade.rotation.z = b * Math.PI / 2;
-        propGroup.add(blade);
-      }
-      propGroup.position.set(-28, 0, 0);
-      propGroup.rotation.y = Math.PI / 2;
-      g.add(propGroup);
-      g.userData.prop = propGroup;
-      /* side fins */
-      for (var sgn = -1; sgn <= 1; sgn += 2) {
-        var fin = new three.Mesh(new three.BoxGeometry(10, 1.2, 6),
-          new three.MeshStandardMaterial({ color: 0xc96a1e, roughness: 0.5 }));
-        fin.position.set(-4, 0, sgn * 13);
-        fin.rotation.x = sgn * 0.35;
-        g.add(fin);
-      }
-      /* grab rail */
-      var rail = new three.Mesh(new three.TorusGeometry(9, 0.8, 8, 16, Math.PI),
-        new three.MeshStandardMaterial({ color: 0x2a1a0c }));
-      rail.position.set(-3, 4, 0);
-      rail.rotation.z = Math.PI;
-      g.add(rail);
-      /* antenna + sonar dot */
-      var antenna = new three.Mesh(new three.CylinderGeometry(0.4, 0.4, 10, 6),
-        new three.MeshStandardMaterial({ color: 0x2a1a0c }));
-      antenna.position.set(10, 20, 0);
-      antenna.rotation.z = -0.4;
-      g.add(antenna);
-      var sonarDot = new three.Mesh(new three.SphereGeometry(1.2, 8, 8),
-        new three.MeshBasicMaterial({ color: 0x7ff3ff }));
-      sonarDot.position.set(14, 24, 0);
-      g.add(sonarDot);
-      g.userData.sonar = sonarDot;
+      // Spotlight: the actual lamp (real 3D light that illuminates mantas)
+      lampSpot = new three.SpotLight(0xfff0d0, 3, CONFIG.lampRadius * 2.2, Math.PI / 4.5, 0.4, 1.5);
+      lampSpot.position.set(15, 0, 0);
+      lampSpot.target.position.set(100, 0, 0);
+      g.add(lampSpot);
+      g.add(lampSpot.target);
+      // Beam cone: faint additive shaft of light in the murk
+      var beamGeo = new three.ConeGeometry(CONFIG.lampRadius * 0.45, CONFIG.lampRadius * 1.7, 20, 1, true);
+      beamGeo.translate(0, -CONFIG.lampRadius * 0.85, 0);
+      beamGeo.rotateZ(-Math.PI / 2);
+      beamMesh = new three.Mesh(beamGeo, new three.MeshBasicMaterial({
+        color: 0xfff0c0, transparent: true, opacity: 0.04,
+        blending: three.AdditiveBlending, side: three.DoubleSide, depthWrite: false
+      }));
+      beamMesh.position.set(15, 0, 0);
+      g.add(beamMesh);
       return g;
     }
 
-    /* ---- manta: a diamond plane deformed per-frame for wing undulation ---- */
+    /* ---- manta: vertex-deformed plane, wing undulation ---- */
     function buildManta(size) {
       var geo = new three.PlaneGeometry(size * 2.6, size * 1.4, 14, 8);
-      /* tuck the plane into a manta silhouette: wider at front, tapering to tail */
       var pos = geo.attributes.position;
       for (var i = 0; i < pos.count; i++) {
         var x = pos.getX(i), y = pos.getY(i);
-        var u = (x / (size * 1.3) + 1) / 2;   /* 0 = tail, 1 = nose */
-        pos.setY(i, y * (0.4 + 0.6 * u));      /* shoulders wider than tail */
+        var u = (x / (size * 1.3) + 1) / 2;
+        pos.setY(i, y * (0.4 + 0.6 * u));
       }
-      var mat = new three.MeshStandardMaterial({
-        color: 0x1c2f4a, roughness: 0.6, metalness: 0.1,
-        emissive: 0x0a2a3a, emissiveIntensity: 0.4,
-        side: three.DoubleSide, transparent: true, opacity: 0.92
-      });
-      var mesh = new three.Mesh(geo, mat);
-      return mesh;
+      geo.computeVertexNormals();
+      return new three.Mesh(geo, mantaMat);
     }
-    function animateManta(mesh, time, ph, speed) {
-      /* wing undulation: travelling sine from body centre to wingtips */
+    function animateManta(mesh, time, ph) {
       var geo = mesh.geometry, pos = geo.attributes.position;
-      var size = mesh.userData.size || 16;
+      var size = mesh.userData.size;
       for (var i = 0; i < pos.count; i++) {
         var x = pos.getX(i), y = pos.getY(i);
-        /* dist from centre along the wing span (0..1) */
         var d = Math.abs(y) / (size * 0.7);
-        /* travelling wave: phase delayed toward the tips */
-        var z = Math.sin(time * 3 + ph - d * 2.4) * size * 0.14 * (0.25 + d * 0.75);
-        pos.setZ(i, z);
+        pos.setZ(i, Math.sin(time * 3 + ph - d * 2.4) * size * 0.14 * (0.25 + d * 0.75));
       }
       pos.needsUpdate = true;
-      geo.computeVertexNormals();
     }
 
-    /* ---- whale: a huge dark silhouette ---- */
+    /* ---- whale: a chain of spheres, not a stretched balloon ---- */
     function buildWhale() {
       var g = new three.Group();
-      var bodyGeo = new three.SphereGeometry(1, 24, 16);
-      bodyGeo.scale(260, 70, 90);
-      var body = new three.Mesh(bodyGeo, new three.MeshStandardMaterial({
-        color: 0x071c2c, roughness: 0.9, metalness: 0.05
-      }));
-      g.add(body);
-      /* tail flukes */
-      var tail = new three.Mesh(new three.BoxGeometry(60, 6, 140),
-        new three.MeshStandardMaterial({ color: 0x071c2c, roughness: 0.9 }));
-      tail.position.x = 250;
-      g.add(tail);
-      /* pectoral flipper */
-      var flip = new three.Mesh(new three.BoxGeometry(100, 6, 30),
-        new three.MeshStandardMaterial({ color: 0x0a2436, roughness: 0.9 }));
-      flip.position.set(-40, -20, 80);
-      flip.rotation.z = 0.3;
+      var mat = new three.MeshStandardMaterial({ color: 0x040d18, roughness: 0.92 });
+      var N = 10;
+      for (var j = 0; j < N; j++) {
+        var t = j / (N - 1);
+        var r = 22 * Math.sin(Math.PI * (0.15 + t * 0.7)) * (1 - t * 0.3) + 6;
+        var x = 80 - j * 18;
+        var y = Math.sin(j * 0.3) * 3;
+        var s = new three.Mesh(new three.SphereGeometry(r, 12, 8), mat);
+        s.position.set(x, y, 0);
+        g.add(s);
+      }
+      var fluke = new three.Mesh(new three.BoxGeometry(40, 3, 60), mat);
+      fluke.position.set(80 - N * 18 - 8, 0, 0);
+      g.add(fluke);
+      var flip = new three.Mesh(new three.BoxGeometry(40, 3, 10), mat);
+      flip.position.set(20, -15, 25);
+      flip.rotation.z = 0.4;
       g.add(flip);
       return g;
     }
 
-    /* ---- dolphin: sleek procedural body ---- */
-    function buildDolphin() {
-      var g = new three.Group();
-      var bodyGeo = new three.SphereGeometry(1, 16, 12);
-      bodyGeo.scale(24, 8, 7);
-      var body = new three.Mesh(bodyGeo, new three.MeshStandardMaterial({
-        color: 0x3a5f7a, roughness: 0.3, metalness: 0.2
-      }));
-      g.add(body);
-      /* dorsal fin */
-      var dorsal = new three.Mesh(new three.ConeGeometry(3, 8, 4),
-        new three.MeshStandardMaterial({ color: 0x2a4a5f }));
-      dorsal.position.set(0, 8, 0);
-      dorsal.rotation.x = Math.PI;
-      g.add(dorsal);
-      /* tail flukes */
-      var tail = new three.Mesh(new three.BoxGeometry(6, 1.5, 12),
-        new three.MeshStandardMaterial({ color: 0x2a4a5f }));
-      tail.position.x = -24;
-      g.add(tail);
-      return g;
-    }
-
-    /* ---- jellyfish: translucent dome + tentacle lines ---- */
+    /* ---- jellyfish ---- */
     function buildJelly(r) {
       var g = new three.Group();
       var dome = new three.Mesh(
-        new three.SphereGeometry(r, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.55),
-        new three.MeshPhysicalMaterial({ color: 0x9ad2e0, transparent: true, opacity: 0.28, roughness: 0.1 })
+        new three.SphereGeometry(r, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.55),
+        new three.MeshPhysicalMaterial({ color: 0x9ad2e0, transparent: true, opacity: 0.25, roughness: 0.1 })
       );
       g.add(dome);
-      /* simple tentacle lines */
-      var tentMat = new three.LineBasicMaterial({ color: 0x9ad2e0, transparent: true, opacity: 0.4 });
+      var mat = new three.LineBasicMaterial({ color: 0x9ad2e0, transparent: true, opacity: 0.35 });
       for (var j = 0; j < 5; j++) {
         var pts = [];
-        for (var s = 0; s < 6; s++) pts.push(new three.Vector3(
-          Math.sin(j + s * 0.5) * 3, -s * r * 0.5, Math.cos(j * 1.3 + s * 0.4) * 3
+        for (var s2 = 0; s2 < 6; s2++) pts.push(new three.Vector3(
+          Math.sin(j + s2 * 0.5) * 3, -s2 * r * 0.5, Math.cos(j * 1.3 + s2 * 0.4) * 3
         ));
-        var line = new three.Line(new three.BufferGeometry().setFromPoints(pts), tentMat);
+        var line = new three.Line(new three.BufferGeometry().setFromPoints(pts), mat);
         line.position.x = (j - 2) * r * 0.3;
         g.add(line);
       }
       return g;
     }
 
-    /* ---- god rays: additive planes near the surface ---- */
-    function buildRays() {
-      rays = [];
-      for (var i = 0; i < 6; i++) {
-        var w = 26 + rand() * 30;
-        var geo = new three.PlaneGeometry(w, 400, 1, 1);
-        var mat = new three.MeshBasicMaterial({
-          color: 0xbfe8ff, transparent: true, opacity: 0.06,
-          blending: three.AdditiveBlending, side: three.DoubleSide, depthWrite: false
-        });
-        var m = new three.Mesh(geo, mat);
-        m.position.set((rand() - 0.5) * 600, -100, -80 - rand() * 120);
-        m.rotation.z = (rand() - 0.5) * 0.3;
-        m.rotation.y = (rand() - 0.5) * 0.4;
-        scene3.add(m);
-        rays.push(m);
-      }
-    }
-
-    /* ---- marine snow: THREE.Points ---- */
+    /* ---- marine snow ---- */
     function buildSnow() {
-      var n = isMobile() ? 300 : 800;
+      var n = 150;
       var geo = new three.BufferGeometry();
-      var positions = new Float32Array(n * 3);
+      var pos = new Float32Array(n * 3);
       for (var i = 0; i < n; i++) {
-        positions[i * 3] = (rand() - 0.5) * 800;
-        positions[i * 3 + 1] = (rand() - 0.5) * 600;
-        positions[i * 3 + 2] = (rand() - 0.5) * 600 - 100;
+        pos[i * 3] = (Math.random() - 0.5) * 500;
+        pos[i * 3 + 1] = (Math.random() - 0.5) * 400;
+        pos[i * 3 + 2] = -Math.random() * 300 - 20;
       }
-      geo.setAttribute('position', new three.BufferAttribute(positions, 3));
-      var mat = new three.PointsMaterial({
-        color: 0xc8e6f0, size: 1.8, transparent: true, opacity: 0.35, sizeAttenuation: true
-      });
-      snowPoints = new three.Points(geo, mat);
+      geo.setAttribute('position', new three.BufferAttribute(pos, 3));
+      snowPoints = new three.Points(geo, new three.PointsMaterial({
+        color: 0xc8e6f0, size: 1.4, transparent: true, opacity: 0.3, sizeAttenuation: true
+      }));
       scene3.add(snowPoints);
     }
 
-    /* ---- HUD (DOM overlay, bottom-left) ---- */
+    /* ---- HUD (bottom-left, clean floating text) ---- */
     var hudEl = null;
     function buildHUD() {
       if (hudEl) return;
       hudEl = document.createElement('div');
       hudEl.className = 'abyss-hud';
       hudEl.setAttribute('aria-hidden', 'true');
-      var page = document.querySelector('.page') || document.body;
-      page.appendChild(hudEl);
+      (document.querySelector('.page') || document.body).appendChild(hudEl);
     }
     function updateHUD() {
       if (!hudEl) return;
-      var d = depthM(), press = (1 + d / 10).toFixed(1), temp = Math.max(2, 20 - d / 45).toFixed(1);
       var z = zoneOf();
-      var html = '<p class="hud-depth">' + d + ' m</p>';
+      var html = '<p class="hud-depth">' + depthM() + ' m</p>';
       html += '<p class="hud-zone">' + z.name + '</p>';
-      html += '<p class="hud-row">PRESS ' + press + ' bar · TEMP ' + temp + '°C</p>';
-      html += '<p class="hud-row">BATT ' + Math.round(battery) + '% · BOOST ' + Math.round(energy) + '%</p>';
-      html += '<p class="hud-row">LAMP ' + (CONFIG.lamp ? 'ON' : 'OFF') + '</p>';
       if (log.length) {
-        html += '<p class="hud-log-title">SPECIMEN LOG</p>';
-        var start = Math.max(0, log.length - 4);
-        for (var i = start; i < log.length; i++) html += '<p class="hud-log">' + log[i] + '</p>';
+        html += '<div class="hud-log">';
+        for (var i = 0; i < log.length; i++) html += '<p>' + log[i] + '</p>';
+        html += '</div>';
       }
       hudEl.innerHTML = html;
     }
@@ -2421,267 +2360,228 @@
       loadThree(function () {
         three = window.THREE;
         if (!three) return;
-        /* dedicated WebGL canvas (a canvas cannot hold both 2D and WebGL contexts) */
         glCanvas = document.createElement('canvas');
         glCanvas.id = 'gl-canvas';
         glCanvas.setAttribute('aria-hidden', 'true');
         glCanvas.style.cssText = 'position:fixed;top:0;left:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .45s ease';
         document.body.insertBefore(glCanvas, document.querySelector('.page'));
         renderer = new three.WebGLRenderer({ canvas: glCanvas, alpha: true, antialias: true });
-        renderer.setPixelRatio(Math.min(dprCap(), window.devicePixelRatio || 1));
+        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
         renderer.setSize(innerWidth, innerHeight);
-        /* scene + fog (depth-based, smooth) */
+        renderer.setClearColor(0x020a10, 1);
+
         scene3 = new three.Scene();
-        fogColor = new three.Color(0x2aa6c7);
-        scene3.fog = new three.FogExp2(fogColor, 0.003);
-        /* camera: perspective, looking at the ROV plane */
-        camera3 = new three.PerspectiveCamera(60, innerWidth / innerHeight, 1, 2000);
-        camera3.position.set(0, 0, 200);
-        /* lights */
-        ambientLight = new three.AmbientLight(0x1a3a5a, 0.6);
-        scene3.add(ambientLight);
-        sunLight = new three.DirectionalLight(0xbfe8ff, 0.8);
-        sunLight.position.set(0, 300, 100);
+        fogColor = new three.Color(0x0d4a5e);
+        scene3.fog = new three.FogExp2(fogColor, fogDensity);
+
+        camera3 = new three.PerspectiveCamera(55, innerWidth / innerHeight, 1, 1500);
+        camera3.position.set(40, 20, 200);
+
+        scene3.add(new three.AmbientLight(0x0a1828, 0.3));
+        sunLight = new three.DirectionalLight(0x8ec8e0, 0.4);
+        sunLight.position.set(0, 200, 100);
         scene3.add(sunLight);
-        /* ROV + headlamp light */
-        rovMesh = buildROV();
-        rovMesh.position.set(0, 0, 0);
-        scene3.add(rovMesh);
-        rovLight = new three.PointLight(0xfff7d0, CONFIG.lamp ? 1.8 : 0, CONFIG.lampRadius * 1.5, 2);
-        rovLight.position.set(30, 0, 0);
-        rovMesh.add(rovLight);
-        /* mantas */
+
+        // Shared manta material (dim base glow)
+        mantaMat = new three.MeshStandardMaterial({
+          color: 0x1a2a3e, roughness: 0.7, metalness: 0.1,
+          emissive: 0x0a3a4a, emissiveIntensity: 0.1,
+          side: three.DoubleSide, transparent: true, opacity: 1
+        });
+
+        rovGroup = buildROV();
+        rovGroup.position.set(0, 0, 0);
+        scene3.add(rovGroup);
+
         mantas = [];
-        var n = isMobile() ? 7 : CONFIG.mantaCount;
+        var n = Math.min(CONFIG.mantaCount, 6);
         for (var i = 0; i < n; i++) {
-          var size = 14 + rand() * 12;
+          var size = 14 + Math.random() * 10;
           var m = buildManta(size);
-          m.userData = { size: size, ph: rand() * 6.28, x: (rand() - 0.5) * 400, y: (rand() - 0.5) * 300, z: -rand() * 200,
-                         vx: (rand() - 0.5) * 40, vy: (rand() - 0.5) * 30, vz: (rand() - 0.5) * 20,
-                         leader: i === 0, flash: 0, scatter: 0 };
+          m.userData = {
+            size: size, ph: Math.random() * 6.28,
+            x: (Math.random() - 0.5) * 200, y: (Math.random() - 0.5) * 140, z: -100 - Math.random() * 120,
+            vx: 0, vy: 0, vz: 0, leader: i === 0
+          };
           m.position.set(m.userData.x, m.userData.y, m.userData.z);
           scene3.add(m);
           mantas.push(m);
         }
-        /* dolphins (shallows) */
-        dolphins = [];
-        for (i = 0; i < (isMobile() ? 2 : 4); i++) {
-          var d = buildDolphin();
-          d.userData = { x: (rand() - 0.5) * 500, y: 60 + rand() * 80, z: -rand() * 100,
-                         vx: 40 + rand() * 30, breach: 0, t: 0, ph: rand() * 6.28 };
-          d.position.set(d.userData.x, d.userData.y, d.userData.z);
-          scene3.add(d);
-          dolphins.push(d);
-        }
-        /* whale */
-        whaleMesh = buildWhale();
-        whaleMesh.position.set(600, 100, -400);
-        whaleMesh.visible = false;
-        scene3.add(whaleMesh);
-        /* jellies */
-        jellies = [];
-        for (i = 0; i < (isMobile() ? 3 : 5); i++) {
-          var jl = buildJelly(8 + rand() * 10);
-          jl.userData = { x: (rand() - 0.5) * 400, y: (rand() - 0.5) * 300, z: -rand() * 250, ph: rand() * 6.28 };
-          jl.position.set(jl.userData.x, jl.userData.y, jl.userData.z);
-          scene3.add(jl);
-          jellies.push(jl);
-        }
-        /* god rays + snow */
-        buildRays();
+
+        whaleGroup = buildWhale();
+        whaleGroup.position.set(0, -25, -340);
+        scene3.add(whaleGroup);
+
+        jellyGroup = buildJelly(8);
+        jellyGroup.position.set(80, 30, -160);
+        jellyGroup.userData = { ph: Math.random() * 6.28 };
+        scene3.add(jellyGroup);
+
         buildSnow();
         buildHUD();
         ready = true;
       });
     }
-    function resize(w, h, d) { W = w; H = h; if (renderer && camera3) { renderer.setSize(w, h, false); glCanvas.style.width = w + 'px'; glCanvas.style.height = h + 'px'; camera3.aspect = w / h; camera3.updateProjectionMatrix(); } }
 
-    /* ---- update ---- */
-    var rovTarget = { x: 0, y: 0 };
+    function resize(w, h) {
+      W = w; H = h;
+      if (renderer && camera3) {
+        renderer.setSize(w, h, false);
+        glCanvas.style.width = w + 'px';
+        glCanvas.style.height = h + 'px';
+        camera3.aspect = w / h;
+        camera3.updateProjectionMatrix();
+      }
+    }
+
     function update(dt) {
       if (!ready || !three) return;
       t += dt;
-      /* smooth depth: exponential approach to scroll target */
       depthTarget = Input.scroll;
       depthCur = lerp(depthCur, depthTarget, Math.min(1, dt * 2.5));
-      var zone = zoneOf();
-      /* fog + light interpolate with depth for a smooth WebGL transition */
-      var fogTarget = new three.Color(zone.fog);
+      var z = zoneOf();
+
+      // Smooth fog transition (the "very smooth WebGL-like" depth feel)
+      var fogTarget = new three.Color(z.fog);
       fogColor.lerp(fogTarget, Math.min(1, dt * 1.8));
       scene3.fog.color.copy(fogColor);
-      scene3.fog.density = lerp(scene3.fog.density, zone.density, Math.min(1, dt * 1.8));
-      var sunFade = Math.max(0, 1 - depthCur * 4);
-      sunLight.intensity = lerp(sunLight.intensity, 0.05 + sunFade * 0.9, Math.min(1, dt * 2));
-      ambientLight.intensity = lerp(ambientLight.intensity, 0.15 + sunFade * 0.55, Math.min(1, dt * 2));
-      /* god rays fade out with depth */
-      var rayA = Math.max(0, 1 - depthCur * 6) * 0.08;
-      for (var ri = 0; ri < rays.length; ri++) rays[ri].material.opacity = rayA;
+      fogDensity = lerp(fogDensity, z.density, Math.min(1, dt * 1.8));
+      scene3.fog.density = fogDensity;
+      if (sunLight) sunLight.intensity = lerp(sunLight.intensity || 0, z.sunI, Math.min(1, dt * 2));
 
-      /* --- ROV steering (eased seek with dead zone) --- */
+      // Mantas: present only in twilight, fade out in deep midnight
+      var showMantas = depthCur > 0.1 && depthCur < 0.6;
+      var mantaOpacity = 0;
+      if (depthCur > 0.1 && depthCur < 0.4) mantaOpacity = 1;
+      else if (depthCur >= 0.4 && depthCur < 0.6) mantaOpacity = 1 - (depthCur - 0.4) / 0.2;
+      mantaMat.opacity = mantaOpacity;
+      mantaMat.emissiveIntensity = mantaOpacity * (0.1 + 0.4 * CONFIG.glow);
+      for (var mi = 0; mi < mantas.length; mi++) mantas[mi].visible = showMantas && mantaOpacity > 0.01;
+
+      // Whale: a single distant silhouette in the midnight zone
+      whaleGroup.visible = depthCur > 0.45;
+
+      // --- ROV steering (eased seek) ---
       var kx = (Input.keys['arrowleft'] || Input.keys['a'] ? -1 : 0) + (Input.keys['arrowright'] || Input.keys['d'] ? 1 : 0);
       var ky = (Input.keys['arrowup'] || Input.keys['w'] ? -1 : 0) + (Input.keys['arrowdown'] || Input.keys['s'] ? 1 : 0);
+      var rovTarget = { x: 0, y: 0 };
       var pointerActive = Input.pointerIdle < 2.0;
-      if (kx || ky) { rovTarget.x = clamp(rovMesh.position.x + kx * 80, -200, 200); rovTarget.y = clamp(rovMesh.position.y - ky * 60, -140, 140); }
-      else if (pointerActive) {
+      if (kx || ky) {
+        rovTarget.x = clamp(rovGroup.position.x + kx * 60, -140, 140);
+        rovTarget.y = clamp(rovGroup.position.y - ky * 50, -80, 80);
+      } else if (pointerActive) {
         var wp = screenToWorld(Input.x, Input.y);
-        rovTarget.x = clamp(wp.x, -220, 220); rovTarget.y = clamp(wp.y, -140, 140);
+        rovTarget.x = clamp(wp.x, -160, 160);
+        rovTarget.y = clamp(wp.y, -90, 90);
       }
-      var sdx = rovTarget.x - rovMesh.position.x, sdy = rovTarget.y - rovMesh.position.y;
+      var sdx = rovTarget.x - rovGroup.position.x, sdy = rovTarget.y - rovGroup.position.y;
       var sdist = Math.hypot(sdx, sdy);
       var boosting = (Input.keys['shift'] && energy > 2);
-      if (sdist > 6) {
-        var mag = Math.min(1, (sdist - 6) / 80) * CONFIG.rovSpeed * (boosting ? CONFIG.boost : 1);
-        rovMesh.position.x += (sdx / sdist) * mag * 260 * dt;
-        rovMesh.position.y += (sdy / sdist) * mag * 260 * dt;
+      if (sdist > 5) {
+        var mag = Math.min(1, (sdist - 5) / 60) * CONFIG.rovSpeed * (boosting ? CONFIG.boost : 1);
+        rovGroup.position.x += (sdx / sdist) * mag * 220 * dt;
+        rovGroup.position.y += (sdy / sdist) * mag * 220 * dt;
       }
-      /* bank into turns, gentle wobble */
-      var bank = clamp(sdist > 20 ? (sdx / sdist) * 0.25 : 0, -0.25, 0.25);
-      rovMesh.rotation.z = lerp(rovMesh.rotation.z, -bank, Math.min(1, dt * 4));
-      rovMesh.rotation.y = lerp(rovMesh.rotation.y, 0, Math.min(1, dt * 3));
-      rovMesh.position.y += Math.sin(t * 1.8) * 1.2 * dt; /* idle bob */
-      /* propeller spins with speed */
-      var spMag = Math.min(1, sdist / 60);
-      if (rovMesh.userData.prop) rovMesh.userData.prop.rotation.x += dt * (4 + spMag * 20 + (boosting ? 18 : 0));
-      /* status blink + sonar dot pulse */
-      if (rovMesh.userData.status) rovMesh.userData.status.material.color.setHex(Math.sin(t * 4) > 0 ? 0xff4040 : 0x7a1f12);
-      if (rovMesh.userData.sonar) rovMesh.userData.sonar.scale.setScalar(1 + Math.sin(t * 5) * 0.25);
-      /* lamp */
-      rovLight.intensity = CONFIG.lamp ? 1.8 * CONFIG.glow : 0;
-      rovLight.distance = CONFIG.lampRadius * 1.5;
-      if (Input.keys['f']) { CONFIG.lamp = !CONFIG.lamp; Input.keys['f'] = false; }
-      energy = clamp(energy + (boosting ? -CONFIG.boostCost : CONFIG.boostRegen) * dt, 0, 100);
-      battery = clamp(battery - (CONFIG.lamp ? 0.3 : 0) * dt, 15, 100);
-      /* camera gently follows the ROV for depth */
-      camera3.position.x = lerp(camera3.position.x, rovMesh.position.x * 0.15, Math.min(1, dt * 2));
-      camera3.position.y = lerp(camera3.position.y, rovMesh.position.y * 0.15, Math.min(1, dt * 2));
-      camera3.lookAt(0, 0, -50);
+      rovGroup.rotation.z = lerp(rovGroup.rotation.z, -clamp(sdx / 100, -0.2, 0.2), Math.min(1, dt * 4));
+      rovGroup.position.y += Math.sin(t * 1.6) * 0.8 * dt;
 
-      /* --- MANTA SCHOOL: boids in 3D + wing undulation + bioluminescence --- */
+      if (Input.keys['f']) { CONFIG.lamp = !CONFIG.lamp; Input.keys['f'] = false; }
+      lampSpot.intensity = CONFIG.lamp ? 3 * CONFIG.glow : 0;
+      lampSpot.distance = CONFIG.lampRadius * 2.2;
+      lampMesh.visible = CONFIG.lamp;
+      beamMesh.visible = CONFIG.lamp;
+      beamMesh.scale.setScalar(CONFIG.lampRadius / 180);
+      energy = clamp(energy + (boosting ? -40 : 22) * dt, 0, 100);
+      battery = clamp(battery - 0.2 * dt, 20, 100);
+
+      // Camera follows the ROV loosely, keeping it in the lower-left of the frame
+      camera3.position.x = lerp(camera3.position.x, rovGroup.position.x * 0.4 + 40, Math.min(1, dt * 1.2));
+      camera3.position.y = lerp(camera3.position.y, rovGroup.position.y * 0.3 + 20, Math.min(1, dt * 1.2));
+      camera3.lookAt(rovGroup.position.x * 0.5, rovGroup.position.y * 0.5, -60);
+
+      // --- Manta school: 3D boids, few and quiet ---
       var leader = mantas[0];
       if (leader) {
-        var lang = t * 0.35;
-        leader.userData.vx = Math.cos(lang * 2) * 55;
-        leader.userData.vy = Math.sin(lang) * 35;
-        leader.userData.vz = Math.sin(lang * 0.7) * 18;
+        var lang = t * 0.3;
+        leader.userData.vx = Math.cos(lang * 2) * 40;
+        leader.userData.vy = Math.sin(lang) * 25;
+        leader.userData.vz = Math.sin(lang * 0.7) * 12;
       }
       var mx = 0, my = 0, mz = 0, mvx = 0, mvy = 0, mvz = 0, cnt = 0;
-      for (var mi = 0; mi < mantas.length; mi++) {
-        mx += mantas[mi].userData.x; my += mantas[mi].userData.y; mz += mantas[mi].userData.z;
-        mvx += mantas[mi].userData.vx; mvy += mantas[mi].userData.vy; mvz += mantas[mi].userData.vz; cnt++;
+      for (var mi2 = 0; mi2 < mantas.length; mi2++) {
+        var mu = mantas[mi2].userData;
+        mx += mu.x; my += mu.y; mz += mu.z; mvx += mu.vx; mvy += mu.vy; mvz += mu.vz; cnt++;
       }
-      mx /= cnt; my /= cnt; mz /= cnt; mvx /= cnt; mvy /= cnt; mvz /= cnt;
-      for (mi = 0; mi < mantas.length; mi++) {
-        var m = mantas[mi], ud = m.userData;
+      if (cnt) { mx /= cnt; my /= cnt; mz /= cnt; mvx /= cnt; mvy /= cnt; mvz /= cnt; }
+      for (var mi3 = 0; mi3 < mantas.length; mi3++) {
+        var m = mantas[mi3], ud = m.userData;
         if (!ud.leader) {
-          var sepX = 0, sepY = 0, sepZ = 0, near = 0;
+          var sepX = 0, sepY = 0, sepZ = 0;
           for (var mj = 0; mj < mantas.length; mj++) {
-            if (mj === mi) continue;
+            if (mj === mi3) continue;
             var ddx = ud.x - mantas[mj].userData.x, ddy = ud.y - mantas[mj].userData.y, ddz = ud.z - mantas[mj].userData.z;
             var dd = ddx * ddx + ddy * ddy + ddz * ddz;
-            if (dd < 9000) { var inv = 1 / Math.max(dd, 1); sepX += ddx * inv; sepY += ddy * inv; sepZ += ddz * inv; near++; }
+            if (dd < 8000) { var inv = 1 / Math.max(dd, 1); sepX += ddx * inv; sepY += ddy * inv; sepZ += ddz * inv; }
           }
-          ud.vx += ((mvx - ud.vx) * 0.05 + (mx - ud.x) * 0.003 + sepX * 300) * dt * 6;
-          ud.vy += ((mvy - ud.vy) * 0.05 + (my - ud.y) * 0.003 + sepY * 300) * dt * 6;
-          ud.vz += ((mvz - ud.vz) * 0.05 + (mz - ud.z) * 0.003 + sepZ * 300) * dt * 6;
-          /* follow the leader loosely */
-          ud.vx += (leader.userData.x - ud.x) * 0.002 * dt * 6;
-          ud.vy += (leader.userData.y - ud.y) * 0.002 * dt * 6;
+          ud.vx += ((mvx - ud.vx) * 0.05 + (mx - ud.x) * 0.003 + sepX * 250) * dt * 5;
+          ud.vy += ((mvy - ud.vy) * 0.05 + (my - ud.y) * 0.003 + sepY * 250) * dt * 5;
+          ud.vz += ((mvz - ud.vz) * 0.05 + (mz - ud.z) * 0.003 + sepZ * 250) * dt * 5;
+          ud.vx += (leader.userData.x - ud.x) * 0.002 * dt * 5;
+          ud.vy += (leader.userData.y - ud.y) * 0.002 * dt * 5;
         }
-        /* curious escort when lamp on + slow; scatter when fast */
-        var rdx = rovMesh.position.x - ud.x, rdy = rovMesh.position.y - ud.y, rdz = rovMesh.position.z - ud.z;
-        var rdist = Math.sqrt(rdx * rdx + rdy * rdy + rdz * rdz);
-        if (CONFIG.lamp && spMag < 0.4 && rdist < 250) {
-          ud.vx += rdx * 0.008 * dt * 6; ud.vy += rdy * 0.008 * dt * 6; ud.vz += rdz * 0.008 * dt * 6;
-        } else if (boosting || spMag > 0.9) {
-          if (rdist < 200) { ud.vx -= rdx * 0.06 * dt; ud.vy -= rdy * 0.06 * dt; ud.scatter = 1; }
+        if (CONFIG.lamp && sdist < 0.5) {
+          var rdx = rovGroup.position.x - ud.x, rdy = rovGroup.position.y - ud.y, rdz = rovGroup.position.z - ud.z;
+          ud.vx += rdx * 0.006 * dt * 5; ud.vy += rdy * 0.006 * dt * 5; ud.vz += rdz * 0.006 * dt * 5;
         }
-        if (ud.scatter > 0) ud.scatter = Math.max(0, ud.scatter - dt * 0.25);
-        /* integrate + bounds */
-        ud.vx += CONFIG.current * 10 * dt; ud.vx *= (1 - 0.5 * dt); ud.vy *= (1 - 0.5 * dt); ud.vz *= (1 - 0.5 * dt);
-        var msp = Math.sqrt(ud.vx * ud.vx + ud.vy * ud.vy + ud.vz * ud.vz), mcap = ud.leader ? 80 : 100;
+        ud.vx += CONFIG.current * 8 * dt;
+        ud.vx *= (1 - 0.5 * dt); ud.vy *= (1 - 0.5 * dt); ud.vz *= (1 - 0.5 * dt);
+        var msp = Math.sqrt(ud.vx * ud.vx + ud.vy * ud.vy + ud.vz * ud.vz), mcap = ud.leader ? 60 : 75;
         if (msp > mcap) { ud.vx *= mcap / msp; ud.vy *= mcap / msp; ud.vz *= mcap / msp; }
         ud.x += ud.vx * dt; ud.y += ud.vy * dt; ud.z += ud.vz * dt;
-        ud.x = clamp(ud.x, -260, 260); ud.y = clamp(ud.y, -160, 160); ud.z = clamp(ud.z, -350, 50);
         m.position.set(ud.x, ud.y, ud.z);
-        /* face the direction of travel, banking */
         if (msp > 2) {
           m.rotation.y = Math.atan2(ud.vx, ud.vz);
-          m.rotation.z = lerp(m.rotation.z, clamp(-ud.vx * 0.005, -0.5, 0.5), Math.min(1, dt * 3));
+          m.rotation.x = -ud.vy * 0.005;
         }
-        /* wing undulation + glow */
-        animateManta(m, t, ud.ph, msp);
-        var lampD = CONFIG.lamp ? rdist : 9999;
-        var glowI = (0.4 + (lampD < CONFIG.lampRadius ? 0.5 : 0) + ud.flash) * CONFIG.glow;
-        m.material.emissiveIntensity = lerp(m.material.emissiveIntensity, glowI, Math.min(1, dt * 3));
-        ud.flash = Math.max(0, ud.flash - dt * 1.4);
-        /* sonar flash */
-        for (var rg2 = 0; rg2 < rings.length; rg2++) {
-          if (rings[rg2].t < 0.1) {
-            var rd = Math.sqrt((ud.x - rings[rg2].x) ** 2 + (ud.y - rings[rg2].y) ** 2 + (ud.z - rings[rg2].z) ** 2);
-            if (Math.abs(rd - rings[rg2].r) < 30) ud.flash = 1;
-          }
-        }
+        animateManta(m, t, ud.ph);
       }
 
-      /* --- dolphins (shallows only): cruise + breach --- */
-      var showDol = depthCur < 0.18;
-      for (var di = 0; di < dolphins.length; di++) {
-        var dl = dolphins[di], dud = dl.userData;
-        dl.visible = showDol;
-        if (!showDol) continue;
-        dud.t += dt;
-        dud.x += dud.vx * dt;
-        if (dud.x > 280) { dud.x = -280; dud.y = 50 + rand() * 60; }
-        if (dud.breach <= 0 && Math.random() < 0.0015) dud.breach = 1.2;
-        if (dud.breach > 0) dud.breach -= dt;
-        var br = dud.breach > 0 ? Math.sin((dud.breach / 1.2) * Math.PI) : 0;
-        dl.position.set(dud.x, dud.y + br * 60, dud.z);
-        dl.rotation.z = br * -0.5 + Math.sin(t * 3 + dud.ph) * 0.04;
+      // Whale: slow drift in the deep background
+      if (whaleGroup.visible) {
+        whaleGroup.position.x = Math.sin(t * 0.04) * 30;
+        whaleGroup.position.y = -25 + Math.sin(t * 0.08) * 4;
       }
 
-      /* --- whale: one slow pass per descent --- */
-      var showWhale = depthCur > 0.5;
-      if (showWhale && !whaleMesh.userData.active) {
-        whaleMesh.userData.active = true; whaleMesh.position.x = 600; whaleMesh.visible = true;
-      }
-      if (whaleMesh.userData.active) {
-        whaleMesh.position.x -= 22 * dt;
-        whaleMesh.rotation.y = Math.PI; /* face left */
-        if (whaleMesh.position.x < -700) { whaleMesh.userData.active = false; whaleMesh.visible = false; }
-      } else whaleMesh.visible = false;
+      // Jellyfish: gentle bob
+      var jp = jellyGroup.userData;
+      jp.ph += dt;
+      jellyGroup.position.x = 80 + Math.sin(jp.ph * 0.5) * 8;
+      jellyGroup.position.y = 30 + Math.sin(jp.ph * 0.7) * 5;
+      jellyGroup.rotation.y = jp.ph * 0.2;
 
-      /* --- jellyfish bob --- */
-      for (var ji = 0; ji < jellies.length; ji++) {
-        var jf = jellies[ji], jud = jf.userData;
-        jud.ph += dt;
-        jf.position.set(jud.x + Math.sin(jud.ph * 0.5) * 8, jud.y + Math.sin(jud.ph * 0.7) * 6, jud.z);
-        jf.rotation.y = jud.ph * 0.3;
-      }
-
-      /* --- marine snow sinks with depth --- */
+      // Marine snow
       if (snowPoints) {
         var pos2 = snowPoints.geometry.attributes.position;
-        var fall = 12 + depthCur * 30;
+        var fall = 10 + depthCur * 25;
         for (var si = 0; si < pos2.count; si++) {
           var sy = pos2.getY(si) - fall * dt;
-          if (sy < -320) sy = 320;
+          if (sy < -200) sy = 200;
           pos2.setY(si, sy);
         }
         pos2.needsUpdate = true;
-        snowPoints.material.opacity = 0.2 + depthCur * 0.25;
+        snowPoints.material.opacity = 0.2 + depthCur * 0.15;
       }
 
-      /* --- sonar rings: expanding in 3D --- */
+      // Sonar rings
       for (var rgi = rings.length - 1; rgi >= 0; rgi--) {
         var rg = rings[rgi];
-        rg.r += dt * 300; rg.t += dt; rg.life -= dt * 0.4;
+        rg.r += dt * 280; rg.t += dt; rg.life -= dt * 0.4;
         if (rg.life <= 0) rings.splice(rgi, 1);
       }
 
       updateHUD();
     }
 
-    /* ---- draw: Three.js renders ---- */
     function draw() {
       if (!ready || !renderer) return;
       renderer.render(scene3, camera3);
@@ -2690,33 +2590,29 @@
     return {
       id: 'blue', init: init, resize: resize, update: update, draw: draw,
       start: function () {
-        if (glCanvas) {
-          glCanvas.style.opacity = '1';
-          sceneCanvas.style.opacity = '0'; /* the 2D canvas is idle while WebGL runs */
-        }
+        if (glCanvas) { glCanvas.style.opacity = '1'; sceneCanvas.style.opacity = '0'; }
       },
       stop: function () { if (glCanvas) glCanvas.style.opacity = '0'; },
       destroy: function () {
-        mantas = []; dolphins = []; jellies = []; rays = []; log = []; rings = [];
+        mantas = []; rings = []; log = [];
         if (renderer) { renderer.dispose(); renderer = null; }
         if (scene3) { scene3 = null; }
         if (glCanvas) { glCanvas.remove(); glCanvas = null; }
         if (hudEl) { hudEl.remove(); hudEl = null; }
-        snowPoints = null; whaleMesh = null; rovMesh = null; ready = false; this.__inited = false;
+        mantaMat = null; rovGroup = null; whaleGroup = null; jellyGroup = null; snowPoints = null; lampSpot = null; beamMesh = null; lampMesh = null;
+        ready = false; this.__inited = false;
       },
       CONFIG: CONFIG,
-      ping: function () {
-        if (rovMesh) rings.push({ x: rovMesh.position.x, y: rovMesh.position.y, z: rovMesh.position.z, r: 10, life: 1.2, t: 0 });
-      },
-      callSchool: function () { for (var i = 0; i < mantas.length; i++) { mantas[i].userData.vx += (rovMesh.position.x - mantas[i].userData.x) * 0.02; mantas[i].userData.vy += (rovMesh.position.y - mantas[i].userData.y) * 0.02; } },
-      summonWhale: function () { if (whaleMesh) { whaleMesh.userData.active = true; whaleMesh.position.x = 600; whaleMesh.visible = true; } },
-      dolphinBreach: function () { for (var i = 0; i < dolphins.length; i++) dolphins[i].userData.breach = 1.2; },
-      toggleRestore: function () { CONFIG.restore = !CONFIG.restore; },
+      ping: function () { if (rovGroup) rings.push({ x: rovGroup.position.x, y: rovGroup.position.y, z: rovGroup.position.z, r: 10, life: 1.2, t: 0 }); },
+      callSchool: function () { for (var i = 0; i < mantas.length; i++) { mantas[i].userData.vx += (rovGroup.position.x - mantas[i].userData.x) * 0.02; mantas[i].userData.vy += (rovGroup.position.y - mantas[i].userData.y) * 0.02; } },
+      summonWhale: function () { },
+      dolphinBreach: function () { },
+      toggleRestore: function () { },
       toggleLamp: function () { CONFIG.lamp = !CONFIG.lamp; },
       logSpecimen: function () {
-        var gen = GENERA[(rand() * GENERA.length) | 0], sp = ['crypta', 'noctis', 'abyssi', 'miranda'][(rand() * 4) | 0];
-        log.push(gen + ' ' + sp + ' · ' + (60 + (rand() * 38 | 0)) + '% · ' + depthM() + ' m');
-        if (log.length > 8) log.shift();
+        var gen = GENERA[(Math.random() * GENERA.length) | 0], sp = ['crypta', 'noctis', 'abyssi', 'miranda'][(Math.random() * 4) | 0];
+        log.push(gen + ' ' + sp + ' · ' + (60 + (Math.random() * 38 | 0)) + '% · ' + depthM() + ' m');
+        if (log.length > 6) log.shift();
       }
     };
   })();
@@ -2902,7 +2798,6 @@
       h += labRow('Current strength', 'current', -0.6, 0.8, 0.02, theme);
       h += labRow('Lamp radius', 'lampR', 80, 420, 5, theme);
       h += labRow('ROV speed', 'rovSpeed', 0.3, 2.5, 0.05, theme);
-      h += '<div class="lab-btns">' + labBtn('Call the school', 'call') + labBtn('Summon whale', 'whale') + labBtn('Dolphin breach', 'breach') + labBtn('Toggle restoration', 'restore') + '</div>';
     }
     h += '<div class="lab-btns">' + labBtn('Spawn creature', 'spawn') + labBtn('Pause / play', 'pause') + labBtn('Reset scene', 'reset') +
       labBtn('Save snapshot', 'shot') + labBtn('Randomise seed', 'seed') + '</div>';
