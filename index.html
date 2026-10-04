@@ -78,7 +78,12 @@
 
   .site-head{position:sticky; top:0; z-index:10; background:var(--bg); border-bottom:1px solid var(--line)}
   .site-head .wrap{display:flex; flex-wrap:wrap; align-items:center; gap:.5rem 1rem; padding-top:.8rem; padding-bottom:.8rem}
-  .brand{font-weight:600; font-size:1.05rem; color:var(--fg); text-decoration:none; margin-right:auto}
+  .brand{display:inline-flex; align-items:center; gap:.5rem; font-weight:600; font-size:1.05rem; color:var(--fg); text-decoration:none; margin-right:auto}
+  .logo-avatar{position:relative; width:28px; height:28px; flex:0 0 auto; border-radius:50%; display:grid; place-items:center}
+  .logo-avatar::before{content:""; position:absolute; inset:-2px; border-radius:50%; background:conic-gradient(from 0deg, var(--accent), transparent 55%, var(--accent)); animation:logo-spin 6s linear infinite; opacity:.5}
+  .logo-avatar img{position:relative; width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; background:var(--card); border:1px solid var(--card-border)}
+  @keyframes logo-spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion: reduce){ .logo-avatar::before{animation:none} }
   .nav{order:3; width:100%; display:flex; gap:1.1rem; overflow-x:auto; padding-bottom:.15rem}
   .nav a{font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); text-decoration:none; white-space:nowrap}
   .nav a:hover{color:var(--accent)}
@@ -161,7 +166,7 @@
 
 <header class="site-head">
   <div class="wrap">
-    <a class="brand" href="#about">Youktik Sajjan</a>
+    <a class="brand" href="#about"><span class="logo-avatar" aria-hidden="true"><img src="https://github.com/xyzouktik.png" alt="" width="28" height="28" loading="eager" referrerpolicy="no-referrer"></span>Youktik Sajjan</a>
     <div class="theme-picker" role="radiogroup" aria-label="Theme">
       <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="white" aria-label="White — black on white" title="White"><span></span></button>
       <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="black" aria-label="Black — white on black" title="Black"><span></span></button>
@@ -283,7 +288,7 @@
       </li>
       <li>
         <h3>VC Analyst — Investment Research cohort</h3><span class="role">Cohort participant</span>
-        <p>Startup evaluation and due diligence: market sizing, product-market fit, unit economics, financial projections and investment theses, including valuation methodology associated with Aswath Damodaran.</p>
+        <p>Startup evaluation and due diligence: market sizing, product-market fit, unit economics, financial projections and investment theses, including valuation methodology.</p>
       </li>
       <li>
         <h3>Departmental Representative — Biological Sciences</h3><span class="role">IISER Kolkata · Aug 2024 – present</span>
