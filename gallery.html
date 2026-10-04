@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gallery — Youktik Sajjan</title>
+<meta name="description" content="Photos from daily life and academic pursuits — field notes from the bench and the trail.">
+<link rel="canonical" href="https://xyzouktik.github.io/gallery.html">
+<meta name="theme-color" id="theme-color" content="#0a0a0a">
+<script>
+/* Shares the BLACK & WHITE site theme with index.html. */
+(function(){
+  var D=document.documentElement;
+  try{
+    var t=localStorage.getItem('site-theme')||localStorage.getItem('cv-theme');
+    t = (t==='black'||t==='dark') ? 'black' : (t==='white'||t==='light'||t==='green'||t==='blue') ? 'white' : 'black';
+    D.setAttribute('data-theme',t);
+    localStorage.setItem('site-theme',t);
+  }catch(e){ D.setAttribute('data-theme','black'); }
+})();
+</script>
+<style>
+  :root{
+    color-scheme: light;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,"SFMono-Regular","SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  :root, :root[data-theme="white"]{ color-scheme:light; --paper:#ffffff; --ink:#111111; --muted:#5c5c5c; --rule:#cfcfcf; --link:#111111; --card:#ffffff; --card-border:#e3e3e3; }
+  :root[data-theme="black"]{ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; } }
+
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); font-size:1.02rem; line-height:1.5; -webkit-font-smoothing:antialiased}
+  .sheet{max-width:52rem; margin:0 auto; padding:2rem 1.4rem 3rem}
+  a{color:var(--link); text-decoration:underline; text-underline-offset:2px; text-decoration-color:var(--muted); border:0}
+  a:hover{text-decoration-thickness:2px}
+  :focus-visible{outline:2px solid var(--link); outline-offset:2px}
+
+  .toolbar{display:flex; justify-content:space-between; align-items:center; gap:1rem; font-family:var(--mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:1.2rem}
+  .toolbar a{color:var(--muted); text-decoration:none}
+  .toolbar a:hover{color:var(--link)}
+  .theme-picker{display:flex; gap:.4rem; align-items:center}
+  .swatch{width:1.15rem; height:1.15rem; padding:0; border:1px solid var(--rule); border-radius:50%; background:transparent; cursor:pointer; display:grid; place-items:center; transition:transform .15s ease, border-color .15s ease}
+  .swatch > span{width:.72rem; height:.72rem; border-radius:50%; display:block}
+  .swatch[data-theme-choice="white"] > span{background:#ffffff; box-shadow:inset 0 0 0 1px #b9b9b9}
+  .swatch[data-theme-choice="black"] > span{background:#111111}
+  .swatch:hover{transform:scale(1.14)}
+  .swatch[aria-checked="true"]{border-color:var(--link)}
+  .swatch:focus-visible{outline:2px solid var(--link); outline-offset:2px}
+
+  /* Cover / outlook */
+  .hero{position:relative; border:1px solid var(--card-border); border-radius:10px; overflow:hidden; margin:.2rem 0 1.4rem; background:linear-gradient(135deg,#101010,#2a2a2a)}
+  .hero-img{display:block; width:100%; height:min(48vh,440px); object-fit:cover; object-position:center}
+  .hero-text{position:absolute; left:0; right:0; bottom:0; padding:1.3rem 1.4rem; background:linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,0)); color:#fff}
+  .hero-text h1{margin:0; font-size:2.1rem; font-weight:600; letter-spacing:-.01em}
+  .hero-text .tag{margin:.25rem 0 0; font-family:var(--mono); font-size:.78rem; letter-spacing:.05em; opacity:.92}
+
+  .opener{font-size:1.1rem; max-width:44rem; margin:0 0 1.8rem}
+
+  h2{font-family:var(--mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:1.6rem 0 .7rem; padding-bottom:.35rem; border-bottom:1px solid var(--rule)}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:.85rem}
+  .grid figure{margin:0; border:1px solid var(--card-border); border-radius:8px; overflow:hidden; background:var(--card)}
+  .grid img{display:block; width:100%; aspect-ratio:4/3; object-fit:cover}
+  .grid figcaption{font-family:var(--mono); font-size:.7rem; color:var(--muted); padding:.45rem .6rem}
+  .grid .empty{display:grid; place-items:center; aspect-ratio:4/3; font-family:var(--mono); font-size:.7rem; letter-spacing:.05em; color:var(--muted);
+    background:repeating-linear-gradient(45deg, transparent 0 10px, var(--card-border) 10px 11px)}
+
+  footer{font-family:var(--mono); font-size:.72rem; color:var(--muted); text-align:center; margin-top:2.2rem; padding-top:.9rem; border-top:1px solid var(--rule)}
+
+  @media print{
+    :root, :root[data-theme]{ color-scheme:light !important; --paper:#fff; --ink:#000; --muted:#555; --rule:#999; --link:#000; --card-border:#ccc; }
+    .toolbar{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="toolbar">
+    <a href="index.html">&larr; Portfolio</a>
+    <div class="theme-picker" role="radiogroup" aria-label="Theme">
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="white" aria-label="White — black on white" title="White"><span></span></button>
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="black" aria-label="Black — white on black" title="Black"><span></span></button>
+    </div>
+  </div>
+
+  <!-- Cover image ("outlook"). Drop the file at: images/pixel explorers forest camp.png -->
+  <header class="hero">
+    <img class="hero-img" src="images/pixel explorers forest camp.png"
+         alt="Pixel-art forest camp at dusk — the gallery cover"
+         onerror="this.style.display='none'">
+    <div class="hero-text">
+      <h1>Gallery</h1>
+      <p class="tag">Field notes from a life split between the bench and the trail.</p>
+    </div>
+  </header>
+
+  <p class="opener">Half daily life, half academic rabbit holes. A running roll of what I'm building, where I've wandered, and the small stuff in between — updated whenever something earns a photo.</p>
+
+  <section aria-labelledby="g-daily">
+    <h2 id="g-daily">Daily life</h2>
+    <div class="grid">
+      <!-- To add a photo, copy a line like this and drop the file in /images:
+      <figure><img src="images/your-photo.jpg" alt="Short description of the photo"><figcaption>A caption</figcaption></figure>
+      -->
+      <figure class="empty"><span>Photo coming soon</span></figure>
+      <figure class="empty"><span>Photo coming soon</span></figure>
+      <figure class="empty"><span>Photo coming soon</span></figure>
+    </div>
+  </section>
+
+  <section aria-labelledby="g-academic">
+    <h2 id="g-academic">Academic pursuits</h2>
+    <div class="grid">
+      <figure class="empty"><span>Photo coming soon</span></figure>
+      <figure class="empty"><span>Photo coming soon</span></figure>
+      <figure class="empty"><span>Photo coming soon</span></figure>
+    </div>
+  </section>
+
+  <footer>© <span id="year">2026</span> Youktik Sajjan · <a href="index.html">Portfolio</a></footer>
+</div>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  var DMETA = { black:'#0a0a0a', white:'#ffffff' };
+  var meta = document.getElementById('theme-color');
+  var picker = document.querySelector('.theme-picker');
+  var sw = picker ? [].slice.call(picker.querySelectorAll('.swatch')) : [];
+  function current(){ return root.getAttribute('data-theme') || 'black'; }
+  function paint(){
+    var t = current();
+    if (meta) meta.setAttribute('content', DMETA[t] || DMETA.black);
+    sw.forEach(function(b){
+      var on = b.getAttribute('data-theme-choice') === t;
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.setAttribute('tabindex', on ? '0' : '-1');
+    });
+  }
+  function set(t){ if (t!=='black' && t!=='white') t='black'; root.setAttribute('data-theme', t); try { localStorage.setItem('site-theme', t); } catch(e){} paint(); }
+  sw.forEach(function(b, idx){
+    b.addEventListener('click', function(){ set(b.getAttribute('data-theme-choice')); b.focus(); });
+    b.addEventListener('keydown', function(e){
+      var n = -1;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (idx + 1) % sw.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (idx - 1 + sw.length) % sw.length;
+      else if (e.key === ' ' || e.key === 'Enter') { set(sw[idx].getAttribute('data-theme-choice')); e.preventDefault(); return; }
+      if (n >= 0){ e.preventDefault(); sw[n].focus(); set(sw[n].getAttribute('data-theme-choice')); }
+    });
+  });
+  window.addEventListener('storage', function(e){ if (e.key === 'site-theme' && e.newValue){ root.setAttribute('data-theme', e.newValue); paint(); } });
+  paint();
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
