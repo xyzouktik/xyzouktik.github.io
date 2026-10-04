@@ -16,12 +16,12 @@ Live: https://xyzouktik.github.io
 
 ## Theme
 
-Black and white only. Two modes — **White** (black ink on white) and **Black** (white ink on near-black) — chosen with the
-two-swatch picker in the header. The choice persists in `localStorage["site-theme"]`, follows `prefers-color-scheme` on
-first visit, and is shared with `cv.html`.
+Black and white only, with **Black as the default**. Two modes — **Black** (white ink on near-black) and **White**
+(black ink on white) — chosen with the two-swatch picker in the header. The choice persists in
+`localStorage["site-theme"]` and is shared with `cv.html`.
 
-In the Black mode an interactive arcade **Ender Dragon** is drawn on a fixed `<canvas>` behind the page, rendered in
-grayscale so it stays monochrome.
+An interactive arcade **Ender Dragon**, together with its ambient mobs, is drawn in full colour on a fixed `<canvas>`
+behind the page on both modes; the page chrome stays black and white.
 
 ## Notes
 

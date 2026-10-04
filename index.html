@@ -19,7 +19,7 @@
   var D=document.documentElement;
   try{
     var t=localStorage.getItem('site-theme')||localStorage.getItem('theme')||localStorage.getItem('cv-theme');
-    t = (t==='black'||t==='dark') ? 'black' : (t==='white'||t==='light'||t==='green'||t==='blue') ? 'white' : (window.matchMedia('(prefers-color-scheme: dark)').matches?'black':'white');
+    t = (t==='black'||t==='dark') ? 'black' : (t==='white'||t==='light'||t==='green'||t==='blue') ? 'white' : 'black';
     D.setAttribute('data-theme',t);
     localStorage.setItem('site-theme',t);
   }catch(e){ D.setAttribute('data-theme','white'); }
@@ -118,7 +118,7 @@
 
   .links{font-family:var(--mono); font-size:.82rem}
   .site-foot{border-top:1px solid var(--line); padding:1.6rem 0 2.4rem; color:var(--muted); font-size:.72rem; letter-spacing:.04em}
-  #dragon-canvas{position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:0; pointer-events:none; transition:opacity .5s ease; filter:grayscale(1) contrast(1.05)}
+  #dragon-canvas{position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:0; pointer-events:none; transition:opacity .5s ease}
   .page{position:relative; z-index:1}
   .viewcount{text-align:center; padding:0 1.25rem 2.4rem; margin:0}
   .theme-picker{display:flex; gap:.4rem; align-items:center}
@@ -1175,10 +1175,9 @@
 </script>
 <script>
 /* =====================================================================
-   Theme controller — BLACK & WHITE only.
+   Theme controller — BLACK & WHITE only (black is the default).
    Two modes: "white" (black ink on white paper) and "black" (white ink on
-   near-black). The Ender dragon canvas runs only on "black" and is drawn
-   in grayscale. No scene lab, no other themes.
+   near-black). The coloured Ender dragon and its mobs run on both modes.
    ===================================================================== */
 (function () {
   'use strict';
@@ -1202,10 +1201,7 @@
     if (t !== 'black' && t !== 'white') t = 'white';
     root.setAttribute('data-theme', t);
     if (persist) { try { localStorage.setItem('site-theme', t); } catch (e) {} }
-    if (dragon && window.__ender) {
-      if (t === 'black') { dragon.style.opacity = '1'; window.__ender.start(); }
-      else { window.__ender.stop(); dragon.style.opacity = '0'; }
-    }
+    if (dragon && window.__ender) { dragon.style.opacity = '1'; window.__ender.start(); }
     paint();
   }
   for (var i = 0; i < sw.length; i++) {
@@ -1221,7 +1217,7 @@
     })(sw[i], i);
   }
 
-  set(root.getAttribute('data-theme') || 'white', true);
+  set(root.getAttribute('data-theme') || 'black', true);
   var y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
 })();
 </script>
