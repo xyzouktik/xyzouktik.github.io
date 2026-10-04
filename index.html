@@ -74,7 +74,7 @@
   p{margin:0 0 1rem}
   .lead{font-size:1.18rem}
   .muted{color:var(--muted)}
-  .mono,.role,.sec-label,.site-foot,.toggle,.nav a,.row dt,.preview figcaption{font-family:var(--mono)}
+  .mono,.role,.sec-label,.site-foot,.menu-panel a,.row dt,.preview figcaption{font-family:var(--mono)}
 
   .site-head{position:sticky; top:0; z-index:10; background:var(--bg); border-bottom:1px solid var(--line)}
   .site-head .wrap{display:flex; flex-wrap:wrap; align-items:center; gap:.5rem 1rem; padding-top:.8rem; padding-bottom:.8rem}
@@ -84,11 +84,21 @@
   .logo-avatar img{position:relative; width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; background:var(--card); border:1px solid var(--card-border)}
   @keyframes logo-spin{to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion: reduce){ .logo-avatar::before{animation:none} }
-  .nav{order:3; width:100%; display:flex; gap:1.1rem; overflow-x:auto; padding-bottom:.15rem}
-  .nav a{font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); text-decoration:none; white-space:nowrap}
-  .nav a:hover{color:var(--accent)}
+  .menu{position:relative}
+  .menu-btn{display:flex; flex-direction:column; justify-content:center; gap:4px; width:2.15rem; height:2.15rem; padding:0 .4rem; background:none; border:1px solid var(--line); border-radius:6px; cursor:pointer; transition:border-color .15s ease}
+  .menu-btn:hover{border-color:var(--accent)}
+  .menu-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .menu-btn .dash{display:block; width:100%; height:2px; border-radius:2px; background:var(--fg); transition:transform .2s ease, opacity .2s ease}
+  .menu-btn[aria-expanded="true"] .dash:nth-child(1){transform:translateY(6px) rotate(45deg)}
+  .menu-btn[aria-expanded="true"] .dash:nth-child(2){opacity:0}
+  .menu-btn[aria-expanded="true"] .dash:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+  .menu-panel{position:absolute; right:0; top:calc(100% + .5rem); z-index:20; min-width:12rem; max-height:70vh; overflow:auto; display:flex; flex-direction:column; padding:.4rem; background:var(--card); border:1px solid var(--card-border); border-radius:8px; box-shadow:0 6px 20px var(--shadow); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px)}
+  .menu-panel[hidden]{display:none}
+  .menu-panel a{font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); text-decoration:none; padding:.5rem .7rem; border-radius:5px; white-space:nowrap}
+  .menu-panel a:hover{color:var(--accent); background:var(--selection)}
+  .menu-panel a:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
 
-  @media (min-width:640px){ .nav{order:0; width:auto; padding:0} }
+  @media (min-width:640px){ .menu{margin-left:.2rem} }
 
   main{display:block}
   section{scroll-margin-top:5rem; padding:2.6rem 0; border-top:1px solid var(--line)}
@@ -171,18 +181,24 @@
       <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="white" aria-label="White — black on white" title="White"><span></span></button>
       <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="black" aria-label="Black — white on black" title="Black"><span></span></button>
     </div>
-    <nav class="nav" aria-label="Sections">
-      <a href="#about">About</a>
-      <a href="#focus">Focus</a>
-      <a href="#research">Research</a>
-      <a href="#projects">Projects</a>
-      <a href="#experience">Experience</a>
-      <a href="#skills">Skills</a>
-      <a href="#achievements">Achievements</a>
-      <a href="#contact">Contact</a>
-      <a href="#games">Games</a>
-      <a href="gallery.html">Gallery</a>
-    </nav>
+    <div class="menu">
+      <button id="menu-btn" class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-panel" aria-label="Open section menu">
+        <span class="dash"></span><span class="dash"></span><span class="dash"></span>
+      </button>
+      <nav id="menu-panel" class="menu-panel" aria-label="Sections" hidden>
+        <a href="#about">About</a>
+        <a href="#focus">Focus</a>
+        <a href="#research">Research</a>
+        <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#skills">Skills</a>
+        <a href="#achievements">Achievements</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#games">Games</a>
+        <a href="#contact">Contact</a>
+        <a href="cv.html">CV</a>
+      </nav>
+    </div>
   </div>
 </header>
 
@@ -335,6 +351,11 @@
       <li>Student teacher, English and Biology (classes VI–IX), Ek Pehal.</li>
       <li>Volunteer for blood stem-cell and anti-cancer awareness drives, DKMS BMST.</li>
     </ul>
+  </section>
+
+  <section id="gallery" aria-labelledby="gallery-h">
+    <h2 class="sec-label" id="gallery-h">Gallery</h2>
+    <p>Half daily life, half academic rabbit holes — a running roll of what I'm building, where I've wandered, and the small stuff in between. <a href="gallery.html">Open the gallery →</a></p>
   </section>
 
   <section id="contact" aria-labelledby="contact-h">
@@ -1250,6 +1271,23 @@
   var endLP = function () { clearTimeout(lpTimer); };
   window.addEventListener('pointerup', endLP, { passive: true });
   window.addEventListener('pointercancel', endLP, { passive: true });
+
+  /* Minimal three-dash section menu */
+  var menuBtn = document.getElementById('menu-btn');
+  var menuPanel = document.getElementById('menu-panel');
+  function closeMenu() { if (menuPanel) { menuPanel.hidden = true; if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false'); } }
+  function toggleMenu() {
+    if (!menuPanel || !menuBtn) return;
+    var open = menuPanel.hidden;
+    menuPanel.hidden = !open;
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if (menuBtn && menuPanel) {
+    menuBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleMenu(); });
+    menuPanel.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('a')) closeMenu(); });
+    document.addEventListener('click', function (e) { if (!menuPanel.hidden && !(e.target.closest && e.target.closest('.menu'))) closeMenu(); });
+    window.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+  }
 
   set(root.getAttribute('data-theme') || 'black', true);
   var y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
