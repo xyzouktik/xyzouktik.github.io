@@ -8,15 +8,15 @@
 <link rel="canonical" href="https://xyzouktik.github.io/cv.html">
 <meta name="theme-color" id="theme-color" content="#0b1f2a">
 <script>
-/* Shares the site theme key with index.html; migrates the old cv-theme value. */
+/* Shares the BLACK & WHITE site theme with index.html. */
 (function(){
   var D=document.documentElement;
   try{
     var t=localStorage.getItem('site-theme')||localStorage.getItem('cv-theme');
-    if(t!=='dark'&&t!=='light'&&t!=='green'&&t!=='blue'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
+    t = (t==='black'||t==='dark') ? 'black' : (t==='white'||t==='light'||t==='green'||t==='blue') ? 'white' : (window.matchMedia('(prefers-color-scheme: dark)').matches?'black':'white');
     D.setAttribute('data-theme',t);
-    if(!localStorage.getItem('site-theme'))localStorage.setItem('site-theme',t);
-  }catch(e){ D.setAttribute('data-theme','light'); }
+    localStorage.setItem('site-theme',t);
+  }catch(e){ D.setAttribute('data-theme','white'); }
 })();
 </script>
 <style>
@@ -25,32 +25,28 @@
     --serif:"Latin Modern Roman","CMU Serif","Computer Modern Serif","Iowan Old Style",Georgia,"Times New Roman",serif;
     --sans:"Latin Modern Sans","Helvetica Neue",Arial,sans-serif;
   }
-  /* Same four palettes as index.html (paper + ink naming for the CV) */
-  :root, :root[data-theme="light"]{ color-scheme:light; --paper:#f6f1e7; --ink:#221f1a; --muted:#6b6152; --rule:#c9bda6; --link:#a33b2a; --card-border:#d5c9b2; }
-  :root[data-theme="dark"]{ color-scheme:dark; --paper:#121212; --ink:#e9e7e2; --muted:#a3a09a; --rule:#4a4a4a; --link:#6cc9e8; --card-border:#2b2a27; }
-  :root[data-theme="green"]{ color-scheme:dark; --paper:#1a160d; --ink:#efe6cf; --muted:#b3a488; --rule:#4a3f28; --link:#e6b455; --card-border:#3a3120; }
-  :root[data-theme="blue"]{ color-scheme:dark; --paper:#04121c; --ink:#dff0f5; --muted:#8fb0bb; --rule:#1c4454; --link:#4fd6e0; --card-border:#12303c; }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#121212; --ink:#e9e7e2; --muted:#a3a09a; --rule:#4a4a4a; --link:#6cc9e8; --card-border:#2b2a27; } }
+  /* BLACK & WHITE — the only theme (paper + ink). */
+  :root, :root[data-theme="white"]{ color-scheme:light; --paper:#ffffff; --ink:#111111; --muted:#5c5c5c; --rule:#cfcfcf; --link:#111111; --card-border:#e3e3e3; }
+  :root[data-theme="black"]{ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card-border:#262626; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card-border:#262626; } }
 
   *{box-sizing:border-box}
   body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif);
        font-size:1.02rem; line-height:1.4; -webkit-font-smoothing:antialiased}
   .sheet{max-width:47rem; margin:0 auto; padding:2.2rem 1.4rem 3rem}
-  a{color:var(--link); text-decoration:none; border-bottom:1px solid rgba(26,60,139,.28)}
+  a{color:var(--link); text-decoration:underline; text-underline-offset:2px; text-decoration-color:var(--muted); border-bottom:0}
   a:hover{border-bottom-color:currentColor}
   :focus-visible{outline:2px solid var(--link); outline-offset:2px}
 
   .toolbar{display:flex; justify-content:space-between; align-items:center; gap:1rem; font-family:var(--sans); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:1.6rem}
   .toolbar a{color:var(--muted); border:0}
   .toolbar a:hover{color:var(--link)}
-  /* 4-swatch picker, matching the homepage */
+  /* black & white picker, matching the homepage */
   .theme-picker{display:flex; gap:.4rem; align-items:center}
   .swatch{width:1.15rem; height:1.15rem; padding:0; border:1px solid var(--rule); border-radius:50%; background:transparent; cursor:pointer; display:grid; place-items:center; transition:transform .15s ease, border-color .15s ease}
   .swatch > span{width:.72rem; height:.72rem; border-radius:50%; display:block}
-  .swatch[data-theme-choice="dark"] > span{background:#6cc9e8}
-  .swatch[data-theme-choice="light"] > span{background:#a33b2a}
-  .swatch[data-theme-choice="green"] > span{background:#e6b455}
-  .swatch[data-theme-choice="blue"] > span{background:#4fd6e0}
+  .swatch[data-theme-choice="white"] > span{background:#ffffff; box-shadow:inset 0 0 0 1px #b9b9b9}
+  .swatch[data-theme-choice="black"] > span{background:#111111}
   .swatch:hover{transform:scale(1.14)}
   .swatch[aria-checked="true"]{border-color:var(--link)}
   .swatch:focus-visible{outline:2px solid var(--link); outline-offset:2px}
@@ -95,10 +91,8 @@
   <div class="toolbar">
     <a href="index.html">&larr; Portfolio</a>
     <div class="theme-picker" role="radiogroup" aria-label="Colour theme">
-      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="dark" aria-label="Ender — dark" title="Ender"><span></span></button>
-      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="light" aria-label="Koi — light" title="Koi"><span></span></button>
-      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="green" aria-label="Verdant — green" title="Verdant"><span></span></button>
-      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="blue" aria-label="Abyss — blue" title="Abyss"><span></span></button>
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="white" aria-label="White — black on white" title="White"><span></span></button>
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="black" aria-label="Black — white on black" title="Black"><span></span></button>
     </div>
   </div>
 
@@ -175,8 +169,16 @@
   <section aria-labelledby="s-teaching">
     <h2 id="s-teaching">Teaching</h2>
     <div class="entry">
-      <div class="head"><h3>Undergraduate Teaching Assistant <span class="org">· IISER Kolkata</span></h3><span class="date">Aug – Dec 2026</span></div>
-      <p class="row">LS2102 Biophysics Laboratory (sophomores) under Dr. Bidisha Sinha, and CS1101 Introduction to Computer Programming (first-year students).</p>
+      <div class="head"><h3>Undergraduate Teaching Assistant — LS2102 Biophysics Laboratory <span class="org">· IISER Kolkata</span></h3><span class="date">Aug – Dec 2026</span></div>
+      <p class="row">Teaching the Biophysics laboratory to sophomore students, under Dr. Bidisha Sinha.</p>
+    </div>
+    <div class="entry">
+      <div class="head"><h3>Undergraduate Teaching Assistant — CS1101 Introduction to Computer Programming <span class="org">· IISER Kolkata</span></h3><span class="date">Aug – Dec 2026</span></div>
+      <p class="row">Teaching introductory computer programming to first-year students.</p>
+    </div>
+    <div class="entry">
+      <div class="head"><h3>Undergraduate Teaching Assistant — HU3102 Philosophy <span class="org">· IISER Kolkata</span></h3><span class="date">Aug – Dec 2024</span></div>
+      <p class="row">Teaching assistant for the undergraduate philosophy course, under Prof. Soumitra Banerjee.</p>
     </div>
   </section>
 
@@ -249,7 +251,7 @@
   var meta = document.getElementById('theme-color');
   var picker = document.querySelector('.theme-picker');
   var sw = picker ? [].slice.call(picker.querySelectorAll('.swatch')) : [];
-  var current = function(){ return root.getAttribute('data-theme') || 'light'; };
+  var current = function(){ return root.getAttribute('data-theme') || 'white'; };
   function paint(){
     var t = current();
     if (meta) meta.setAttribute('content', DMETA[t]);
