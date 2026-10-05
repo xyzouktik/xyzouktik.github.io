@@ -25,14 +25,15 @@
     --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
     --mono:ui-monospace,"SFMono-Regular","SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
   }
-  :root, :root[data-theme="white"]{ color-scheme:light; --paper:#ffffff; --ink:#111111; --muted:#5c5c5c; --rule:#cfcfcf; --link:#111111; --card:#ffffff; --card-border:#e3e3e3; --soft:#f4f4f4; --veil:.80; }
-  :root[data-theme="black"]{ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; --veil:.68; }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; --veil:.68; } }
+  :root, :root[data-theme="white"]{ color-scheme:light; --paper:#ffffff; --ink:#111111; --muted:#5c5c5c; --rule:#cfcfcf; --link:#111111; --card:#ffffff; --card-border:#e3e3e3; --soft:#f4f4f4; --veil:.52; }
+  :root[data-theme="black"]{ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; --veil:.42; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; --veil:.42; } }
   *{box-sizing:border-box}
   body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); font-size:1.02rem; line-height:1.5; -webkit-font-smoothing:antialiased}
   body.no-scroll{overflow:hidden}
-  #bgvid{position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; opacity:.5}
-  #bgveil{position:fixed; inset:0; z-index:-1; pointer-events:none; background:var(--paper); opacity:var(--veil)}
+  #bgvid{position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-3; opacity:.92; filter:saturate(1.6) contrast(1.15) brightness(1.08)}
+  #bgveil{position:fixed; inset:0; z-index:-2; pointer-events:none; background:var(--paper); opacity:var(--veil)}
+  #grid{position:fixed; inset:0; z-index:-1; pointer-events:none}
   .sheet{max-width:62rem; margin:0 auto; padding:1.6rem 1.4rem 3rem; position:relative}
   a{color:var(--link); text-decoration:underline; text-underline-offset:2px; text-decoration-color:var(--muted)}
   a:hover{text-decoration-thickness:2px}
@@ -122,7 +123,7 @@
 </head>
 <body>
 <video id="bgvid" autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="assets/gallery/background/black-hole.mp4" type="video/mp4"></video>
-<div id="bgveil" aria-hidden="true"></div>
+<canvas id="grid" aria-hidden="true"></canvas>
 <div class="sheet">
   <div class="toolbar">
     <a href="index.html">&larr; Portfolio</a>
@@ -402,6 +403,50 @@
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeMenu(); });
   window.addEventListener('storage', function(e){ if (e.key === 'site-theme' && e.newValue) { root.setAttribute('data-theme', e.newValue); paint(); } });
   paint();
+})();
+</script>
+<script>
+/* Cursor-reactive dot grid over the wallpaper. */
+(function () {
+  var c = document.getElementById('grid');
+  if (!c) return;
+  var g = c.getContext('2d');
+  var W = 0, H = 0, dpr = 1, mx = -9999, my = -9999, raf = 0;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function ink() { var v = getComputedStyle(document.documentElement).getPropertyValue('--ink'); return (v && v.trim()) || '#ffffff'; }
+  function resize() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    paint();
+  }
+  var STEP = 34, R = 150;
+  function paint() {
+    g.clearRect(0, 0, W, H);
+    var col = ink(), half = STEP / 2;
+    for (var gx = half; gx < W; gx += STEP) {
+      for (var gy = half; gy < H; gy += STEP) {
+        var dx = gx - mx, dy = gy - my, d = Math.sqrt(dx * dx + dy * dy);
+        var t = d < R ? (1 - d / R) : 0;
+        g.globalAlpha = 0.10 + t * 0.6;
+        g.fillStyle = col;
+        g.beginPath(); g.arc(gx, gy, 1 + t * t * 3.4, 0, 6.2832); g.fill();
+      }
+    }
+    g.globalAlpha = 1;
+  }
+  function loop() { paint(); raf = window.requestAnimationFrame(loop); }
+  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('pointermove', function (e) { mx = e.clientX; my = e.clientY; }, { passive: true });
+  window.addEventListener('pointerout', function () { mx = -9999; my = -9999; });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { if (raf) { window.cancelAnimationFrame(raf); raf = 0; } }
+    else if (!reduced && !raf) { raf = window.requestAnimationFrame(loop); }
+  });
+  resize();
+  if (!reduced) raf = window.requestAnimationFrame(loop);
 })();
 </script>
 </body>
