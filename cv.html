@@ -74,7 +74,16 @@
 
   footer{font-family:var(--sans); font-size:.72rem; color:var(--muted); text-align:center; margin-top:2rem; padding-top:.8rem; border-top:1px solid var(--rule)}
 
-  @media print{
+  @media (max-width:640px){
+    html{-webkit-text-size-adjust:100%}
+    .sheet{padding:1.6rem 1.1rem 2.6rem}
+    h1{font-size:1.55rem}
+    h2{font-size:.95rem}
+    .contact{font-size:.78rem; line-height:1.75}
+    .head{flex-direction:column; gap:.1rem}
+    .head .date{white-space:normal}
+    .entry{margin:.45rem 0 .6rem}
+  }  @media print{
     /* printing always uses the light paper palette */
     :root, :root[data-theme]{ color-scheme:light !important; --paper:#fff; --ink:#000; --muted:#555; --rule:#999; --link:#000; --card-border:#ccc; }
     .toolbar, footer .screen{display:none}

@@ -132,7 +132,19 @@
   .rail-btn:hover{border-color:var(--ink)}
   .rail-btn:disabled{opacity:.25}
   .rail-btn.prev{left:-.7rem} .rail-btn.next{right:-.7rem}
-  @media (max-width:640px){ .rail-btn{display:none} }  @media (prefers-reduced-motion: reduce){
+  @media (max-width:640px){ .rail-btn{display:none} }  @media (max-width:640px){
+    html{-webkit-text-size-adjust:100%}
+    .sheet{padding:1.4rem 1.1rem 2.6rem}
+    header.page h1{font-size:1.85rem}
+    header.page p.sub{font-size:.97rem}
+    .rail-track > *{width:82vw}
+    .modal-inner{padding:1.1rem 1.1rem 3rem}
+    .timeline{gap:.3rem}
+    .timeline li{font-size:.58rem; padding:.22rem .5rem}
+    .campus{grid-template-columns:1fr}
+    .swatch{width:1.55rem; height:1.55rem}
+    .swatch > span{width:.85rem; height:.85rem}
+  }  @media (prefers-reduced-motion: reduce){
     .card,.viz img,.modal{transition:none}
     .card:hover{transform:none}
     .card:hover .viz img{transform:none}

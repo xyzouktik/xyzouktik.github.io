@@ -83,7 +83,21 @@
   .logo-avatar::before{content:""; position:absolute; inset:-2px; border-radius:50%; background:conic-gradient(from 0deg, var(--accent), transparent 55%, var(--accent)); animation:logo-spin 6s linear infinite; opacity:.5}
   .logo-avatar img{position:relative; width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; background:var(--card); border:1px solid var(--card-border)}
   @keyframes logo-spin{to{transform:rotate(360deg)}}
-  @media (prefers-reduced-motion: reduce){ .logo-avatar::before{animation:none} }
+  @media (max-width:640px){
+    html{-webkit-text-size-adjust:100%}
+    h1{font-size:1.75rem}
+    h2{font-size:1.3rem}
+    .site-head .wrap{gap:.45rem .6rem; padding-top:.6rem; padding-bottom:.6rem}
+    .brand{font-size:.98rem}
+    .slash-nav{font-size:.62rem; gap:.3rem}
+    .swatch{width:1.55rem; height:1.55rem}
+    .swatch > span{width:.85rem; height:.85rem}
+    .menu-btn{width:2.5rem; height:2.5rem}
+    .wrap{padding:0 1.15rem}
+    section{padding:2.1rem 0}
+    .row{grid-template-columns:1fr; gap:.15rem}
+    .row dt{padding-top:0}
+  }  @media (prefers-reduced-motion: reduce){ .logo-avatar::before{animation:none} }
   .slash-nav{display:flex; align-items:center; gap:.4rem; font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; text-transform:uppercase}
   .slash-nav a{color:var(--muted); text-decoration:none}
   .slash-nav a:hover{color:var(--accent)}

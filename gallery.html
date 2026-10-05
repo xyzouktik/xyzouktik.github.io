@@ -118,7 +118,22 @@
   .lb-prev{left:1rem; top:50%; transform:translateY(-50%)}
   .lb-next{right:1rem; top:50%; transform:translateY(-50%)}
   footer{font-family:var(--mono); font-size:.72rem; color:var(--muted); text-align:center; margin-top:2rem; padding-top:.9rem; border-top:1px solid var(--rule)}
-  @media (prefers-reduced-motion: reduce){ #bgvid{display:none} .card,.story,.lightbox{transition:none} .card:hover{transform:none} }
+  @media (max-width:640px){
+    html{-webkit-text-size-adjust:100%}
+    .sheet{padding:1.1rem 1.1rem 2.4rem}
+    header.page{margin:.4rem 0 1.2rem}
+    header.page h1{font-size:2rem}
+    header.page p.sub{font-size:.97rem}
+    .rail-track{gap:.7rem}
+    .rail-track > *{width:82vw}
+    .story-inner{padding:1.1rem 1.1rem 3rem}
+    .shots{grid-template-columns:1fr}
+    .lb-btn{width:2.7rem; height:2.7rem}
+    .lb-prev{left:.5rem} .lb-next{right:.5rem}
+    .swatch{width:1.55rem; height:1.55rem}
+    .swatch > span{width:.85rem; height:.85rem}
+    .menu-btn{width:2.5rem; height:2.5rem}
+  }  @media (prefers-reduced-motion: reduce){ #bgvid{display:none} .card,.story,.lightbox{transition:none} .card:hover{transform:none} }
   @media print{ #bgvid,#bgveil,.toolbar,.story,.lightbox{display:none} }
 </style>
 </head>
