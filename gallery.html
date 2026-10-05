@@ -41,7 +41,7 @@
   .intro-img{width:min(92vw,840px); max-height:64vh; height:auto; border:1px solid var(--card-border); border-radius:10px; display:block; box-shadow:0 10px 40px rgba(0,0,0,.35)}
   .intro-line{font-family:var(--mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0}
   .intro-bar{width:min(92vw,840px); height:2px; background:var(--card-border); overflow:hidden}
-  .intro-bar span{display:block; height:100%; width:0; background:var(--ink); animation:introFill 1.7s ease forwards}
+  .intro-bar span{display:block; height:100%; width:0; background:var(--ink); animation:introFill 4s ease forwards}
   @keyframes introFill{to{width:100%}}
   @media (prefers-reduced-motion: reduce){ .intro-bar span{animation:none; width:100%} #intro{transition:none} }
   .sheet{max-width:62rem; margin:0 auto; padding:1.6rem 1.4rem 3rem; position:relative}
@@ -541,7 +541,7 @@
   var t0 = Date.now(), done = false, reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function handover() {
     if (done) return; done = true;
-    var minWait = reduced ? 0 : Math.max(0, 900 - (Date.now() - t0));
+    var minWait = Math.max(0, 4000 - (Date.now() - t0));
     setTimeout(function () {
       line.textContent = 'embrace your stargazer';
       setTimeout(function () {
@@ -556,7 +556,7 @@
     else { v.addEventListener('canplay', handover, { once: true }); v.addEventListener('loadeddata', handover, { once: true }); }
   }
   window.addEventListener('load', function () { setTimeout(handover, 350); });
-  setTimeout(handover, 2800);
+  setTimeout(handover, 4400);
 })();
 </script>
 </body>
