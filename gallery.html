@@ -25,13 +25,13 @@
     --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
     --mono:ui-monospace,"SFMono-Regular","SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
   }
-  :root, :root[data-theme="white"]{ color-scheme:light; --paper:#ffffff; --ink:#111111; --muted:#5c5c5c; --rule:#cfcfcf; --link:#111111; --card:#ffffff; --card-border:#e3e3e3; --soft:#f4f4f4; --veil:.86; }
-  :root[data-theme="black"]{ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; --veil:.80; }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; --veil:.80; } }
+  :root, :root[data-theme="white"]{ color-scheme:light; --paper:#ffffff; --ink:#111111; --muted:#5c5c5c; --rule:#cfcfcf; --link:#111111; --card:#ffffff; --card-border:#e3e3e3; --soft:#f4f4f4; --veil:.80; }
+  :root[data-theme="black"]{ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; --veil:.68; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; --veil:.68; } }
   *{box-sizing:border-box}
   body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); font-size:1.02rem; line-height:1.5; -webkit-font-smoothing:antialiased}
   body.no-scroll{overflow:hidden}
-  #bgvid{position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; opacity:.34}
+  #bgvid{position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; opacity:.5}
   #bgveil{position:fixed; inset:0; z-index:-1; pointer-events:none; background:var(--paper); opacity:var(--veil)}
   .sheet{max-width:62rem; margin:0 auto; padding:1.6rem 1.4rem 3rem; position:relative}
   a{color:var(--link); text-decoration:underline; text-underline-offset:2px; text-decoration-color:var(--muted)}
@@ -220,7 +220,12 @@
         tags: '#3DPrinting #CAD #Portrait #Gift', steps: ['Model', 'Sculpt', 'Print', 'Finish'],
         cover: { src: IMG+'builds/printed-portrait-soumyajit-roy.jpg', caption: 'The printed portrait, presented' },
         media: [ { type: 'image', src: IMG+'builds/printed-portrait-soumyajit-roy.jpg', caption: '3D-printed portrait of Prof. Soumyajit Roy' } ],
-        link: { href: 'https://soumyajit-roy.com/', label: 'Prof. Soumyajit Roy' } }
+        link: { href: 'https://soumyajit-roy.com/', label: 'Prof. Soumyajit Roy' } },
+      { kicker: '04 · Client Work', title: 'First Paid Client',
+        blog: "My first paid client engagement: I delivered a service for iFiNN and was paid CAD $1,623. Small by any business measure — but the first time a client actually put money on the table for something I built. This letter of intent is the paper trail behind it.",
+        tags: '#iFiNN #FinTech #Startup #Client', steps: ['Brief', 'Build', 'Deliver', 'Paid'],
+        cover: { src: IMG+'builds/ifinn-loi.png', caption: 'iFiNN letter of intent — CAD $1,623' },
+        media: [ { type: 'image', src: IMG+'builds/ifinn-loi.png', caption: 'iFiNN LOI' } ] }
     ]},
     { id: 'nature', n: '04', name: 'Nature', items: [
       { img: IMG+'nature/rat-snake.jpg', cap: 'rat snake handling' },
