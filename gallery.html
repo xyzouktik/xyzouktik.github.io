@@ -148,7 +148,12 @@
   @media print{ #bgvid,#bgveil,.toolbar,.story,.lightbox{display:none} }
 </style>
 </head>
-+
+<body>
+<div id="intro" role="status" aria-live="polite">
+  <img class="intro-img" src="assets/gallery/pixel-explorers-preview.jpg" alt="Pixel-art forest camp">
+  <p class="intro-line">You are entering YSD's Galaxy</p>
+  <div class="intro-bar" aria-hidden="true"><span></span></div>
+</div>
 <video id="bgvid" autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="assets/gallery/background/black-hole.mp4" type="video/mp4"></video>
 <canvas id="grid" aria-hidden="true"></canvas>
 <div class="sheet">
@@ -491,5 +496,32 @@
   if (!reduced) raf = window.requestAnimationFrame(loop);
 })();
 </script>
-
+<script>
+/* Loading screen: hold until the wallpaper can play, then hand over. */
+(function () {
+  var intro = document.getElementById('intro');
+  if (!intro) return;
+  var line = intro.querySelector('.intro-line');
+  var t0 = Date.now(), done = false, reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function handover() {
+    if (done) return; done = true;
+    var minWait = reduced ? 0 : Math.max(0, 900 - (Date.now() - t0));
+    setTimeout(function () {
+      line.textContent = 'embrace your stargazer';
+      setTimeout(function () {
+        intro.classList.add('hide');
+        setTimeout(function () { if (intro.parentNode) intro.parentNode.removeChild(intro); }, 650);
+      }, reduced ? 100 : 750);
+    }, minWait);
+  }
+  var v = document.getElementById('bgvid');
+  if (v) {
+    if (v.readyState >= 3) handover();
+    else { v.addEventListener('canplay', handover, { once: true }); v.addEventListener('loadeddata', handover, { once: true }); }
+  }
+  window.addEventListener('load', function () { setTimeout(handover, 350); });
+  setTimeout(handover, 2800);
+})();
+</script>
+</body>
 </html>
