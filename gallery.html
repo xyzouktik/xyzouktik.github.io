@@ -169,7 +169,24 @@
   .slot{display:block}
   .ch-ph{aspect-ratio:4/3; display:grid; place-items:center; text-align:center; padding:.6rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); background:repeating-linear-gradient(45deg,transparent 0 12px,var(--card-border) 12px 13px)}
   .ch-note{font-family:var(--mono); font-size:.66rem; color:var(--muted); border-top:1px solid var(--rule); padding-top:.7rem; margin:1rem 0 0}
-  @media (prefers-reduced-motion: reduce){
+  /* no text-selection I-beam, nebula cursor */
+  *,*::before,*::after{-webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none}
+  input,textarea,[contenteditable="true"]{-webkit-user-select:text; user-select:text}
+  html,body{cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'11'%20fill%3D'%231a0b3a'%20opacity%3D'0.10'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'8'%20fill%3D'%235b2ea6'%20opacity%3D'0.26'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'5.5'%20fill%3D'%23b388ff'%20opacity%3D'0.52'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'3.2'%20fill%3D'%23e6d5ff'%20opacity%3D'0.85'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'1.6'%20fill%3D'%23ffffff'%2F%3E%3Ccircle%20cx%3D'9'%20cy%3D'9.5'%20r%3D'3.6'%20fill%3D'%237ff3ff'%20opacity%3D'0.12'%2F%3E%3Ccircle%20cx%3D'15.2'%20cy%3D'14.5'%20r%3D'2.6'%20fill%3D'%23ff9bf0'%20opacity%3D'0.10'%2F%3E%3C%2Fsvg%3E") 12 12,auto}
+  a,button,summary,label,[role="radio"]{cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'11'%20fill%3D'%231a0b3a'%20opacity%3D'0.10'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'8'%20fill%3D'%235b2ea6'%20opacity%3D'0.26'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'5.5'%20fill%3D'%23b388ff'%20opacity%3D'0.52'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'3.2'%20fill%3D'%23e6d5ff'%20opacity%3D'0.85'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'1.6'%20fill%3D'%23ffffff'%2F%3E%3Ccircle%20cx%3D'9'%20cy%3D'9.5'%20r%3D'3.6'%20fill%3D'%237ff3ff'%20opacity%3D'0.12'%2F%3E%3Ccircle%20cx%3D'15.2'%20cy%3D'14.5'%20r%3D'2.6'%20fill%3D'%23ff9bf0'%20opacity%3D'0.10'%2F%3E%3C%2Fsvg%3E") 12 12,pointer}
+  /* horizontal story rails */
+  .rail{position:relative}
+  .rail-track{display:flex; gap:.9rem; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth; padding:.2rem .2rem .8rem; -webkit-overflow-scrolling:touch}
+  .rail-track > *{flex:0 0 auto; width:min(76vw,285px); scroll-snap-align:start; margin:0}
+  .rail-track::-webkit-scrollbar{height:6px}
+  .rail-track::-webkit-scrollbar-thumb{background:var(--card-border); border-radius:3px}
+  .rail-track::-webkit-scrollbar-track{background:transparent}
+  .rail-btn{position:absolute; top:50%; transform:translateY(-50%); z-index:3; width:2.2rem; height:2.2rem; display:grid; place-items:center; border-radius:50%;
+    background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-size:1.15rem; line-height:1; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .rail-btn:hover{border-color:var(--ink)}
+  .rail-btn:disabled{opacity:.25}
+  .rail-btn.prev{left:-.7rem} .rail-btn.next{right:-.7rem}
+  @media (max-width:640px){ .rail-btn{display:none} }  @media (prefers-reduced-motion: reduce){
     .build, .story, .lightbox{transition:none}
     .build:hover{transform:none}
   }
@@ -204,29 +221,29 @@
 
   <section aria-labelledby="g-daily">
     <h2 id="g-daily">Daily life</h2>
-    <div class="grid">
+    <div class="rail"><div class="grid rail-track" data-rail>
       <figure><img src="assets/gallery/daily-life/cricket-ground.jpg" alt="The cricket ground at IISER Kolkata" loading="lazy"><figcaption>The cricket ground, IISERK</figcaption></figure>
       <figure><img src="assets/gallery/daily-life/nscb-mess.jpg" alt="NSCB and the mess, from the hill" loading="lazy"><figcaption>NSCB &amp; the mess</figcaption></figure>
       <figure><img src="assets/gallery/daily-life/iiserk-canal.jpg" alt="The canal beside the IISER Kolkata campus" loading="lazy"><figcaption>The canal</figcaption></figure>
       <figure><img src="assets/gallery/daily-life/lhc-landscape.jpg" alt="A landscape around campus" loading="lazy"><figcaption>Around campus</figcaption></figure>
       <figure><img src="assets/gallery/daily-life/grasshopper.jpg" alt="A grasshopper on a desk" loading="lazy"><figcaption>A grasshopper on my desk</figcaption></figure>
       <figure><img src="assets/gallery/daily-life/two-bros.jpg" alt="Two friends asleep after a long build" loading="lazy"><figcaption>Two bros sleeping together after all the work</figcaption></figure>
-    </div>
+    </div></div>
   </section>
 
   <section aria-labelledby="g-academic">
     <h2 id="g-academic">Academic pursuits</h2>
-    <div class="grid">
+    <div class="rail"><div class="grid rail-track" data-rail>
       <figure><img src="assets/gallery/academia-life/teaching-lab-ls2102.jpg" alt="A lab bench covered with pipettes, tips, culture tubes and reagents" loading="lazy"><figcaption>Prepping bacteria and reagents for the LS2102 teaching lab</figcaption></figure>
       <figure><img src="assets/gallery/academia-life/render-terrain.jpg" alt="3D reconstruction of a coastal terrain with the camera flight path" loading="lazy"><figcaption>Reconstruction — terrain, with the capture path</figcaption></figure>
       <figure><img src="assets/gallery/academia-life/render-building.jpg" alt="3D reconstruction of a large domed building" loading="lazy"><figcaption>Reconstruction — a domed building</figcaption></figure>
-    </div>
+    </div></div>
   </section>
 
   <section aria-labelledby="g-builds">
     <h2 id="g-builds">Builds &amp; Experiments</h2>
     <p class="section-note">Things I've actually put together with my own hands — CAD, solder, prints, prototypes and test flights. Field notes, not case studies.</p>
-    <div class="builds" id="builds"><!-- filled by script --></div>
+    <div class="rail"><div class="rail-track" id="builds" data-rail><!-- filled by script --></div></div>
   </section>
 
   <!-- ── Chapter: Powerlifting ── -->
@@ -237,24 +254,22 @@
     <p class="ch-badges"><span>Gold — 2025</span><span>Gold — 2026</span></p>
 
     <div class="ch-prose">
-      <p>It started as a challenge, then slowly became a habit.</p>
-      <p>Training, showing up, trying again, adding a little more weight — most of the progress happened when nobody was watching.</p>
+      <p>It started as a challenge. Then it became a habit.</p>
+      <p>Most of the progress happened when nobody was watching.</p>
     </div>
     <div class="ch-media">
       <figure class="ch-fig"><img src="assets/gallery/achievements/powerlifting-medals.jpg" alt="The 2025 and 2026 Inter-Batch powerlifting medals" loading="lazy"><figcaption>2025 &amp; 2026 — the medals</figcaption></figure>
       <figure class="ch-fig"><video src="assets/gallery/extra-curricular/powerlifting.mp4" muted loop playsinline preload="metadata"></video><figcaption>A lift</figcaption></figure>
     </div>
     <div class="ch-prose">
-      <p>Then came 2025: Gold.</p>
-      <p>And 2026: Gold again.</p>
-      <p>Two years. Two Golds.</p>
+      <p>2025: Gold. 2026: Gold again.</p>
     </div>
     <figure class="ch-fig wide">
       <img src="assets/gallery/extra-curricular/powerlifting-66-74kg-1st.png" alt="Official results: 1st Place, Youktik (22MS), 380 kg, in the 66.01 to 74 kg class" loading="lazy">
       <figcaption>Gold — official results, 66.01–74 kg</figcaption>
     </figure>
     <div class="ch-prose">
-      <p>The medals are great, but what I really took away from powerlifting was the habit of showing up, pushing a little further, and doing it all over again.</p>
+      <p>The medals are nice. The habit is the real win.</p>
     </div>
   </section>
 
@@ -265,9 +280,8 @@
     <p class="ch-sub">Experimenting with Gaussian Splatting and 3D reconstruction.</p>
 
     <div class="ch-prose">
-      <p>What if a photograph wasn't just something you looked at, but somewhere you could step into?</p>
-      <p>That was the idea behind this experiment. I started playing with Gaussian Splatting and 3D reconstruction, taking real-world visual data and turning it into a spatial representation.</p>
-      <p>It is strangely satisfying watching a collection of ordinary images slowly become something that feels like a real place.</p>
+      <p>What if a photograph wasn't something you looked at — but somewhere you could step into?</p>
+      <p>I take ordinary images and turn them into a place you can move around in. Watching it come together never gets old.</p>
     </div>
     <div class="ch-media">
       <figure class="ch-fig"><img src="assets/gallery/academia-life/render-terrain.jpg" alt="3D reconstruction of a coastal terrain with the capture path overlaid" loading="lazy"><figcaption>Reality</figcaption></figure>
@@ -275,7 +289,7 @@
       <figure class="ch-fig"><span class="slot" data-src="images/Side projects/recon-splat.jpg" data-label="Gaussian Splat" data-alt="Gaussian Splatting render"></span><figcaption>Gaussian Splat</figcaption></figure>
     </div>
     <div class="ch-prose">
-      <p>Still experimenting. Still breaking things. Still trying to make reality behave like a 3D model.</p>
+      <p>Still experimenting. Still breaking things.</p>
     </div>
     <p class="ch-note">Ongoing project — source code and architecture are currently private.</p>
   </section>
@@ -286,9 +300,9 @@
     <p class="ch-title">The one they call about</p>
     <p class="ch-sub">Snakes, ponds, and whatever else shows up on campus.</p>
     <div class="ch-prose">
-      <p>I spend a lot of time watching animals — and on campus, that mostly means snakes.</p>
-      <p>Every so often one turns up, and for reasons I still find funny, security started calling me. The big one was a rat snake, nearly five feet. I handled it and photographed it while the nature club and staff kept everyone calm.</p>
-      <p>Being the person who gets the snake call is a strange thing to be known for. I'll take it.</p>
+      <p>On campus, I'm the person they call when there's a snake.</p>
+      <p>Nearly five feet of rat snake — handled, photographed and released, with the nature club keeping everyone calm.</p>
+      <p>Strange thing to be known for. I'll take it.</p>
     </div>
     <div class="ch-media">
       <figure class="ch-fig"><img src="assets/gallery/nature/rat-snake.jpg" alt="A rat snake being handled safely" loading="lazy"><figcaption>Rat snake — handled, photographed</figcaption></figure>
@@ -306,8 +320,8 @@
     <p class="ch-title">Stages, costumes and a red Deadpool</p>
     <p class="ch-sub">The bits that happen after the lab closes.</p>
     <div class="ch-prose">
-      <p>In 2024 I was on stage in full costume for the IISERK dance-drama — the kind of thing you do once and remember for all the right reasons.</p>
-      <p>Later I 3D-printed a Deadpool mask, modelled from a face reconstruction, and I have not stopped showing it to people since.</p>
+      <p>2024: on stage, in full costume, for the IISERK dance-drama.</p>
+      <p>Also: a 3D-printed Deadpool mask I will not stop showing people.</p>
     </div>
     <div class="ch-media">
       <figure class="ch-fig"><img src="assets/gallery/extra-curricular/dance-drama-2024.jpg" alt="Cast in costume and makeup backstage for the 2024 dance-drama" loading="lazy"><figcaption>Dance-drama, 2024 — backstage</figcaption></figure>
@@ -322,8 +336,8 @@
     <p class="ch-title">Where everything gets made</p>
     <p class="ch-sub">A workbench, too many boxes, and a printer that never stops.</p>
     <div class="ch-prose">
-      <p>Every project starts somewhere messy. Mine starts here — a workbench buried in pliers, wire, tape and whatever I am fixing this week, with a McLaren poster I have had since school watching over it.</p>
-      <p>If it flies, prints, or fails spectacularly on the first try, it probably began on this table.</p>
+      <p>Every project starts somewhere messy. Mine starts on this bench.</p>
+      <p>If it flies, prints, or fails spectacularly on the first try — it began here.</p>
     </div>
     <div class="ch-media">
       <figure class="ch-fig wide"><img src="assets/gallery/side-projects/workstation.jpg" alt="A cluttered workbench with tools, wires and a 3D printer" loading="lazy"><figcaption>The workbench</figcaption></figure>
@@ -511,14 +525,9 @@
     card.appendChild(m);
 
     var body = el('div', 'build-body');
-    var k = el('p', 'kicker'); k.textContent = b.kicker;
     var h = el('h3'); h.textContent = b.title;
-    var p = el('p', 'blog'); p.textContent = b.blog;
-    var meta = el('p', 'meta'); meta.textContent = 'Built / Experimented by Youktik Sajjan';
     var tags = el('p', 'tags'); tags.textContent = b.tags;
-    var cta = el('p', 'cta'); cta.textContent = 'Read the story →';
-    body.appendChild(k); body.appendChild(h); body.appendChild(p);
-    body.appendChild(meta); body.appendChild(tags); body.appendChild(cta);
+    body.appendChild(h); body.appendChild(tags);
     card.appendChild(body);
 
     card.addEventListener('click', function () { openStory(b); });
@@ -683,6 +692,25 @@
   Array.prototype.forEach.call(document.querySelectorAll('.ch-fig video'), function (v) {
     v.addEventListener('mouseenter', function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); });
     v.addEventListener('mouseleave', function () { v.pause(); });
+  });
+})();
+</script>
+<script>
+/* Horizontal story rails: inject prev/next arrows and scroll by ~a card. */
+(function () {
+  Array.prototype.forEach.call(document.querySelectorAll('[data-rail]'), function (track) {
+    var rail = track.parentNode;
+    var prev = document.createElement('button'), next = document.createElement('button');
+    prev.type = 'button'; prev.className = 'rail-btn prev'; prev.setAttribute('aria-label', 'Scroll left'); prev.textContent = '‹';
+    next.type = 'button'; next.className = 'rail-btn next'; next.setAttribute('aria-label', 'Scroll right'); next.textContent = '›';
+    rail.appendChild(prev); rail.appendChild(next);
+    function step(){ return Math.max(240, Math.round(track.clientWidth * 0.8)); }
+    prev.addEventListener('click', function(){ track.scrollBy({ left: -step(), behavior: 'smooth' }); });
+    next.addEventListener('click', function(){ track.scrollBy({ left: step(), behavior: 'smooth' }); });
+    function upd(){ var max = track.scrollWidth - track.clientWidth - 2; prev.disabled = track.scrollLeft <= 2; next.disabled = track.scrollLeft >= max; }
+    track.addEventListener('scroll', upd, { passive: true });
+    window.addEventListener('resize', upd);
+    upd();
   });
 })();
 </script>

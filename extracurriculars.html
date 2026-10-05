@@ -117,7 +117,24 @@
   footer{font-family:var(--mono); font-size:.72rem; color:var(--muted); text-align:center; margin-top:2.4rem; padding-top:.9rem; border-top:1px solid var(--rule)}
 
   @media (max-width:640px){ .card.featured{grid-column:span 1} }
-  @media (prefers-reduced-motion: reduce){
+  /* no text-selection I-beam, nebula cursor */
+  *,*::before,*::after{-webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none}
+  input,textarea,[contenteditable="true"]{-webkit-user-select:text; user-select:text}
+  html,body{cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'11'%20fill%3D'%231a0b3a'%20opacity%3D'0.10'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'8'%20fill%3D'%235b2ea6'%20opacity%3D'0.26'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'5.5'%20fill%3D'%23b388ff'%20opacity%3D'0.52'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'3.2'%20fill%3D'%23e6d5ff'%20opacity%3D'0.85'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'1.6'%20fill%3D'%23ffffff'%2F%3E%3Ccircle%20cx%3D'9'%20cy%3D'9.5'%20r%3D'3.6'%20fill%3D'%237ff3ff'%20opacity%3D'0.12'%2F%3E%3Ccircle%20cx%3D'15.2'%20cy%3D'14.5'%20r%3D'2.6'%20fill%3D'%23ff9bf0'%20opacity%3D'0.10'%2F%3E%3C%2Fsvg%3E") 12 12,auto}
+  a,button,summary,label,[role="radio"]{cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'11'%20fill%3D'%231a0b3a'%20opacity%3D'0.10'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'8'%20fill%3D'%235b2ea6'%20opacity%3D'0.26'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'5.5'%20fill%3D'%23b388ff'%20opacity%3D'0.52'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'3.2'%20fill%3D'%23e6d5ff'%20opacity%3D'0.85'%2F%3E%3Ccircle%20cx%3D'12'%20cy%3D'12'%20r%3D'1.6'%20fill%3D'%23ffffff'%2F%3E%3Ccircle%20cx%3D'9'%20cy%3D'9.5'%20r%3D'3.6'%20fill%3D'%237ff3ff'%20opacity%3D'0.12'%2F%3E%3Ccircle%20cx%3D'15.2'%20cy%3D'14.5'%20r%3D'2.6'%20fill%3D'%23ff9bf0'%20opacity%3D'0.10'%2F%3E%3C%2Fsvg%3E") 12 12,pointer}
+  /* horizontal story rails */
+  .rail{position:relative}
+  .rail-track{display:flex; gap:.9rem; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth; padding:.2rem .2rem .8rem; -webkit-overflow-scrolling:touch}
+  .rail-track > *{flex:0 0 auto; width:min(76vw,285px); scroll-snap-align:start; margin:0}
+  .rail-track::-webkit-scrollbar{height:6px}
+  .rail-track::-webkit-scrollbar-thumb{background:var(--card-border); border-radius:3px}
+  .rail-track::-webkit-scrollbar-track{background:transparent}
+  .rail-btn{position:absolute; top:50%; transform:translateY(-50%); z-index:3; width:2.2rem; height:2.2rem; display:grid; place-items:center; border-radius:50%;
+    background:var(--card); border:1px solid var(--card-border); color:var(--ink); font-size:1.15rem; line-height:1; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .rail-btn:hover{border-color:var(--ink)}
+  .rail-btn:disabled{opacity:.25}
+  .rail-btn.prev{left:-.7rem} .rail-btn.next{right:-.7rem}
+  @media (max-width:640px){ .rail-btn{display:none} }  @media (prefers-reduced-motion: reduce){
     .card,.viz img,.modal{transition:none}
     .card:hover{transform:none}
     .card:hover .viz img{transform:none}
@@ -339,17 +356,8 @@
     card.appendChild(viz);
 
     var body = el('div', 'body');
-    body.appendChild(el2('p', 'kicker', c.cat));
     body.appendChild(el2('h3', '', c.title));
-    var d = el('p', 'desc'); d.textContent = c.desc.length > 150 ? c.desc.slice(0, 147).replace(/\s+\S*$/, '') + '…' : c.desc; body.appendChild(d);
-    var rev = el('div', 'reveal');
-    var metaBits = [];
-    if (c.year) metaBits.push(c.year);
-    if (c.org) metaBits.push(c.org);
-    if (metaBits.length) rev.appendChild(el2('p', 'meta', metaBits.join(' · ')));
-    rev.appendChild(el2('p', 'tags', c.tags));
-    body.appendChild(rev);
-    body.appendChild(el2('p', 'more', 'Open →'));
+    body.appendChild(el2('p', 'tags', c.tags));
     card.appendChild(body);
 
     card.addEventListener('click', function () { openModal(c); });
@@ -369,9 +377,10 @@
     host.appendChild(h);
 
     if (items.length) {
-      var grid = el('div', 'cards');
+      var rail = el('div', 'rail');
+      var grid = el('div', 'cards rail-track'); grid.setAttribute('data-rail', '');
       items.forEach(function (c, i) { grid.appendChild(makeCard(c, i)); });
-      host.appendChild(grid);
+      rail.appendChild(grid); host.appendChild(rail);
     }
     if (s.n === '06') {
       var sub = el('h3'); sub.style.cssText = 'font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:1.1rem 0 .6rem';
@@ -457,6 +466,25 @@
   });
   window.addEventListener('storage', function(e){ if (e.key === 'site-theme' && e.newValue){ root.setAttribute('data-theme', e.newValue); paint(); } });
   paint();
+})();
+</script>
+<script>
+/* Horizontal story rails: inject prev/next arrows and scroll by ~a card. */
+(function () {
+  Array.prototype.forEach.call(document.querySelectorAll('[data-rail]'), function (track) {
+    var rail = track.parentNode;
+    var prev = document.createElement('button'), next = document.createElement('button');
+    prev.type = 'button'; prev.className = 'rail-btn prev'; prev.setAttribute('aria-label', 'Scroll left'); prev.textContent = '‹';
+    next.type = 'button'; next.className = 'rail-btn next'; next.setAttribute('aria-label', 'Scroll right'); next.textContent = '›';
+    rail.appendChild(prev); rail.appendChild(next);
+    function step(){ return Math.max(240, Math.round(track.clientWidth * 0.8)); }
+    prev.addEventListener('click', function(){ track.scrollBy({ left: -step(), behavior: 'smooth' }); });
+    next.addEventListener('click', function(){ track.scrollBy({ left: step(), behavior: 'smooth' }); });
+    function upd(){ var max = track.scrollWidth - track.clientWidth - 2; prev.disabled = track.scrollLeft <= 2; next.disabled = track.scrollLeft >= max; }
+    track.addEventListener('scroll', upd, { passive: true });
+    window.addEventListener('resize', upd);
+    upd();
+  });
 })();
 </script>
 </body>
