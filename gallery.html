@@ -103,6 +103,9 @@
   .story h1{margin:.2rem 0 .3rem; font-size:1.9rem; letter-spacing:-.01em}
   .story .lead{font-size:1.05rem; color:var(--muted); margin:0 0 1rem}
   .story p.body{font-size:1.02rem; margin:0 0 1rem}
+  .ext-link{display:inline-block; font-family:var(--mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--paper); background:var(--ink); border:1px solid var(--ink); border-radius:6px; padding:.5rem .8rem; margin:.4rem 0 0; text-decoration:none}
+  .ext-link:hover{opacity:.85}
+  .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
   .story .cover{width:100%; border:1px solid var(--card-border); border-radius:10px; margin:.4rem 0 1.2rem; display:block; background:#0d0d0d; aspect-ratio:16/9; object-fit:cover}
   .cover-wrap{position:relative; width:100%; aspect-ratio:16/9; border:1px solid var(--card-border); border-radius:10px; overflow:hidden; background:#0d0d0d; margin:.4rem 0 1.2rem}
   .cover-wrap img,.cover-wrap video,.cover-wrap .ph{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
@@ -147,6 +150,25 @@
 
   footer{font-family:var(--mono); font-size:.72rem; color:var(--muted); text-align:center; margin-top:2.2rem; padding-top:.9rem; border-top:1px solid var(--rule)}
 
+  /* ── visual-blog chapters ── */
+  .chapter{margin:2.6rem 0 0; padding-top:1.6rem; border-top:1px solid var(--rule)}
+  .chapter > h2{font-family:var(--mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 .7rem; padding:0; border:0}
+  .ch-title{font-size:1.5rem; font-weight:600; margin:.1rem 0 .2rem; letter-spacing:-.01em}
+  .ch-sub{font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 .9rem}
+  .ch-badges{display:flex; gap:.4rem; flex-wrap:wrap; margin:0 0 1.1rem}
+  .ch-badges span{font-family:var(--mono); font-size:.64rem; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--card-border); border-radius:999px; padding:.25rem .6rem; color:var(--muted)}
+  .ch-prose{font-size:1.05rem; max-width:40rem}
+  .ch-prose p{margin:0 0 1rem}
+  .ch-media{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.8rem; margin:1rem 0 1.4rem}
+  .ch-fig{margin:0; border:1px solid var(--card-border); border-radius:10px; overflow:hidden; background:#0d0d0d}
+  .ch-fig img{width:100%; aspect-ratio:4/3; object-fit:cover; display:block; transition:transform .5s ease}
+  .ch-fig:hover img{transform:scale(1.03)}
+  .ch-fig figcaption{font-family:var(--mono); font-size:.62rem; color:var(--muted); padding:.4rem .55rem}
+  .ch-fig.wide{grid-column:1/-1}
+  .ch-fig.wide img{aspect-ratio:16/9}
+  .slot{display:block}
+  .ch-ph{aspect-ratio:4/3; display:grid; place-items:center; text-align:center; padding:.6rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); background:repeating-linear-gradient(45deg,transparent 0 12px,var(--card-border) 12px 13px)}
+  .ch-note{font-family:var(--mono); font-size:.66rem; color:var(--muted); border-top:1px solid var(--rule); padding-top:.7rem; margin:1rem 0 0}
   @media (prefers-reduced-motion: reduce){
     .build, .story, .lightbox{transition:none}
     .build:hover{transform:none}
@@ -202,6 +224,57 @@
     <h2 id="g-builds">Builds &amp; Experiments</h2>
     <p class="section-note">Things I've actually put together with my own hands — CAD, solder, prints, prototypes and test flights. Field notes, not case studies.</p>
     <div class="builds" id="builds"><!-- filled by script --></div>
+  </section>
+
+  <!-- ── Chapter: Powerlifting ── -->
+  <section class="chapter" id="powerlifting" aria-labelledby="g-power">
+    <h2 id="g-power">Powerlifting</h2>
+    <p class="ch-title">Two Years. Two Golds.</p>
+    <p class="ch-sub">Inter-Batch Powerlifting — IISER Kolkata</p>
+    <p class="ch-badges"><span>Gold — 2025</span><span>Gold — 2026</span></p>
+
+    <div class="ch-prose">
+      <p>It started as a challenge, then slowly became a habit.</p>
+      <p>Training, showing up, trying again, adding a little more weight — most of the progress happened when nobody was watching.</p>
+    </div>
+    <div class="ch-media">
+      <figure class="ch-fig"><span class="slot" data-src="images/Extra Curricular/powerlifting-2025.jpg" data-label="2025" data-alt="Powerlifting, 2025 Inter-Batch competition"></span><figcaption>2025</figcaption></figure>
+      <figure class="ch-fig"><span class="slot" data-src="images/Extra Curricular/powerlifting-2026.jpg" data-label="2026" data-alt="Powerlifting, 2026 Inter-Batch competition"></span><figcaption>2026</figcaption></figure>
+    </div>
+    <div class="ch-prose">
+      <p>Then came 2025: Gold.</p>
+      <p>And 2026: Gold again.</p>
+      <p>Two years. Two Golds.</p>
+    </div>
+    <figure class="ch-fig wide">
+      <img src="assets/gallery/extra-curricular/powerlifting-66-74kg-1st.png" alt="Official results: 1st Place, Youktik (22MS), 380 kg, in the 66.01 to 74 kg class" loading="lazy">
+      <figcaption>Gold — official results, 66.01–74 kg</figcaption>
+    </figure>
+    <div class="ch-prose">
+      <p>The medals are great, but what I really took away from powerlifting was the habit of showing up, pushing a little further, and doing it all over again.</p>
+    </div>
+  </section>
+
+  <!-- ── Chapter: 3D Reconstruction ── -->
+  <section class="chapter" id="reconstruction" aria-labelledby="g-recon">
+    <h2 id="g-recon">3D Reconstruction</h2>
+    <p class="ch-title">Turning Reality Into 3D</p>
+    <p class="ch-sub">Experimenting with Gaussian Splatting and 3D reconstruction.</p>
+
+    <div class="ch-prose">
+      <p>What if a photograph wasn't just something you looked at, but somewhere you could step into?</p>
+      <p>That was the idea behind this experiment. I started playing with Gaussian Splatting and 3D reconstruction, taking real-world visual data and turning it into a spatial representation.</p>
+      <p>It is strangely satisfying watching a collection of ordinary images slowly become something that feels like a real place.</p>
+    </div>
+    <div class="ch-media">
+      <figure class="ch-fig"><span class="slot" data-src="images/Side projects/recon-input.jpg" data-label="Reality / Input" data-alt="Source photographs used for reconstruction"></span><figcaption>Reality</figcaption></figure>
+      <figure class="ch-fig"><span class="slot" data-src="images/Side projects/recon-result.jpg" data-label="Reconstruction" data-alt="3D reconstruction result"></span><figcaption>Reconstruction</figcaption></figure>
+      <figure class="ch-fig wide"><span class="slot" data-src="images/Side projects/recon-splat.jpg" data-label="Gaussian Splat" data-alt="Gaussian Splatting render"></span><figcaption>Gaussian Splat</figcaption></figure>
+    </div>
+    <div class="ch-prose">
+      <p>Still experimenting. Still breaking things. Still trying to make reality behave like a 3D model.</p>
+    </div>
+    <p class="ch-note">Ongoing project — source code and architecture are currently private.</p>
   </section>
 
   <footer>© <span id="year">2026</span> Youktik Sajjan · <a href="index.html">Portfolio</a></footer>
@@ -301,7 +374,6 @@
       media: [
         { type: 'image', src: 'assets/gallery/builds/photoreactor-cad.jpg', caption: 'CAD — FreeCAD mounting plate' },
         { type: 'image', src: 'assets/gallery/builds/photoreactor-printed-plate.jpg', caption: 'Prototype — 3D-printed plate, in the lab' },
-        { type: 'image', src: 'assets/gallery/builds/photocatalysis-poster.jpg', caption: 'The lab — photocatalysis poster' },
         { type: 'video', src: 'videos/builds/hardware-fabrication.mp4', caption: 'Fabrication — short process clip' }
       ]
     },
@@ -320,18 +392,16 @@
       ]
     },
     {
-      id: 'recon',
-      kicker: '03 · 3D Reconstruction',
-      title: 'Turning Reality Into 3D',
-      blog: "I’ve also been experimenting with emerging computer-vision techniques for reconstructing the physical world. One area I’m exploring is Gaussian Splatting—using ordinary visual data such as images or video to reconstruct detailed 3D representations of real environments and objects. I’m interested in where this can move beyond visualisation into usable 3D models for engineering, research, mapping, and robotics.",
-      tags: '#ComputerVision #GaussianSplatting #Research',
-      steps: ['Capture', 'Reconstruct', 'Gaussian Splatting', 'Model'],
-      cover: { type: 'image', src: 'images/builds/recon-splat.jpg', caption: 'Gaussian Splatting render' },
+      id: 'mural',
+      kicker: '03 · 3D-Printed Portrait',
+      title: 'A Portrait, Printed',
+      blog: "For Prof. Soumyajit Roy's 50th birthday I built a mural: I 3D-modelled his portrait and 3D-printed it, then mounted it as a piece the group could give him. It was my first time taking a face from a model all the way to a finished physical object — and the fiddly part was never the printing, it was getting the likeness to survive every step from mesh to machine.",
+      tags: '#3DPrinting #CAD #Portrait #Gift',
+      steps: ['Model', 'Sculpt', 'Print', 'Finish'],
+      cover: { type: 'image', src: 'assets/gallery/builds/printed-portrait-soumyajit-roy.jpg', caption: 'The printed portrait, presented' },
+      link: { href: 'https://soumyajit-roy.com/', label: 'Prof. Soumyajit Roy ↗' },
       media: [
-        { type: 'video', src: 'videos/builds/recon-demo.mp4', caption: 'Demonstration — orbit of a reconstruction' },
-        { type: 'compare', before: 'images/builds/recon-before.jpg', after: 'images/builds/recon-after.jpg', caption: 'Before / after — input vs reconstruction' },
-        { type: 'image', src: 'images/builds/recon-result.jpg', caption: 'Reconstruction result' },
-        { type: 'image', src: 'images/builds/recon-splat.jpg', caption: 'Gaussian Splatting render' }
+        { type: 'image', src: 'assets/gallery/builds/printed-portrait-soumyajit-roy.jpg', caption: '3D-printed portrait of Prof. Soumyajit Roy' }
       ]
     }
   ];
@@ -424,6 +494,14 @@
 
     var bodyEl = document.getElementById('story-body'); bodyEl.innerHTML = '';
     var para = el('p', 'body'); para.textContent = b.blog; bodyEl.appendChild(para);
+    if (b.link) {
+      var a = el('a', 'ext-link');
+      a.href = b.link.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      a.textContent = b.link.label.replace(' ↗', '');
+      var arrow = el('span'); arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = ' ↗'; a.appendChild(arrow);
+      var sr = el('span', 'sr'); sr.textContent = ' (opens in a new tab)'; a.appendChild(sr);
+      bodyEl.appendChild(a);
+    }
 
     var shots = document.getElementById('story-shots'); shots.innerHTML = '';
     b.media.forEach(function (item, i) {
@@ -530,6 +608,22 @@
       if (e.key === 'ArrowLeft') step(-1);
       if (e.key === 'ArrowRight') step(1);
     }
+  });
+})();
+</script>
+<script>
+/* Fill photo slots: show the image if it exists, otherwise a labelled placeholder. */
+(function () {
+  var slots = document.querySelectorAll('.slot');
+  Array.prototype.forEach.call(slots, function (host) {
+    var src = host.getAttribute('data-src');
+    var label = host.getAttribute('data-label') || 'Photo';
+    var img = new Image();
+    img.alt = host.getAttribute('data-alt') || label;
+    img.loading = 'lazy';
+    img.onload = function () { host.innerHTML = ''; host.appendChild(img); };
+    img.onerror = function () { host.innerHTML = ''; var d = document.createElement('div'); d.className = 'ch-ph'; d.textContent = label; host.appendChild(d); };
+    img.src = src;
   });
 })();
 </script>
