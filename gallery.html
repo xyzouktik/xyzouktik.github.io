@@ -397,6 +397,10 @@
   }
 
   var host = document.getElementById('sections');
+  /* randomise the order of the photos inside each section */
+  function shuffleInPlace(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  DATA.forEach(function (sec) { if (sec.items && sec.items.length > 1) shuffleInPlace(sec.items); });
+
   DATA.forEach(function (sec) {
     var s = el('section', 'sec'); s.id = sec.id;
     var head = el('div', 'sec-head'); var h2 = el('h2'); var num = el('span', 'n'); num.textContent = sec.n + ' / '; h2.id = sec.id + '-h';
