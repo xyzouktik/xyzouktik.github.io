@@ -43,7 +43,7 @@
   .intro-bar{width:min(92vw,840px); height:2px; background:var(--card-border); overflow:hidden}
   .intro-bar span{display:block; height:100%; width:0; background:var(--ink); animation:introFill 4s linear forwards}
   @keyframes introFill{to{width:100%}}
-  @media (prefers-reduced-motion: reduce){ .intro-bar span{animation:none; width:100%} #intro{transition:none} }
+  @media (prefers-reduced-motion: reduce){ .intro-bar span{animation:none; width:100%} #intro,.intro-line{transition:none} }
   .sheet{max-width:62rem; margin:0 auto; padding:1.6rem 1.4rem 3rem; position:relative}
   a{color:var(--link); text-decoration:underline; text-underline-offset:2px; text-decoration-color:var(--muted)}
   a:hover{text-decoration-thickness:2px}
@@ -541,7 +541,7 @@
   var t0 = Date.now(), done = false, reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function handover() {
     if (done) return; done = true;
-    var minWait = Math.max(0, 4000 - (Date.now() - t0));
+    var minWait = Math.max(0, (reduced ? 800 : 4000) - (Date.now() - t0));
     setTimeout(function () {
       line.style.opacity = '0';
       setTimeout(function () {
@@ -549,8 +549,8 @@
         line.style.opacity = '1';
         setTimeout(function () {
           intro.classList.add('hide');
-          setTimeout(function () { if (intro.parentNode) intro.parentNode.removeChild(intro); }, reduced ? 200 : 1000);
-        }, reduced ? 200 : 1300);
+          setTimeout(function () { if (intro.parentNode) intro.parentNode.removeChild(intro); }, reduced ? 0 : 1000);
+        }, reduced ? 400 : 1300);
       }, reduced ? 0 : 450);
     }, minWait);
   }
@@ -560,7 +560,7 @@
     else { v.addEventListener('canplay', handover, { once: true }); v.addEventListener('loadeddata', handover, { once: true }); }
   }
   window.addEventListener('load', function () { setTimeout(handover, 350); });
-  setTimeout(handover, 4400);
+  setTimeout(handover, reduced ? 1200 : 4400);
 })();
 </script>
 </body>
