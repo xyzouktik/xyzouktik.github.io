@@ -38,9 +38,9 @@
   #intro{position:fixed; inset:0; z-index:100; display:grid; place-content:center; justify-items:center; gap:1.1rem; text-align:center; padding:1.4rem;
     background:var(--paper); transition:opacity .55s ease, visibility .55s ease}
   #intro.hide{opacity:0; visibility:hidden}
-  .intro-img{width:min(58vw,260px); border:1px solid var(--card-border); border-radius:10px; display:block; box-shadow:0 10px 40px rgba(0,0,0,.35)}
+  .intro-img{width:min(88vw,520px); max-height:56vh; height:auto; border:1px solid var(--card-border); border-radius:10px; display:block; box-shadow:0 10px 40px rgba(0,0,0,.35)}
   .intro-line{font-family:var(--mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0}
-  .intro-bar{width:min(58vw,260px); height:2px; background:var(--card-border); overflow:hidden}
+  .intro-bar{width:min(88vw,520px); height:2px; background:var(--card-border); overflow:hidden}
   .intro-bar span{display:block; height:100%; width:0; background:var(--ink); animation:introFill 1.7s ease forwards}
   @keyframes introFill{to{width:100%}}
   @media (prefers-reduced-motion: reduce){ .intro-bar span{animation:none; width:100%} #intro{transition:none} }
@@ -318,7 +318,6 @@
     ]},
     { id: 'extracurricular', n: '09', name: 'Extracurricular', items: [
       { img: IMG+'achievements-g/powerlifting-video.mp4', cap: "Powerlifting video", type: 'video' },
-      { img: IMG+'achievements-g/ifinn-loi.jpg', cap: "iFiNN LOI" },
       { img: IMG+'achievements-g/best-speaker-award-at-iiserk-mun.jpg', cap: "Best Speaker Award at IISERK MUN" },
       { img: IMG+'achievements-g/iit-madras-i-summit-with-shuvam.jpg', cap: "IIT Madras I-summit with Shuvam" },
       { img: IMG+'achievements-g/at-iit-delhi-incubator-summit.jpg', cap: "At IIT-Delhi Incubator Summit" },
