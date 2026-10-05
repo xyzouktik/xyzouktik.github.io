@@ -13,7 +13,7 @@ I build applied systems where science meets computation: marine-imagery models a
 
 ## About Me
 
-I work across disciplines rather than within one: biological sciences and computation, computer vision and robotics, and quantitative finance. I co-founded two deep-tech startups and have built hardware and software for underwater environments. Currently in the final year of an Integrated BS-MS at IISER Kolkata (Biological Sciences major; Computer Sciences minor, Humanities minor), with a master's thesis on species detection from biological imagery and two papers under review (ICWSM, IndoML).
+I work across disciplines rather than within one: biological sciences and computation, computer vision and robotics, and quantitative finance. I co-founded two deep-tech startups and have built hardware and software for underwater environments. Currently in the final year of an Integrated BS-MS at IISER Kolkata (Biological Sciences major; Computer Sciences minor, Humanities minor), with a master's thesis on species detection from biological imagery, a paper accepted at IndoML, and another under review at ICWSM.
 
 ## Current Focus
 
@@ -44,7 +44,7 @@ I work across disciplines rather than within one: biological sciences and comput
 
 - **Master's thesis** — hardware + machine learning for species detection and identification from biological images and videos.
 - **Attention Follows Power, Not Population: Thirty Years of Political Coverage in the Indian English-Language Press** — under review, ICWSM.
-- **AquaVision: A Trainable Iterative Refinement Loop for Underwater Image Enhancement** — under review, IndoML.
+- **AquaVision: A Trainable Iterative Refinement Loop for Underwater Image Enhancement** — accepted, IndoML.
 - **Internships** — EEPC India, Bose Institute.
 
 ## Selected Technical Projects
