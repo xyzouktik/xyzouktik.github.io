@@ -104,6 +104,7 @@
   .modal .m-cat{font-family:var(--mono); font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0}
   .modal .m-desc{font-size:1.02rem; margin:.7rem 0 1rem}
   .modal .m-visual{width:100%; border:1px solid var(--card-border); border-radius:10px; margin:.2rem 0 1rem; display:block; background:var(--soft)}
+  .modal .m-cap{font-family:var(--mono); font-size:.62rem; color:var(--muted); margin:-.6rem 0 1rem}
   .modal dl{display:grid; grid-template-columns:9rem 1fr; gap:.35rem 1rem; margin:.4rem 0 1rem; font-size:.92rem}
   .modal dt{font-family:var(--mono); font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding-top:.15rem}
   .modal dd{margin:0}
@@ -235,6 +236,17 @@
       tags: '#WebDesign #Design #Competition #IISERKolkata #Slashdot',
       link: { href: 'https://slashdot-iiserk.github.io/events/web-design-2026/', label: 'View Competition →', kind: 'Slashdot' } },
 
+    { sec: '02', type: 'achievement',
+      title: "BizPitch '26 — 3rd Prize",
+      cat: 'Entrepreneurship / Competition',
+      desc: "I pitched iFiNN at BizPitch, run by the Presidency University Young Entrepreneurs Society. The slide walked through the platform as one interface for traders — 130+ indicators, no-code ML, backtesting, social sentiment and live execution. We placed 3rd. The real work was compression: turning months of engineering into a few minutes a non-specialist can follow.",
+      year: '2026', achievement: '3rd Prize', org: 'PUYES · Presidency University',
+      tags: '#Entrepreneurship #iFiNN #Pitching #BizPitch',
+      imgs: [
+        { src: 'assets/gallery/achievements/bizpitch-ifinn-pitch.jpg', alt: 'Pitching iFiNN at BizPitch — presentation slide on screen', caption: 'Pitching iFiNN — the slide' },
+        { src: 'assets/gallery/achievements/bizpitch-award-certificate.jpg', alt: 'Certificate of award at BizPitch', caption: 'Certificate of award' }
+      ] },
+
     /* 03 — Film & Creative Arts */
     { sec: '03', type: 'creative',
       title: 'Chhayasutra — Short Film',
@@ -246,13 +258,22 @@
       imgAlt: 'Thumbnail of the short film Chhayasutra',
       link: { href: 'https://youtu.be/_q8SxFPoHyE?si=ESKEQuypDdzCzlPI', label: 'Watch Chhayasutra →', kind: 'YouTube' } },
 
+    { sec: '03', type: 'creative',
+      title: 'Artwork',
+      cat: 'Drawing / Creative',
+      desc: "Not everything I make ends up on a bench. I draw — mostly architecture and objects, in pencil, in whatever notebook is around. This tower study is from 2019. Drawing is where I first learned to think in structure and proportion, and it still shapes how I approach CAD.",
+      year: '2019', achievement: 'Personal work', org: '',
+      tags: '#Artwork #Sketch #Design',
+      imgs: [ { src: 'assets/gallery/artwork/tower-sketch-2019.jpg', alt: 'Pencil sketch of a tower in a ruled notebook, dated 2019', caption: 'Tower study, 2019' } ] },
+
     /* 04 — Sports */
     { sec: '04', type: 'sport',
-      title: 'Powerlifting',
+      title: 'Powerlifting — 1st, Interbatch Tournament',
       cat: 'Sports / Strength',
-      desc: "Powerlifting is the part of my week that keeps everything else honest. It is competitive sport, but most of it is invisible: consistency, progressive training, and turning up on the days you don't feel like it. Discipline I've carried straight into everything else.",
-      year: '', achievement: 'Participation', org: '',
-      tags: '#Powerlifting #Sports #Strength #Discipline' },
+      desc: "I compete in the Interbatch Powerlifting Tournament run by the Gym Club of IISER Kolkata. I placed 1st in the 66.01–74 kg class with a 380 kg total. Most of it is invisible work — consistency, progressive training, and turning up on the days you don't feel like it.",
+      year: '', achievement: '1st Place — 66.01–74 kg (380 kg total)', org: 'Interbatch Powerlifting Tournament · Gym Club of IISER Kolkata',
+      tags: '#Powerlifting #Sports #Strength #Discipline',
+      imgs: [ { src: 'assets/gallery/extra-curricular/powerlifting-66-74kg-1st.png', alt: 'Official results: 1st Place, Youktik (22MS), 380 kg, in the 66.01 to 74 kg class', caption: 'Official results — 1st place, 66.01–74 kg, 380 kg total' } ] },
 
     /* 05 — Olympiads */
     { sec: '05', type: 'achievement',
@@ -296,8 +317,9 @@
     card.setAttribute('aria-label', 'Open: ' + c.title);
 
     var viz = el('div', 'viz');
-    if (c.img) {
-      var im = el('img'); im.src = c.img; im.alt = c.imgAlt || c.title; im.loading = 'lazy';
+    var lead = c.img || (c.imgs && c.imgs[0] && c.imgs[0].src);
+    if (lead) {
+      var im = el('img'); im.src = lead; im.alt = (c.imgs && c.imgs[0] && c.imgs[0].alt) || c.imgAlt || c.title; im.loading = 'lazy';
       im.addEventListener('error', function () { viz.innerHTML = ''; var n = el('span', 'numeral'); n.textContent = c.sec; viz.appendChild(n); });
       viz.appendChild(im);
     } else {
@@ -365,8 +387,13 @@
     document.getElementById('m-cat').textContent = c.cat;
     document.getElementById('m-title').textContent = c.title;
     var viz = document.getElementById('m-visual'); viz.innerHTML = '';
-    if (c.img) { var im = el('img', 'm-visual'); im.src = c.img; im.alt = c.imgAlt || c.title;
-      im.addEventListener('error', function () { viz.innerHTML = ''; }); viz.appendChild(im); }
+    var imgs = c.imgs ? c.imgs : (c.img ? [{ src: c.img, alt: c.imgAlt || c.title }] : []);
+    imgs.forEach(function (it) {
+      var im = el('img', 'm-visual'); im.src = it.src; im.alt = it.alt || c.title; im.loading = 'lazy';
+      im.addEventListener('error', function () { if (im.parentNode) im.parentNode.removeChild(im); });
+      viz.appendChild(im);
+      if (it.caption) { var cap = el('p', 'm-cap'); cap.textContent = it.caption; viz.appendChild(cap); }
+    });
     document.getElementById('m-desc').textContent = c.desc;
     var dl = document.getElementById('m-meta'); dl.innerHTML = '';
     var rows = [];
