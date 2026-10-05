@@ -217,85 +217,118 @@
   var IMG = 'assets/gallery/';
   var DATA = [
     { id: 'daily', n: '01', name: 'Daily life', items: [
-      { img: IMG+'daily-life/cricket-ground.jpg', cap: 'Cricket ground' },
-      { img: IMG+'daily-life/nscb-mess.jpg', cap: 'NSCB & mess' },
-      { img: IMG+'daily-life/iiserk-canal.jpg', cap: 'Canal' },
-      { img: IMG+'daily-life/lhc-landscape.jpg', cap: 'Campus landscape' },
-      { img: IMG+'daily-life/two-bros.jpg', cap: 'just two bros sleeping together after all the work' },
-      { img: IMG+'daily-life/workstation.jpg', cap: 'My workstation' }
+      { img: IMG+'daily-life/adrish-harami-hai.jpg', cap: "Adrish Harami hai" },
+      { img: IMG+'daily-life/cricket-ground-landscape-at-iiserk.jpg', cap: "Cricket Ground Landscape at iiserk" },
+      { img: IMG+'daily-life/iiserk-canal.jpg', cap: "IISERK Canal" },
+      { img: IMG+'daily-life/just-3-of-us-working-overnight.mp4', cap: "Just 3 of us working overnight", type: 'video' },
+      { img: IMG+'daily-life/just-two-bros-sleeping-together-after-all-the-wo.jpg', cap: "just two bros sleeping together after all the work" },
+      { img: IMG+'daily-life/lhc-landscape.jpg', cap: "LHC landscape" },
+      { img: IMG+'daily-life/momma-cat.jpg', cap: "Momma Cat" },
+      { img: IMG+'daily-life/my-workstation.jpg', cap: "My workstation" },
+      { img: IMG+'daily-life/nscb-and-mess-landscape.jpg', cap: "NSCB and Mess Landscape" },
+      { img: IMG+'daily-life/with-friends-after-pongal.jpg', cap: "With Friends after Pongal" }
     ]},
     { id: 'academia', n: '02', name: 'Academia', items: [
-      { img: IMG+'academia-life/teaching-lab-ls2102.jpg', cap: 'Me at my teaching lab preparing bacteria and reagents for LS2102 lab' },
-      { img: IMG+'academia-life/recon-single-pass.jpg', cap: '3d reconstruction from a single pass footage where the drone path is also mapped' },
-      { img: IMG+'academia-life/recon-camera-to-depth.jpg', cap: 'original camera image to accurate depth map' },
-      { img: IMG+'academia-life/recon-1.jpg', cap: '3d reconstruction1' },
-      { img: IMG+'academia-life/recon-2.jpg', cap: 'Reconstruction2' },
-      { img: IMG+'academia-life/recon-depth.jpg', cap: 'depth map for reconstruction' }
+      { img: IMG+'academia-life/3d-reconstruction-from-a-single-pass-footage-whe.jpg', cap: "3d reconstruction from a single pass footage where the drone path is also mapped" },
+      { img: IMG+'academia-life/3d-reconstruction1.jpg', cap: "3d reconstruction1" },
+      { img: IMG+'academia-life/completion-of-hu3102-taship-with-a-mustache.jpg', cap: "Completion of HU3102 TAship with a mustache" },
+      { img: IMG+'academia-life/depth-map-for-reconstruction.jpg', cap: "depth map for reconstruction" },
+      { img: IMG+'academia-life/me-at-my-teaching-lab-preparing-bacteria-and-rea.jpg', cap: "Me at my teaching lab preparing bacteria and reagents for LS2102 lab" },
+      { img: IMG+'academia-life/original-camera-image-to-accurate-depth-map.jpg', cap: "original camera image to accurate depth map" },
+      { img: IMG+'academia-life/reconstruction2.jpg', cap: "Reconstruction2" }
     ]},
     { id: 'builds', n: '03', name: 'Builds', cards: [
       { kicker: '01 · Custom Laboratory Hardware', title: 'From CAD to the Lab',
         blog: "I like building scientific tools rather than only using them. I 3D-modelled and fabricated custom laboratory hardware for real experimental requirements, including a photoreactor. The interesting part is taking a requirement from a researcher, turning it into a mechanical design, iterating through prototypes, and putting the instrument to work in the lab.",
         tags: '#Hardware #CAD #3DPrinting #Research', steps: ['Requirement', 'CAD', 'Prototype', 'Fabrication', 'In the Lab'],
-        cover: { src: IMG+'builds/photoreactor-fabricated.jpg', caption: 'The finished photoreactor, on the bench' },
+        cover: { src: IMG+'builds/bm-lab-custom-reactor1.jpg', caption: 'Bm Lab custom reactor1' },
         media: [
-          { type: 'image', src: IMG+'builds/photoreactor-cad.jpg', caption: 'CAD — FreeCAD mounting plate' },
-          { type: 'image', src: IMG+'builds/photoreactor-printed-plate.jpg', caption: 'Prototype — 3D-printed plate' },
-          { type: 'image', src: IMG+'builds/photoreactor-fabricated.jpg', caption: 'Fabricated — the finished photoreactor' }
+          { type: 'image', src: IMG+'builds/bm-lab-custom-reactor1.jpg', caption: 'Bm Lab custom reactor1' },
+          { type: 'image', src: IMG+'builds/bm-lab-custom-reactor2.jpg', caption: 'Bm Lab custom reactor2' },
+          { type: 'image', src: IMG+'builds/fabricated-product-of-bmlab.jpg', caption: 'Fabricated product of BMlab' }
         ]},
       { kicker: '02 · Physical Drones', title: 'Building Machines That Fly',
         blog: "I got into drones by building them from individual components rather than buying finished systems — motors, ESCs, flight controllers, batteries, hand-soldering, configuration, tuning and test flights. Each build became a lesson in electronics, embedded systems, mechanical design and debugging. The maiden flight of this one ended exactly where the photo says it did.",
         tags: '#Drones #Electronics #Embedded #Robotics', steps: ['Components', 'Solder', 'Configure', 'Tune', 'Flight test'],
-        cover: { src: IMG+'builds/drone-body.jpg', caption: 'FPV quadcopter, on the bench' },
+        cover: { src: IMG+'builds/drone-body.jpg', caption: 'Drone body' },
         media: [
           { type: 'image', src: IMG+'builds/drone-body.jpg', caption: 'Drone body' },
-          { type: 'video', src: IMG+'builds/drone-test-flight.mp4', caption: 'Drone test1' },
-          { type: 'image', src: IMG+'builds/drone-crash-maiden-flight.jpg', caption: 'drone crash after flight test' }
+          { type: 'video', src: IMG+'builds/drone-test1.mp4', caption: 'Drone test1' },
+          { type: 'image', src: IMG+'builds/drone-crash-after-flight-test.jpg', caption: 'drone crash after flight test' }
         ]},
       { kicker: '03 · 3D-Printed Portrait', title: 'A Portrait, Printed',
         blog: "For Prof. Soumyajit Roy's 50th birthday I built a mural: I 3D-modelled his portrait and 3D-printed it as a piece the group could give him. Taking a face from a model all the way to a finished physical object was the fun part; the fiddly part was keeping the likeness through every step from mesh to machine.",
         tags: '#3DPrinting #CAD #Portrait #Gift', steps: ['Model', 'Sculpt', 'Print', 'Finish'],
-        cover: { src: IMG+'builds/printed-portrait-soumyajit-roy.jpg', caption: 'The printed portrait, presented' },
-        media: [ { type: 'image', src: IMG+'builds/printed-portrait-soumyajit-roy.jpg', caption: '3D-printed portrait of Prof. Soumyajit Roy' } ],
+        cover: { src: IMG+'builds/printed-portrait-soumyajit-roy.jpg', caption: 'Sroy Mural' },
+        media: [ { type: 'image', src: IMG+'builds/printed-portrait-soumyajit-roy.jpg', caption: 'Sroy Mural' } ],
         link: { href: 'https://soumyajit-roy.com/', label: 'Prof. Soumyajit Roy' } },
       { kicker: '04 · Client Work', title: 'First Paid Client',
         blog: "My first paid client engagement: I delivered a service for iFiNN and was paid CAD $1,623. Small by any business measure — but the first time a client actually put money on the table for something I built. This letter of intent is the paper trail behind it.",
         tags: '#iFiNN #FinTech #Startup #Client', steps: ['Brief', 'Build', 'Deliver', 'Paid'],
-        cover: { src: IMG+'builds/ifinn-loi.png', caption: 'iFiNN letter of intent — CAD $1,623' },
+        cover: { src: IMG+'builds/ifinn-loi.png', caption: 'iFiNN LOI' },
         media: [ { type: 'image', src: IMG+'builds/ifinn-loi.png', caption: 'iFiNN LOI' } ] }
     ]},
     { id: 'film', n: '04', name: 'Short Film', items: [
-      { img: 'https://img.youtube.com/vi/_q8SxFPoHyE/hqdefault.jpg', cap: 'Chhayasutra — short film', link: 'https://youtu.be/_q8SxFPoHyE?si=ESKEQuypDdzCzlPI' }
+      { img: IMG+'shortfilm/adilkrishna-the-best-dop-i-could-ever-get.jpg', cap: "Adilkrishna (the best DOP I could ever get)" },
+      { img: 'https://img.youtube.com/vi/_q8SxFPoHyE/hqdefault.jpg', cap: "Chhayasutra", link: 'https://youtu.be/_q8SxFPoHyE?si=ESKEquypDdzCzlPI' }
     ]},
     { id: 'drama', n: '05', name: 'Drama & Theatre', items: [
-      { img: IMG+'drama/dance-drama-2023.jpg', cap: 'Dance Drama 2023' },
-      { img: IMG+'drama/dance-drama-2024.jpg', cap: 'Dance Drama 2024' },
-      { img: IMG+'drama/stage-performance-2024.jpg', cap: "Stage Performance (Dance Drama 24')" },
-      { img: IMG+'drama/stage-performance-2024-2.jpg', cap: "Stage Performance (Dance Drama 24') 2" },
-      { img: IMG+'drama/iicm-drama-gold-2025.jpg', cap: 'IICM Gold 2025 — Drama' }
+      { img: IMG+'drama/16th-january-at-gyan-mancha.jpg', cap: "(16th January) at Gyan Mancha" },
+      { img: IMG+'drama/1st-place-at-makaut-drama-comp-2025.jpg', cap: "1st Place at Makaut Drama Comp 2025" },
+      { img: IMG+'drama/dance-drama-2023.jpg', cap: "Dance Drama 2023" },
+      { img: IMG+'drama/dance-drama-2024.jpg', cap: "Dance Drama 2024" },
+      { img: IMG+'drama/freedom.jpg', cap: "Freedom" },
+      { img: IMG+'drama/iicm-gold-2025-for-drama-medal.jpg', cap: "IICM Gold 2025 for Drama Medal" },
+      { img: IMG+'drama/iicm-trophy-with-anubhab-for-free.jpg', cap: "IICM Trophy with Anubhab for free" },
+      { img: IMG+'drama/just-iicm-things.jpg', cap: "Just IICM things" },
+      { img: IMG+'drama/lakeer-e-kabaddi-opening-24.jpg', cap: "Lakeer E Kabaddi opening 24'" },
+      { img: IMG+'drama/lakeer-scene1.jpg', cap: "Lakeer Scene1" },
+      { img: IMG+'drama/lakeer0.jpg', cap: "Lakeer0" },
+      { img: IMG+'drama/lakeer2.jpg', cap: "Lakeer2" },
+      { img: IMG+'drama/lakeer3.jpg', cap: "Lakeer3" },
+      { img: IMG+'drama/lakeer4.jpg', cap: "Lakeer4" },
+      { img: IMG+'drama/macbeth-ek-hotya-rohosyo-at-girish-mancha.jpg', cap: "Macbeth (Ek Hotya Rohosyo) at Girish Mancha" },
+      { img: IMG+'drama/me-and-soumita.jpg', cap: "Me and Soumita" },
+      { img: IMG+'drama/stage-performance-dance-drama-24.jpg', cap: "Stage Performance (Dance Drama 24')" },
+      { img: IMG+'drama/stage-performance-dance-drama-24-2.jpg', cap: "Stage Performance (Dance Drama 24')2" },
+      { img: IMG+'drama/uttorottor-ramcharit-at-aikatan-naihati.jpg', cap: "Uttorottor Ramcharit at Aikatan Naihati" },
+      { img: IMG+'drama/yaaron-at-iiser-bpr-beach.mp4', cap: "Yaaron at IISER BPR Beach", type: 'video' }
     ]},
-    { id: 'music', n: '06', name: 'Music', note: 'Hindustani classical vocal (5 years), self-taught guitarist and bassist, and founder of the band Mohona — I sing and play rhythm guitar.' },
+    { id: 'music', n: '06', name: 'Music', note: 'Hindustani classical vocal (5 years), self-taught guitarist and bassist, and founder of the band Mohona — I sing and play rhythm guitar.', items: [
+      { img: IMG+'music/janmashtami-jamming-with-ananya-and-soumyadipta.jpg', cap: "Janmashtami Jamming with Ananya and Soumyadipta" }
+    ]},
     { id: 'artwork', n: '07', name: 'Artwork', items: [
-      { img: IMG+'artwork/tower-sketch-2019.jpg', cap: 'Tower sketch, 2019' },
-      { img: IMG+'extra-curricular/deadpool-mask.jpg', cap: '3D-printed Deadpool mask' },
-      { img: IMG+'extra-curricular/deadpool-mask.mp4', type: 'video', cap: 'Deadpool mask — video' }
+      { img: IMG+'artwork/3d-rpinted-deadpool-artwork.jpg', cap: "3d rpinted deadpool artwork" },
+      { img: IMG+'artwork/artwork1.jpg', cap: "artwork1" },
+      { img: IMG+'artwork/deadpool-artwork-video.mp4', cap: "deadpool artwork video", type: 'video' }
     ]},
     { id: 'nature', n: '08', name: 'Nature', items: [
-      { img: IMG+'nature/rat-snake.jpg', cap: 'rat snake handling' },
-      { img: IMG+'nature/snake-caught.jpg', cap: 'snake caught' },
-      { img: IMG+'nature/gautam-snake.jpg', cap: 'Gautam holding snake' },
-      { img: IMG+'nature/planted-tank.jpg', cap: "A planetd tank in my friend's room" },
-      { img: IMG+'daily-life/grasshopper.jpg', cap: 'Grasshopper on my desk' },
-      { img: IMG+'nature/snake.mp4', type: 'video', cap: 'snake video' },
-      { img: IMG+'nature/snake-head.mp4', type: 'video', cap: 'snake head video' }
+      { img: IMG+'nature/a-dog-jackal-hybrid-at-our-campus.jpg', cap: "A Dog-Jackal Hybrid at our campus" },
+      { img: IMG+'nature/a-planetd-tank-in-my-friend-s-room.jpg', cap: "A planetd tank in my friend's room" },
+      { img: IMG+'nature/gautam-holding-snake.jpg', cap: "Gautam holding snake" },
+      { img: IMG+'nature/grasshopper-on-my-desk.jpg', cap: "Grasshopper on my desk" },
+      { img: IMG+'nature/lesser-adjutant-stork.jpg', cap: "Lesser Adjutant Stork" },
+      { img: IMG+'nature/mangroves-and-majhi.jpg', cap: "Mangroves and Majhi" },
+      { img: IMG+'nature/rat-snake-handling.jpg', cap: "rat snake handling" },
+      { img: IMG+'nature/saltwater-crocodile-basking.jpg', cap: "Saltwater Crocodile basking" },
+      { img: IMG+'nature/snake-caught.jpg', cap: "snake caught" },
+      { img: IMG+'nature/snake-head-video.mp4', cap: "snake head video", type: 'video' },
+      { img: IMG+'nature/snake-video.mp4', cap: "snake video", type: 'video' },
+      { img: IMG+'nature/spotted-deer-in-the-mangroves.jpg', cap: "Spotted deer in the mangroves" }
     ]},
     { id: 'extracurricular', n: '09', name: 'Extracurricular', items: [
-      { img: IMG+'extra-curricular/powerlifting-2025.png', cap: 'Powerlifting 25 & 26 gold — official results' },
-      { img: IMG+'achievements/powerlifting-medals.jpg', cap: 'Powerlifting 25 and 26 medals' },
-      { img: IMG+'extra-curricular/powerlifting.mp4', type: 'video', cap: 'Powerlifting video' },
-      { img: IMG+'achievements/iit-delhi-summit.jpg', cap: 'At IIT-Delhi Incubator Summit' },
-      { img: IMG+'achievements/iit-madras-summit.jpg', cap: 'IIT Madras I-summit with Shuvam' },
-      { img: IMG+'achievements/bizpitch-ifinn-pitch.jpg', cap: 'Puyes Bizpitch1' },
-      { img: IMG+'achievements/bizpitch-award-certificate.jpg', cap: 'Puyes Bizpitch2' }
+      { img: IMG+'achievements-g/at-iit-delhi-incubator-summit.jpg', cap: "At IIT-Delhi Incubator Summit" },
+      { img: IMG+'achievements-g/best-speaker-award-at-iiserk-mun.jpg', cap: "Best Speaker Award at IISERK MUN" },
+      { img: IMG+'achievements-g/dr-kaushik-hatti-and-dr-chalavadi-vishnu-with-un.jpg', cap: "Dr. Kaushik Hatti and Dr. Chalavadi Vishnu with Underwater AI at IIES" },
+      { img: IMG+'achievements-g/ifinn-loi.jpg', cap: "iFiNN LOI" },
+      { img: IMG+'achievements-g/iit-madras-i-summit-with-shuvam.jpg', cap: "IIT Madras I-summit with Shuvam" },
+      { img: IMG+'achievements-g/mun-snap.jpg', cap: "MUN snap" },
+      { img: IMG+'achievements-g/powerlifting-25-and-26-medals.jpg', cap: "Powerlifting 25 and 26 medals" },
+      { img: IMG+'achievements-g/powerlifting-25-gold.jpg', cap: "Powerlifting 25 gold" },
+      { img: IMG+'achievements-g/powerlifting-26-gold.jpg', cap: "Powerlifting 26 gold" },
+      { img: IMG+'achievements-g/powerlifting-video.mp4', cap: "Powerlifting video", type: 'video' },
+      { img: IMG+'achievements-g/puyes-bizpitch1.jpg', cap: "Puyes Bizpitch1" },
+      { img: IMG+'achievements-g/puyes-bizpitch2.jpg', cap: "Puyes Bizpitch2" }
     ]}
   ];
   function el(t, c) { var n = document.createElement(t); if (c) n.className = c; return n; }
