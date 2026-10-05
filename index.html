@@ -155,6 +155,14 @@
   @media (max-width:560px){ .row{grid-template-columns:1fr; gap:.2rem} .row dt{padding-top:0} }
 
   .links{font-family:var(--mono); font-size:.82rem}
+  .ps{display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; font-family:var(--mono); font-size:.78rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin:.15rem 0 0}
+  .spoiler{position:relative; display:inline-block; flex:none; width:72px; height:46px; border:1px solid var(--card-border); border-radius:8px; overflow:hidden; text-decoration:none; background:var(--card); vertical-align:middle}
+  .spoiler img{width:100%; height:100%; object-fit:cover; display:block; filter:blur(8px) grayscale(1) brightness(.7); transform:scale(1.18); transition:filter .5s ease, transform .5s ease}
+  .spoiler:hover img,.spoiler:focus-visible img{filter:none; transform:scale(1)}
+  .spoiler-tag{position:absolute; inset:0; display:grid; place-content:center; font-family:var(--mono); font-size:.55rem; letter-spacing:.16em; text-transform:uppercase; color:#fff; background:rgba(0,0,0,.5); transition:opacity .45s ease}
+  .spoiler:hover .spoiler-tag,.spoiler:focus-visible .spoiler-tag{opacity:0}
+  @media (prefers-reduced-motion: reduce){ .spoiler img,.spoiler-tag{transition:none} }
+  @media (max-width:640px){ .spoiler{width:84px; height:54px} }
   .site-foot{border-top:1px solid var(--line); padding:1.6rem 0 2.4rem; color:var(--muted); font-size:.72rem; letter-spacing:.04em}
   #dragon-canvas{position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:0; pointer-events:none; transition:opacity .5s ease}
   .page{position:relative; z-index:1}
@@ -242,6 +250,12 @@
       <a href="https://www.linkedin.com/in/youktik-sajjan">LinkedIn</a> ·
       <a href="https://github.com/xyzouktik">GitHub</a> ·
       <a href="cv.html">CV</a>
+    </p>
+    <p class="ps">P.S: Gallery is pretty interesting
+      <a class="spoiler" href="gallery.html" aria-label="Spoiler: a peek from the gallery">
+        <img src="assets/gallery/spoiler-teaser.jpg" alt="" loading="lazy">
+        <span class="spoiler-tag" aria-hidden="true">spoiler</span>
+      </a>
     </p>
   </section>
 
