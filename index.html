@@ -84,6 +84,14 @@
   .logo-avatar img{position:relative; width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; background:var(--card); border:1px solid var(--card-border)}
   @keyframes logo-spin{to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion: reduce){ .logo-avatar::before{animation:none} }
+  .slash-nav{display:flex; align-items:center; gap:.4rem; font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; text-transform:uppercase}
+  .slash-nav a{color:var(--muted); text-decoration:none}
+  .slash-nav a:hover{color:var(--accent)}
+  .slash-nav .sl{color:var(--line)}
+  .gal-link{position:relative; display:inline-block}
+  .gal-preview{position:absolute; top:1.5rem; left:50%; transform:translateX(-50%) translateY(4px); z-index:30; width:190px; padding:.3rem; background:var(--card); border:1px solid var(--card-border); border-radius:8px; box-shadow:0 8px 24px var(--shadow); opacity:0; visibility:hidden; transition:opacity .2s ease, transform .2s ease, visibility .2s}
+  .gal-link:hover .gal-preview, .gal-link:focus-visible .gal-preview{opacity:1; visibility:visible; transform:translateX(-50%) translateY(0)}
+  .gal-preview img{display:block; width:100%; border-radius:5px}
   .menu{position:relative}
   .menu-btn{display:flex; flex-direction:column; justify-content:center; gap:4px; width:2.15rem; height:2.15rem; padding:0 .4rem; background:none; border:1px solid var(--line); border-radius:6px; cursor:pointer; transition:border-color .15s ease}
   .menu-btn:hover{border-color:var(--accent)}
@@ -178,6 +186,11 @@
 <header class="site-head">
   <div class="wrap">
     <a class="brand" href="#about"><span class="logo-avatar" aria-hidden="true"><img src="https://github.com/xyzouktik.png" alt="" width="28" height="28" loading="eager" referrerpolicy="no-referrer"></span>Youktik Sajjan</a>
+    <span class="slash-nav">
+      <a href="#about">About me</a>
+      <span class="sl">/</span>
+      <a href="gallery.html" class="gal-link">Gallery<span class="gal-preview" aria-hidden="true"><img src="assets/gallery/pixel-explorers-preview.jpg" alt=""></span></a>
+    </span>
     <div class="theme-picker" role="radiogroup" aria-label="Theme">
       <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="white" aria-label="White — black on white" title="White"><span></span></button>
       <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="black" aria-label="Black — white on black" title="Black"><span></span></button>

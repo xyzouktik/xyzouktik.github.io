@@ -83,6 +83,7 @@
   .rail-btn:disabled{opacity:.2}
   .rail-btn.prev{left:-.7rem} .rail-btn.next{right:-.7rem}
   @media (max-width:640px){ .rail-btn{display:none} }
+  .sec-note{margin:.2rem 0 0; max-width:44rem; font-size:1.05rem; color:var(--ink)}
   .tile{margin:0; border:1px solid var(--card-border); border-radius:10px; overflow:hidden; background:#0d0d0d; cursor:zoom-in; position:relative}
   .tile img,.tile video{width:100%; aspect-ratio:4/3; object-fit:contain; display:block; background:#0d0d0d}
   .tile figcaption{font-family:var(--mono); font-size:.62rem; color:var(--muted); padding:.45rem .6rem; background:var(--card); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
@@ -140,6 +141,10 @@
           <a href="#daily">Daily life</a>
           <a href="#academia">Academia</a>
           <a href="#builds">Builds</a>
+          <a href="#film">Short Film</a>
+          <a href="#drama">Drama</a>
+          <a href="#music">Music</a>
+          <a href="#artwork">Artwork</a>
           <a href="#nature">Nature</a>
           <a href="#extracurricular">Extracurricular</a>
         </nav>
@@ -228,7 +233,20 @@
         cover: { src: IMG+'builds/ifinn-loi.png', caption: 'iFiNN letter of intent — CAD $1,623' },
         media: [ { type: 'image', src: IMG+'builds/ifinn-loi.png', caption: 'iFiNN LOI' } ] }
     ]},
-    { id: 'nature', n: '04', name: 'Nature', items: [
+    { id: 'film', n: '04', name: 'Short Film', items: [
+      { img: 'https://img.youtube.com/vi/_q8SxFPoHyE/hqdefault.jpg', cap: 'Chhayasutra — short film', link: 'https://youtu.be/_q8SxFPoHyE?si=ESKEQuypDdzCzlPI' }
+    ]},
+    { id: 'drama', n: '05', name: 'Drama & Theatre', items: [
+      { img: IMG+'extra-curricular/dance-drama-2024.jpg', cap: 'Dance Drama 2024' },
+      { img: IMG+'achievements/iicm-drama-gold-2025.jpg', cap: 'IICM Gold 2025 — Drama' }
+    ]},
+    { id: 'music', n: '06', name: 'Music', note: 'Hindustani classical vocal (5 years), self-taught guitarist and bassist, and founder of the band Mohona — I sing and play rhythm guitar.' },
+    { id: 'artwork', n: '07', name: 'Artwork', items: [
+      { img: IMG+'artwork/tower-sketch-2019.jpg', cap: 'Tower sketch, 2019' },
+      { img: IMG+'extra-curricular/deadpool-mask.jpg', cap: '3D-printed Deadpool mask' },
+      { img: IMG+'extra-curricular/deadpool-mask.mp4', type: 'video', cap: 'Deadpool mask — video' }
+    ]},
+    { id: 'nature', n: '08', name: 'Nature', items: [
       { img: IMG+'nature/rat-snake.jpg', cap: 'rat snake handling' },
       { img: IMG+'nature/snake-caught.jpg', cap: 'snake caught' },
       { img: IMG+'nature/gautam-snake.jpg', cap: 'Gautam holding snake' },
@@ -236,26 +254,22 @@
       { img: IMG+'nature/snake.mp4', type: 'video', cap: 'snake video' },
       { img: IMG+'nature/snake-head.mp4', type: 'video', cap: 'snake head video' }
     ]},
-    { id: 'extracurricular', n: '05', name: 'Extracurricular', items: [
-      { img: IMG+'extra-curricular/dance-drama-2024.jpg', cap: 'Dance Drama 2024' },
-      { img: IMG+'extra-curricular/deadpool-mask.jpg', cap: '3d rpinted deadpool artwork' },
-      { img: IMG+'extra-curricular/deadpool-mask.mp4', type: 'video', cap: 'deadpool artwork video' },
+    { id: 'extracurricular', n: '09', name: 'Extracurricular', items: [
       { img: IMG+'extra-curricular/powerlifting-2025.png', cap: 'Powerlifting 25 & 26 gold — official results' },
       { img: IMG+'achievements/powerlifting-medals.jpg', cap: 'Powerlifting 25 and 26 medals' },
       { img: IMG+'extra-curricular/powerlifting.mp4', type: 'video', cap: 'Powerlifting video' },
-      { img: IMG+'achievements/iicm-drama-gold-2025.jpg', cap: 'IICM Gold 2025 for Drama Medal' },
       { img: IMG+'achievements/iit-delhi-summit.jpg', cap: 'At IIT-Delhi Incubator Summit' },
       { img: IMG+'achievements/iit-madras-summit.jpg', cap: 'IIT Madras I-summit with Shuvam' },
       { img: IMG+'achievements/bizpitch-ifinn-pitch.jpg', cap: 'Puyes Bizpitch1' },
-      { img: IMG+'achievements/bizpitch-award-certificate.jpg', cap: 'Puyes Bizpitch2' },
-      { img: IMG+'artwork/tower-sketch-2019.jpg', cap: 'artwork1' }
+      { img: IMG+'achievements/bizpitch-award-certificate.jpg', cap: 'Puyes Bizpitch2' }
     ]}
   ];
-
   function el(t, c) { var n = document.createElement(t); if (c) n.className = c; return n; }
+  function srcOf(it) { return it.src || it.img; }
+  function capOf(it) { return it.caption || it.cap || ''; }
   function mediaNode(it) {
-    if (it.type === 'video') { var v = el('video'); v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata'; v.src = it.img; return v; }
-    var im = el('img'); im.src = it.img; im.alt = it.cap; im.loading = 'lazy'; return im;
+    if (it.type === 'video') { var v = el('video'); v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata'; v.src = srcOf(it); return v; }
+    var im = el('img'); im.src = srcOf(it); im.alt = capOf(it); im.loading = 'lazy'; return im;
   }
 
   var story = document.getElementById('story'), lightbox = document.getElementById('lightbox');
@@ -320,15 +334,17 @@
     var s = el('section', 'sec'); s.id = sec.id;
     var head = el('div', 'sec-head'); var h2 = el('h2'); var num = el('span', 'n'); num.textContent = sec.n + ' / '; h2.id = sec.id + '-h';
     h2.appendChild(num); h2.appendChild(document.createTextNode(sec.name)); head.appendChild(h2); s.appendChild(head);
+    if (sec.note) { var np = el('p', 'sec-note'); np.textContent = sec.note; s.appendChild(np); host.appendChild(s); return; }
     var rail = el('div', 'rail'); var track = el('div', 'rail-track'); track.setAttribute('data-rail', '');
     if (sec.cards) { sec.cards.forEach(function (b) { track.appendChild(makeCard(b)); }); }
     else {
       sec.items.forEach(function (it) {
         var fig = el('figure', 'tile'); fig.appendChild(mediaNode(it));
-        var c = el('figcaption'); c.textContent = it.cap || ''; fig.appendChild(c);
+        var c = el('figcaption'); c.textContent = capOf(it); fig.appendChild(c);
         var media = fig.firstChild;
         fig.tabIndex = 0; fig.setAttribute('role', 'button');
         fig.addEventListener('click', function () {
+          if (it.link) { window.open(it.link, '_blank', 'noopener,noreferrer'); return; }
           var nodes = Array.prototype.slice.call(track.querySelectorAll('img, video'));
           var list = nodes.map(function (n) { var f = n.parentNode, cc = f ? f.querySelector('figcaption') : null; return { type: n.tagName === 'VIDEO' ? 'video' : 'image', src: n.getAttribute('src'), caption: cc ? cc.textContent : '' }; });
           openLightbox(list, nodes.indexOf(media));

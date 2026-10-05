@@ -54,12 +54,10 @@
   header.page h1{margin:0; font-size:2.2rem; font-weight:600; letter-spacing:-.01em}
   header.page p.sub{margin:.4rem 0 0; font-size:1.08rem; color:var(--muted); max-width:40rem}
 
-  /* timeline */
-  .timeline{margin:1.4rem 0 2rem; padding:0; list-style:none; border-left:1px solid var(--rule)}
-  .timeline li{position:relative; padding:0 0 .9rem 1.1rem; font-size:.95rem}
-  .timeline li::before{content:""; position:absolute; left:-3.5px; top:.45rem; width:6px; height:6px; border-radius:50%; background:var(--ink)}
-  .timeline .yr{font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:block}
-  .timeline .mid{font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+  /* timeline — compact horizontal map */
+  .timeline{display:flex; flex-wrap:wrap; align-items:center; gap:.4rem; margin:.5rem 0 1.5rem; padding:0; list-style:none}
+  .timeline li{font-family:var(--mono); font-size:.64rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); border:1px solid var(--card-border); border-radius:999px; padding:.26rem .6rem; white-space:nowrap}
+  .timeline li .yr{color:var(--ink); margin-right:.35rem}
 
   h2.cat{font-family:var(--mono); font-size:.76rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:2rem 0 .9rem; padding-bottom:.35rem; border-bottom:1px solid var(--rule)}
   h2.cat .n{color:var(--ink)}
@@ -160,14 +158,15 @@
     <p class="sub">Things I've competed in, performed in, created, and experienced beyond the classroom.</p>
   </header>
 
-  <!-- Timeline: only known years are labelled; undated things are listed without a year. -->
+  <!-- Compact milestone map (only known years are labelled). -->
   <ol class="timeline" aria-label="Milestones">
-    <li><span class="yr">2018</span>English Olympiad — Silver</li>
-    <li><span class="mid">Competing &amp; creating</span>Inter-IISER Entrepreneurship — 1st Prize</li>
-    <li>IIT Madras I-Summit — Finalist &nbsp;·&nbsp; IIT Delhi Incubator Summit — Finalist</li>
-    <li><span class="yr">2025</span>Drama — Gold, Inter IISER–NISER Cultural Meet</li>
-    <li><span class="yr">2026</span>Web Design — 3rd Prize</li>
-    <li>Chhayasutra — Short Film</li>
+    <li><span class="yr">2018</span>English Olympiad</li>
+    <li>Entrepreneurship 1st Prize</li>
+    <li>IIT Madras Finalist</li>
+    <li>IIT Delhi Finalist</li>
+    <li><span class="yr">2025</span>Drama Gold</li>
+    <li><span class="yr">2026</span>Web Design 3rd</li>
+    <li>Chhayasutra Film</li>
   </ol>
 
   <div id="cats"></div>
