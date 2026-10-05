@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gallery — Youktik Sajjan</title>
-<meta name="description" content="Photos from daily life and academic pursuits — field notes from the bench and the trail.">
+<meta name="description" content="Photos and field notes from daily life, academic pursuits, and things I've built and experimented with.">
 <link rel="canonical" href="https://xyzouktik.github.io/gallery.html">
 <meta name="theme-color" id="theme-color" content="#0a0a0a">
 <script>
@@ -25,28 +25,29 @@
     --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
     --mono:ui-monospace,"SFMono-Regular","SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
   }
-  :root, :root[data-theme="white"]{ color-scheme:light; --paper:#ffffff; --ink:#111111; --muted:#5c5c5c; --rule:#cfcfcf; --link:#111111; --card:#ffffff; --card-border:#e3e3e3; }
-  :root[data-theme="black"]{ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; } }
+  :root, :root[data-theme="white"]{ color-scheme:light; --paper:#ffffff; --ink:#111111; --muted:#5c5c5c; --rule:#cfcfcf; --link:#111111; --card:#ffffff; --card-border:#e3e3e3; --soft:#f4f4f4; }
+  :root[data-theme="black"]{ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; } }
 
   *{box-sizing:border-box}
   body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); font-size:1.02rem; line-height:1.5; -webkit-font-smoothing:antialiased}
+  body.no-scroll{overflow:hidden}
   .sheet{max-width:52rem; margin:0 auto; padding:2rem 1.4rem 3rem}
   a{color:var(--link); text-decoration:underline; text-underline-offset:2px; text-decoration-color:var(--muted); border:0}
   a:hover{text-decoration-thickness:2px}
-  :focus-visible{outline:2px solid var(--link); outline-offset:2px}
+  :focus-visible{outline:2px solid var(--ink); outline-offset:2px}
 
   .toolbar{display:flex; justify-content:space-between; align-items:center; gap:1rem; font-family:var(--mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:1.2rem}
   .toolbar a{color:var(--muted); text-decoration:none}
-  .toolbar a:hover{color:var(--link)}
+  .toolbar a:hover{color:var(--ink)}
   .theme-picker{display:flex; gap:.4rem; align-items:center}
   .swatch{width:1.15rem; height:1.15rem; padding:0; border:1px solid var(--rule); border-radius:50%; background:transparent; cursor:pointer; display:grid; place-items:center; transition:transform .15s ease, border-color .15s ease}
   .swatch > span{width:.72rem; height:.72rem; border-radius:50%; display:block}
   .swatch[data-theme-choice="white"] > span{background:#ffffff; box-shadow:inset 0 0 0 1px #b9b9b9}
   .swatch[data-theme-choice="black"] > span{background:#111111}
   .swatch:hover{transform:scale(1.14)}
-  .swatch[aria-checked="true"]{border-color:var(--link)}
-  .swatch:focus-visible{outline:2px solid var(--link); outline-offset:2px}
+  .swatch[aria-checked="true"]{border-color:var(--ink)}
+  .swatch:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
 
   /* Cover / outlook */
   .hero{position:relative; border:1px solid var(--card-border); border-radius:10px; overflow:hidden; margin:.2rem 0 1.4rem; background:linear-gradient(135deg,#101010,#2a2a2a)}
@@ -56,8 +57,9 @@
   .hero-text .tag{margin:.25rem 0 0; font-family:var(--mono); font-size:.78rem; letter-spacing:.05em; opacity:.92}
 
   .opener{font-size:1.1rem; max-width:44rem; margin:0 0 1.8rem}
+  .section-note{font-size:.95rem; color:var(--muted); margin:-.3rem 0 1.1rem; max-width:46rem}
 
-  h2{font-family:var(--mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:1.6rem 0 .7rem; padding-bottom:.35rem; border-bottom:1px solid var(--rule)}
+  h2{font-family:var(--mono); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:1.8rem 0 .7rem; padding-bottom:.35rem; border-bottom:1px solid var(--rule)}
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:.85rem}
   .grid figure{margin:0; border:1px solid var(--card-border); border-radius:8px; overflow:hidden; background:var(--card)}
   .grid img{display:block; width:100%; aspect-ratio:4/3; object-fit:cover}
@@ -65,11 +67,93 @@
   .grid .empty{display:grid; place-items:center; aspect-ratio:4/3; font-family:var(--mono); font-size:.7rem; letter-spacing:.05em; color:var(--muted);
     background:repeating-linear-gradient(45deg, transparent 0 10px, var(--card-border) 10px 11px)}
 
+  /* ── Builds & Experiments ── */
+  .builds{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem}
+  .build{display:flex; flex-direction:column; text-align:left; padding:0; border:1px solid var(--card-border); border-radius:10px; overflow:hidden;
+    background:var(--card); color:var(--ink); font:inherit; cursor:pointer; transition:transform .22s ease, border-color .22s ease}
+  .build:hover{transform:translateY(-3px); border-color:var(--ink)}
+  .build:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+  .build-media{position:relative; aspect-ratio:16/10; background:#0d0d0d; overflow:hidden}
+  .build-media img,.build-media video{width:100%; height:100%; object-fit:cover; display:block}
+  .build-body{padding:.95rem 1rem 1.1rem; display:flex; flex-direction:column; gap:.4rem}
+  .kicker{font-family:var(--mono); font-size:.64rem; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); margin:0}
+  .build h3{margin:0; font-size:1.16rem; font-weight:600; line-height:1.25}
+  .build .blog{font-size:.9rem; margin:0; color:var(--ink)}
+  .meta{font-family:var(--mono); font-size:.64rem; letter-spacing:.04em; color:var(--muted); margin:.15rem 0 0}
+  .tags{font-family:var(--mono); font-size:.62rem; letter-spacing:.03em; color:var(--muted); margin:0}
+  .cta{font-family:var(--mono); font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); margin:.35rem 0 0}
+
+  /* placeholder tile for missing media */
+  .ph{display:grid; place-items:center; gap:.3rem; width:100%; min-height:100%; padding:1rem; text-align:center;
+    font-family:var(--mono); font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+    background:repeating-linear-gradient(45deg, transparent 0 12px, var(--card-border) 12px 13px)}
+  .ph small{display:block; font-size:.58rem; letter-spacing:.03em; text-transform:none; opacity:.8}
+
+  /* ── Story overlay ── */
+  .story{position:fixed; inset:0; z-index:50; background:var(--paper); overflow-y:auto; overscroll-behavior:contain;
+    opacity:0; visibility:hidden; transition:opacity .3s ease, visibility .3s ease}
+  .story.open{opacity:1; visibility:visible}
+  .story-inner{max-width:52rem; margin:0 auto; padding:1.6rem 1.4rem 4rem}
+  .story-bar{position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    padding:.7rem 0; background:var(--paper); border-bottom:1px solid var(--rule); margin-bottom:1.2rem}
+  .story-bar .kicker{margin:0}
+  .close{font-family:var(--mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer;
+    background:none; border:1px solid var(--card-border); color:var(--muted); border-radius:6px; padding:.4rem .7rem}
+  .close:hover{color:var(--ink); border-color:var(--ink)}
+  .story h1{margin:.2rem 0 .3rem; font-size:1.9rem; letter-spacing:-.01em}
+  .story .lead{font-size:1.05rem; color:var(--muted); margin:0 0 1rem}
+  .story p.body{font-size:1.02rem; margin:0 0 1rem}
+  .story .cover{width:100%; border:1px solid var(--card-border); border-radius:10px; margin:.4rem 0 1.2rem; display:block; background:#0d0d0d; aspect-ratio:16/9; object-fit:cover}
+  .cover-wrap{position:relative; width:100%; aspect-ratio:16/9; border:1px solid var(--card-border); border-radius:10px; overflow:hidden; background:#0d0d0d; margin:.4rem 0 1.2rem}
+  .cover-wrap img,.cover-wrap video,.cover-wrap .ph{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+
+  /* timeline / process indicator */
+  .timeline{display:flex; flex-wrap:wrap; gap:.4rem; margin:.2rem 0 1.3rem}
+  .step{font-family:var(--mono); font-size:.64rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
+    border:1px solid var(--card-border); border-radius:999px; padding:.26rem .6rem}
+  .step:not(:last-child)::after{content:"→"; margin-left:.5rem; opacity:.5}
+  .step:last-child{border-color:var(--ink); color:var(--ink)}
+
+  .shots{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:.7rem; margin:.4rem 0 1.2rem}
+  .shot{margin:0; position:relative; border:1px solid var(--card-border); border-radius:8px; overflow:hidden; background:#0d0d0d; cursor:zoom-in}
+  .shot img,.shot video{width:100%; aspect-ratio:4/3; object-fit:cover; display:block}
+  .shot figcaption{font-family:var(--mono); font-size:.62rem; color:var(--muted); padding:.4rem .55rem}
+  .shot:hover img,.shot:hover video{filter:brightness(1.08)}
+  .shot .ph{aspect-ratio:4/3}
+  .build-media .ph{min-height:100%}
+
+  /* before / after compare */
+  .compare{position:relative; aspect-ratio:16/9; border:1px solid var(--card-border); border-radius:10px; overflow:hidden; background:#0d0d0d; margin:.4rem 0 1.2rem}
+  .compare img,.compare .ph{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+  .compare .before{clip-path:inset(0 calc(100% - var(--p,50%)) 0 0)}
+  .compare .lab{position:absolute; top:.5rem; font-family:var(--mono); font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; color:#fff; background:rgba(0,0,0,.55); padding:.15rem .45rem; border-radius:4px}
+  .compare .lab.l{left:.5rem} .compare .lab.r{right:.5rem}
+  .compare input[type="range"]{position:absolute; left:.5rem; right:.5rem; bottom:.5rem; width:calc(100% - 1rem); accent-color:#fff}
+
+  /* ── Lightbox ── */
+  .lightbox{position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.93); display:grid; place-items:center;
+    opacity:0; visibility:hidden; transition:opacity .25s ease, visibility .25s ease}
+  .lightbox.open{opacity:1; visibility:visible}
+  .lb-stage{max-width:94vw; max-height:84vh; display:block}
+  .lb-stage img,.lb-stage video{max-width:94vw; max-height:84vh; display:block; margin:0 auto}
+  .lb-cap{font-family:var(--mono); font-size:.68rem; color:#cfcfcf; text-align:center; margin:.6rem 0 0}
+  .lb-btn{position:absolute; font-family:var(--mono); font-size:1rem; color:#fff; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.25);
+    border-radius:8px; width:2.4rem; height:2.4rem; cursor:pointer; display:grid; place-items:center}
+  .lb-btn:hover{background:rgba(255,255,255,.18)}
+  .lb-close{top:1rem; right:1rem}
+  .lb-prev{left:1rem; top:50%; transform:translateY(-50%)}
+  .lb-next{right:1rem; top:50%; transform:translateY(-50%)}
+  .lb-btn:focus-visible{outline:2px solid #fff; outline-offset:2px}
+
   footer{font-family:var(--mono); font-size:.72rem; color:var(--muted); text-align:center; margin-top:2.2rem; padding-top:.9rem; border-top:1px solid var(--rule)}
 
+  @media (prefers-reduced-motion: reduce){
+    .build, .story, .lightbox{transition:none}
+    .build:hover{transform:none}
+  }
   @media print{
-    :root, :root[data-theme]{ color-scheme:light !important; --paper:#fff; --ink:#000; --muted:#555; --rule:#999; --link:#000; --card-border:#ccc; }
-    .toolbar{display:none}
+    :root, :root[data-theme]{ color-scheme:light !important; --paper:#fff; --ink:#000; --muted:#555; --rule:#999; --link:#000; --card-border:#ccc; --soft:#f4f4f4 }
+    .toolbar,.story,.lightbox{display:none}
   }
 </style>
 </head>
@@ -99,9 +183,6 @@
   <section aria-labelledby="g-daily">
     <h2 id="g-daily">Daily life</h2>
     <div class="grid">
-      <!-- To add a photo, copy a line like this and drop the file in /images:
-      <figure><img src="images/your-photo.jpg" alt="Short description of the photo"><figcaption>A caption</figcaption></figure>
-      -->
       <figure class="empty"><span>Photo coming soon</span></figure>
       <figure class="empty"><span>Photo coming soon</span></figure>
       <figure class="empty"><span>Photo coming soon</span></figure>
@@ -117,7 +198,42 @@
     </div>
   </section>
 
+  <section aria-labelledby="g-builds">
+    <h2 id="g-builds">Builds &amp; Experiments</h2>
+    <p class="section-note">Things I've actually put together with my own hands — CAD, solder, prints, prototypes and test flights. Field notes, not case studies.</p>
+    <div class="builds" id="builds"><!-- filled by script --></div>
+  </section>
+
   <footer>© <span id="year">2026</span> Youktik Sajjan · <a href="index.html">Portfolio</a></footer>
+</div>
+
+<!-- Story overlay -->
+<div class="story" id="story" role="dialog" aria-modal="true" aria-labelledby="story-title" aria-hidden="true">
+  <div class="story-inner">
+    <div class="story-bar">
+      <span class="kicker" id="story-kicker"></span>
+      <button class="close" id="story-close" type="button">Close ✕</button>
+    </div>
+    <h1 id="story-title"></h1>
+    <p class="lead" id="story-meta"></p>
+    <div class="timeline" id="story-timeline" aria-label="Process"></div>
+    <div id="story-cover"></div>
+    <div id="story-body"></div>
+    <div class="shots" id="story-shots"></div>
+    <p class="tags" id="story-tags"></p>
+    <p class="meta">Built / Experimented by Youktik Sajjan</p>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Media viewer" aria-hidden="true">
+  <button class="lb-btn lb-prev" id="lb-prev" type="button" aria-label="Previous">‹</button>
+  <div>
+    <div class="lb-stage" id="lb-stage"></div>
+    <p class="lb-cap" id="lb-cap"></p>
+  </div>
+  <button class="lb-btn lb-next" id="lb-next" type="button" aria-label="Next">›</button>
+  <button class="lb-btn lb-close" id="lb-close" type="button" aria-label="Close viewer">✕</button>
 </div>
 
 <script>
@@ -151,6 +267,272 @@
   window.addEventListener('storage', function(e){ if (e.key === 'site-theme' && e.newValue){ root.setAttribute('data-theme', e.newValue); paint(); } });
   paint();
   document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+
+<script>
+/* =====================================================================
+   BUILD & EXPERIMENTS — data-driven field notes.
+   Drop real media at the paths below and it appears automatically; until
+   then each tile shows a labelled placeholder (CAD / Prototype / …).
+
+   images/builds/hardware-cover.jpg  hardware-cad.jpg  hardware-prototype.jpg
+   images/builds/hardware-fabrication.jpg  hardware-lab.jpg
+   videos/builds/hardware-fabrication.mp4
+
+   images/builds/drone-1.jpg  drone-2.jpg  drone-solder.jpg  drone-fc.jpg
+   videos/builds/drone-flight.mp4
+
+   images/builds/recon-before.jpg  recon-after.jpg  recon-result.jpg  recon-splat.jpg
+   videos/builds/recon-demo.mp4
+   ===================================================================== */
+(function () {
+  'use strict';
+
+  var BUILDS = [
+    {
+      id: 'hardware',
+      kicker: '01 · Custom Laboratory Hardware',
+      title: 'From CAD to the Lab',
+      blog: "I like building scientific tools rather than only using them. I have designed, CAD-modelled, 3D-printed, and fabricated custom laboratory hardware for real experimental requirements, including photoreactors and other experimental equipment. The interesting part is taking a requirement from a researcher, translating it into a mechanical design, iterating through prototypes, and finally putting the physical instrument to work in a real laboratory.",
+      tags: '#Hardware #CAD #3DPrinting #Research',
+      steps: ['Requirement', 'CAD', 'Prototype', 'Fabrication', 'In the Lab'],
+      cover: { type: 'image', src: 'images/builds/hardware-cover.jpg', caption: 'Photoreactor — in the lab' },
+      media: [
+        { type: 'image', src: 'images/builds/hardware-cad.jpg', caption: 'CAD' },
+        { type: 'image', src: 'images/builds/hardware-prototype.jpg', caption: 'Prototype' },
+        { type: 'video', src: 'videos/builds/hardware-fabrication.mp4', caption: 'Fabrication — short process clip' },
+        { type: 'image', src: 'images/builds/hardware-fabrication.jpg', caption: 'Fabrication' },
+        { type: 'image', src: 'images/builds/hardware-lab.jpg', caption: 'In the Lab' }
+      ]
+    },
+    {
+      id: 'drones',
+      kicker: '02 · Physical Drones',
+      title: 'Building Machines That Fly',
+      blog: "I got into drones by building them from individual components rather than buying finished systems. I have worked through the entire process—from selecting motors, ESCs, flight controllers and batteries, to hand-soldering electronics, configuring flight controllers, tuning the system, and testing complete aircraft. Each build became a practical lesson in electronics, embedded systems, mechanical design, and debugging.",
+      tags: '#Drones #Electronics #Embedded #Robotics',
+      steps: ['Components', 'Solder', 'Configure', 'Tune', 'Flight test'],
+      cover: { type: 'image', src: 'images/builds/drone-1.jpg', caption: 'Quadcopter — bench to air' },
+      media: [
+        { type: 'image', src: 'images/builds/drone-1.jpg', caption: 'Drone — assembled' },
+        { type: 'image', src: 'images/builds/drone-2.jpg', caption: 'Frame & motors' },
+        { type: 'image', src: 'images/builds/drone-solder.jpg', caption: 'Hand-soldering the power train' },
+        { type: 'image', src: 'images/builds/drone-fc.jpg', caption: 'Flight controller & wiring' },
+        { type: 'video', src: 'videos/builds/drone-flight.mp4', caption: 'Flight test — hover' }
+      ]
+    },
+    {
+      id: 'recon',
+      kicker: '03 · 3D Reconstruction',
+      title: 'Turning Reality Into 3D',
+      blog: "I’ve also been experimenting with emerging computer-vision techniques for reconstructing the physical world. One area I’m exploring is Gaussian Splatting—using ordinary visual data such as images or video to reconstruct detailed 3D representations of real environments and objects. I’m interested in where this can move beyond visualisation into usable 3D models for engineering, research, mapping, and robotics.",
+      tags: '#ComputerVision #GaussianSplatting #Research',
+      steps: ['Capture', 'Reconstruct', 'Gaussian Splatting', 'Model'],
+      cover: { type: 'image', src: 'images/builds/recon-splat.jpg', caption: 'Gaussian Splatting render' },
+      media: [
+        { type: 'video', src: 'videos/builds/recon-demo.mp4', caption: 'Demonstration — orbit of a reconstruction' },
+        { type: 'compare', before: 'images/builds/recon-before.jpg', after: 'images/builds/recon-after.jpg', caption: 'Before / after — input vs reconstruction' },
+        { type: 'image', src: 'images/builds/recon-result.jpg', caption: 'Reconstruction result' },
+        { type: 'image', src: 'images/builds/recon-splat.jpg', caption: 'Gaussian Splatting render' }
+      ]
+    }
+  ];
+
+  function el(tag, cls) { var n = document.createElement(tag); if (cls) n.className = cls; return n; }
+
+  /* Replace a tile's media with a labelled placeholder when the file is missing. */
+  function toPlaceholder(host, caption, hint) {
+    host.innerHTML = '';
+    var ph = el('div', 'ph');
+    var t = el('span'); t.textContent = caption || 'Media';
+    ph.appendChild(t);
+    if (hint) { var s = el('small'); s.textContent = hint; ph.appendChild(s); }
+    host.appendChild(ph);
+  }
+
+  function mediaLoaded(node) {
+    return (node.tagName === 'IMG') ? (node.naturalWidth > 0) : (node.readyState > 0 && node.videoWidth > 0);
+  }
+
+  function buildMediaNode(item, host) {
+    if (item.type === 'video') {
+      var v = el('video');
+      v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata';
+      v.setAttribute('muted', '');
+      var s = document.createElement('source'); s.src = item.src; s.type = 'video/mp4';
+      v.appendChild(s);
+      v.addEventListener('error', function () { toPlaceholder(host, item.caption, item.src); }, true);
+      // autoplay muted only, and play/pause on hover
+      v.addEventListener('mouseenter', function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); });
+      v.addEventListener('mouseleave', function () { v.pause(); });
+      return v;
+    }
+    var img = el('img');
+    img.alt = item.caption || '';
+    img.loading = 'lazy';
+    img.addEventListener('error', function () { toPlaceholder(host, item.caption, item.src); });
+    img.src = item.src;
+    return img;
+  }
+
+  /* ── Card ─────────────────────────────────────────────────────────── */
+  function makeCard(b) {
+    var card = el('article', 'build');
+    card.setAttribute('data-build', b.id);
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', 'Read the story: ' + b.title);
+
+    var m = el('div', 'build-media');
+    m.appendChild(buildMediaNode(b.cover, m));
+    card.appendChild(m);
+
+    var body = el('div', 'build-body');
+    var k = el('p', 'kicker'); k.textContent = b.kicker;
+    var h = el('h3'); h.textContent = b.title;
+    var p = el('p', 'blog'); p.textContent = b.blog;
+    var meta = el('p', 'meta'); meta.textContent = 'Built / Experimented by Youktik Sajjan';
+    var tags = el('p', 'tags'); tags.textContent = b.tags;
+    var cta = el('p', 'cta'); cta.textContent = 'Read the story →';
+    body.appendChild(k); body.appendChild(h); body.appendChild(p);
+    body.appendChild(meta); body.appendChild(tags); body.appendChild(cta);
+    card.appendChild(body);
+
+    card.addEventListener('click', function () { openStory(b); });
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openStory(b); }
+    });
+    return card;
+  }
+
+  /* ── Story ────────────────────────────────────────────────────────── */
+  var story = document.getElementById('story');
+  var lastFocus = null, activeBuild = null, activeIndex = 0;
+
+  function renderStory(b) {
+    activeBuild = b;
+    document.getElementById('story-kicker').textContent = b.kicker;
+    document.getElementById('story-title').textContent = b.title;
+    document.getElementById('story-meta').textContent = 'Built / Experimented by Youktik Sajjan';
+    var tl = document.getElementById('story-timeline'); tl.innerHTML = '';
+    b.steps.forEach(function (s, i) {
+      var sp = el('span', 'step'); sp.textContent = (i + 1) + '. ' + s; tl.appendChild(sp);
+    });
+    var cover = document.getElementById('story-cover'); cover.innerHTML = '';
+    var coverWrap = el('div', 'cover-wrap');
+    coverWrap.appendChild(buildMediaNode(b.cover, coverWrap));
+    cover.appendChild(coverWrap);
+
+    var bodyEl = document.getElementById('story-body'); bodyEl.innerHTML = '';
+    var para = el('p', 'body'); para.textContent = b.blog; bodyEl.appendChild(para);
+
+    var shots = document.getElementById('story-shots'); shots.innerHTML = '';
+    b.media.forEach(function (item, i) {
+      if (item.type === 'compare') { shots.appendChild(makeCompare(item)); return; }
+      var fig = el('figure', 'shot');
+      var holder = el('div');
+      holder.style.position = 'relative';
+      holder.appendChild(buildMediaNode(item, holder));
+      fig.appendChild(holder);
+      var cap = el('figcaption'); cap.textContent = item.caption || ''; fig.appendChild(cap);
+      fig.tabIndex = 0;
+      fig.setAttribute('role', 'button');
+      fig.setAttribute('aria-label', 'Open ' + (item.caption || 'media'));
+      fig.addEventListener('click', function () { openLightbox(i); });
+      fig.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(i); } });
+      shots.appendChild(fig);
+    });
+
+    document.getElementById('story-tags').textContent = b.tags;
+  }
+
+  function makeCompare(item) {
+    var wrap = el('div', 'compare');
+    wrap.style.gridColumn = '1 / -1';
+    var after = el('img'); after.alt = 'After'; after.src = item.after;
+    var before = el('img'); before.className = 'before'; before.alt = 'Before'; before.src = item.before;
+    var l1 = el('span', 'lab l'); l1.textContent = 'Input';
+    var l2 = el('span', 'lab r'); l2.textContent = 'Reconstruction';
+    var range = document.createElement('input');
+    range.type = 'range'; range.min = 0; range.max = 100; range.value = 50;
+    range.setAttribute('aria-label', 'Before and after comparison');
+    function upd(){ wrap.style.setProperty('--p', range.value + '%'); }
+    range.addEventListener('input', upd); upd();
+    var missing = false;
+    after.addEventListener('error', function(){ if(!missing){ missing = true; toPlaceholder(wrap, item.caption, 'before / after'); } });
+    before.addEventListener('error', function(){ if(!missing){ missing = true; toPlaceholder(wrap, item.caption, 'before / after'); } });
+    var cap = el('figcaption'); cap.style.cssText = 'position:absolute;left:0;right:0;bottom:0;font-family:var(--mono);font-size:.62rem;color:#fff;background:rgba(0,0,0,.55);padding:.3rem .5rem';
+    cap.textContent = item.caption || '';
+    wrap.appendChild(after); wrap.appendChild(before); wrap.appendChild(l1); wrap.appendChild(l2); wrap.appendChild(range); wrap.appendChild(cap);
+    return wrap;
+  }
+
+  function openStory(b) {
+    lastFocus = document.activeElement;
+    renderStory(b);
+    story.classList.add('open');
+    story.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('no-scroll');
+    story.scrollTop = 0;
+    document.getElementById('story-close').focus();
+  }
+  function closeStory() {
+    story.classList.remove('open');
+    story.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('no-scroll');
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  /* ── Lightbox ─────────────────────────────────────────────────────── */
+  var lb = document.getElementById('lightbox');
+  function openLightbox(i) {
+    activeIndex = i;
+    renderLightbox();
+    lb.classList.add('open');
+    lb.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('no-scroll');
+    document.getElementById('lb-close').focus();
+  }
+  function closeLightbox() {
+    lb.classList.remove('open');
+    lb.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('no-scroll');
+  }
+  function renderLightbox() {
+    var items = activeBuild.media.filter(function (m) { return m.type !== 'compare'; });
+    if (!items.length) { closeLightbox(); return; }
+    activeIndex = Math.max(0, Math.min(items.length - 1, activeIndex));
+    var item = items[activeIndex];
+    var stage = document.getElementById('lb-stage'); stage.innerHTML = '';
+    var holder = el('div');
+    var node = buildMediaNode(item, holder);
+    if (item.type === 'video') { var p = node.play(); if (p && p.catch) p.catch(function () {}); }
+    stage.appendChild(holder);
+    document.getElementById('lb-cap').textContent = (item.caption || '') + '  (' + (activeIndex + 1) + ' / ' + items.length + ')';
+  }
+  function step(d) {
+    var items = activeBuild.media.filter(function (m) { return m.type !== 'compare'; });
+    activeIndex = (activeIndex + d + items.length) % items.length;
+    renderLightbox();
+  }
+
+  /* ── wire up ──────────────────────────────────────────────────────── */
+  var host = document.getElementById('builds');
+  BUILDS.forEach(function (b) { host.appendChild(makeCard(b)); });
+
+  document.getElementById('story-close').addEventListener('click', closeStory);
+  document.getElementById('lb-close').addEventListener('click', closeLightbox);
+  document.getElementById('lb-prev').addEventListener('click', function () { step(-1); });
+  document.getElementById('lb-next').addEventListener('click', function () { step(1); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) closeLightbox(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { if (lb.classList.contains('open')) closeLightbox(); else if (story.classList.contains('open')) closeStory(); }
+    if (lb.classList.contains('open')) {
+      if (e.key === 'ArrowLeft') step(-1);
+      if (e.key === 'ArrowRight') step(1);
+    }
+  });
 })();
 </script>
 </body>
