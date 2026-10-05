@@ -70,8 +70,8 @@
   .card:hover{transform:translateY(-3px); border-color:var(--ink); box-shadow:0 6px 18px rgba(0,0,0,.10)}
   .card:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
   .card.featured{grid-column:span 2}
-  .viz{position:relative; aspect-ratio:16/10; background:var(--soft); display:grid; place-items:center; overflow:hidden}
-  .viz img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease}
+  .viz{position:relative; aspect-ratio:4/3; background:var(--soft); display:grid; place-items:center; overflow:hidden}
+  .viz img{width:100%; height:100%; object-fit:contain; display:block; background:var(--soft); transition:transform .5s ease}
   .card:hover .viz img{transform:scale(1.04)}
   .viz .numeral{font-family:var(--mono); font-size:2.6rem; letter-spacing:.1em; color:var(--muted); opacity:.5}
   .viz .badge{position:absolute; top:.55rem; left:.55rem; font-family:var(--mono); font-size:.6rem; letter-spacing:.09em; text-transform:uppercase;
