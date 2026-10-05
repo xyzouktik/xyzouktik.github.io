@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extracurriculars &amp; Achievements — Youktik Sajjan</title>
+<meta name="description" content="Things I've competed in, performed in, created, and experienced beyond the classroom.">
+<link rel="canonical" href="https://xyzouktik.github.io/extracurriculars.html">
+<meta name="theme-color" id="theme-color" content="#0a0a0a">
+<script>
+/* Shares the BLACK & WHITE site theme with index.html. */
+(function(){
+  var D=document.documentElement;
+  try{
+    var t=localStorage.getItem('site-theme')||localStorage.getItem('cv-theme');
+    t = (t==='black'||t==='dark') ? 'black' : (t==='white'||t==='light'||t==='green'||t==='blue') ? 'white' : 'black';
+    D.setAttribute('data-theme',t);
+    localStorage.setItem('site-theme',t);
+  }catch(e){ D.setAttribute('data-theme','black'); }
+})();
+</script>
+<style>
+  :root{
+    color-scheme: light;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,"SFMono-Regular","SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  :root, :root[data-theme="white"]{ color-scheme:light; --paper:#ffffff; --ink:#111111; --muted:#5c5c5c; --rule:#cfcfcf; --link:#111111; --card:#ffffff; --card-border:#e3e3e3; --soft:#f4f4f4; }
+  :root[data-theme="black"]{ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme]){ color-scheme:dark; --paper:#0a0a0a; --ink:#f2f2f2; --muted:#9a9a9a; --rule:#4a4a4a; --link:#f2f2f2; --card:#141414; --card-border:#262626; --soft:#161616; } }
+
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); font-size:1.02rem; line-height:1.5; -webkit-font-smoothing:antialiased}
+  body.no-scroll{overflow:hidden}
+  .sheet{max-width:56rem; margin:0 auto; padding:2rem 1.4rem 3rem}
+  a{color:var(--link); text-decoration:underline; text-underline-offset:2px; text-decoration-color:var(--muted)}
+  a:hover{text-decoration-thickness:2px}
+  :focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+  .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+  .toolbar{display:flex; justify-content:space-between; align-items:center; gap:1rem; font-family:var(--mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:1.4rem}
+  .toolbar a{color:var(--muted); text-decoration:none}
+  .toolbar a:hover{color:var(--ink)}
+  .theme-picker{display:flex; gap:.4rem; align-items:center}
+  .swatch{width:1.15rem; height:1.15rem; padding:0; border:1px solid var(--rule); border-radius:50%; background:transparent; cursor:pointer; display:grid; place-items:center; transition:transform .15s ease, border-color .15s ease}
+  .swatch > span{width:.72rem; height:.72rem; border-radius:50%; display:block}
+  .swatch[data-theme-choice="white"] > span{background:#ffffff; box-shadow:inset 0 0 0 1px #b9b9b9}
+  .swatch[data-theme-choice="black"] > span{background:#111111}
+  .swatch:hover{transform:scale(1.14)}
+  .swatch[aria-checked="true"]{border-color:var(--ink)}
+  .swatch:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+
+  header.page{margin:.4rem 0 1.2rem}
+  header.page h1{margin:0; font-size:2.2rem; font-weight:600; letter-spacing:-.01em}
+  header.page p.sub{margin:.4rem 0 0; font-size:1.08rem; color:var(--muted); max-width:40rem}
+
+  /* timeline */
+  .timeline{margin:1.4rem 0 2rem; padding:0; list-style:none; border-left:1px solid var(--rule)}
+  .timeline li{position:relative; padding:0 0 .9rem 1.1rem; font-size:.95rem}
+  .timeline li::before{content:""; position:absolute; left:-3.5px; top:.45rem; width:6px; height:6px; border-radius:50%; background:var(--ink)}
+  .timeline .yr{font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:block}
+  .timeline .mid{font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+
+  h2.cat{font-family:var(--mono); font-size:.76rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:2rem 0 .9rem; padding-bottom:.35rem; border-bottom:1px solid var(--rule)}
+  h2.cat .n{color:var(--ink)}
+
+  .cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:1rem}
+  .card{display:flex; flex-direction:column; text-align:left; padding:0; border:1px solid var(--card-border); border-radius:10px; overflow:hidden;
+    background:var(--card); color:var(--ink); font:inherit; cursor:pointer; transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease}
+  .card:hover{transform:translateY(-3px); border-color:var(--ink); box-shadow:0 6px 18px rgba(0,0,0,.10)}
+  .card:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+  .card.featured{grid-column:span 2}
+  .viz{position:relative; aspect-ratio:16/10; background:var(--soft); display:grid; place-items:center; overflow:hidden}
+  .viz img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease}
+  .card:hover .viz img{transform:scale(1.04)}
+  .viz .numeral{font-family:var(--mono); font-size:2.6rem; letter-spacing:.1em; color:var(--muted); opacity:.5}
+  .viz .badge{position:absolute; top:.55rem; left:.55rem; font-family:var(--mono); font-size:.6rem; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--ink); background:var(--card); border:1px solid var(--card-border); border-radius:999px; padding:.18rem .5rem}
+  .body{padding:.9rem 1rem 1.05rem; display:flex; flex-direction:column; gap:.35rem}
+  .kicker{font-family:var(--mono); font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0}
+  .card h3{margin:0; font-size:1.1rem; font-weight:600; line-height:1.28}
+  .card .desc{margin:0; font-size:.9rem; color:var(--ink)}
+  .meta{font-family:var(--mono); font-size:.63rem; letter-spacing:.03em; color:var(--muted); margin:.15rem 0 0}
+  .tags{font-family:var(--mono); font-size:.6rem; color:var(--muted); margin:0}
+  .more{font-family:var(--mono); font-size:.63rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); margin:.3rem 0 0}
+  /* metadata reveal on hover */
+  .card .reveal{max-height:0; overflow:hidden; opacity:0; transition:max-height .3s ease, opacity .3s ease}
+  .card:hover .reveal, .card:focus-visible .reveal{max-height:4rem; opacity:1}
+
+  /* community sub-list */
+  .campus{margin:.2rem 0 0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:.5rem}
+  .campus li{border:1px solid var(--card-border); border-radius:8px; padding:.6rem .7rem; font-size:.9rem; background:var(--card)}
+  .campus li span{display:block; font-family:var(--mono); font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.15rem}
+
+  /* modal */
+  .modal{position:fixed; inset:0; z-index:60; background:var(--paper);
+    opacity:0; visibility:hidden; overflow-y:auto; overscroll-behavior:contain; transition:opacity .3s ease, visibility .3s ease}
+  .modal.open{opacity:1; visibility:visible}
+  .modal-inner{max-width:46rem; margin:0 auto; padding:1.6rem 1.4rem 4rem}
+  .modal-bar{position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.7rem 0; background:var(--paper); border-bottom:1px solid var(--rule); margin-bottom:1.1rem}
+  .close{font-family:var(--mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; background:none; border:1px solid var(--card-border); color:var(--muted); border-radius:6px; padding:.4rem .7rem}
+  .close:hover{color:var(--ink); border-color:var(--ink)}
+  .modal h2{margin:.1rem 0 .3rem; font-size:1.7rem; letter-spacing:-.01em}
+  .modal .m-cat{font-family:var(--mono); font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0}
+  .modal .m-desc{font-size:1.02rem; margin:.7rem 0 1rem}
+  .modal .m-visual{width:100%; border:1px solid var(--card-border); border-radius:10px; margin:.2rem 0 1rem; display:block; background:var(--soft)}
+  .modal dl{display:grid; grid-template-columns:9rem 1fr; gap:.35rem 1rem; margin:.4rem 0 1rem; font-size:.92rem}
+  .modal dt{font-family:var(--mono); font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding-top:.15rem}
+  .modal dd{margin:0}
+  .btn{display:inline-block; font-family:var(--mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; text-decoration:none;
+    color:var(--paper); background:var(--ink); border:1px solid var(--ink); border-radius:6px; padding:.55rem .85rem; margin:.5rem .5rem 0 0}
+  .btn:hover{opacity:.85}
+  .btn.ghost{color:var(--ink); background:transparent}
+  @media (max-width:560px){ .modal dl{grid-template-columns:1fr; gap:.1rem} .modal dd{margin-bottom:.6rem} }
+
+  footer{font-family:var(--mono); font-size:.72rem; color:var(--muted); text-align:center; margin-top:2.4rem; padding-top:.9rem; border-top:1px solid var(--rule)}
+
+  @media (max-width:640px){ .card.featured{grid-column:span 1} }
+  @media (prefers-reduced-motion: reduce){
+    .card,.viz img,.modal{transition:none}
+    .card:hover{transform:none}
+    .card:hover .viz img{transform:none}
+  }
+  @media print{
+    :root, :root[data-theme]{ color-scheme:light !important; --paper:#fff; --ink:#000; --muted:#555; --rule:#999; --link:#000; --card-border:#ccc; --soft:#f4f4f4 }
+    .toolbar,.modal{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="toolbar">
+    <a href="gallery.html">&larr; Gallery</a>
+    <div class="theme-picker" role="radiogroup" aria-label="Theme">
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="white" aria-label="White — black on white" title="White"><span></span></button>
+      <button class="swatch" type="button" role="radio" aria-checked="false" tabindex="-1" data-theme-choice="black" aria-label="Black — white on black" title="Black"><span></span></button>
+    </div>
+  </div>
+
+  <header class="page">
+    <h1>Extracurriculars &amp; Achievements</h1>
+    <p class="sub">Things I've competed in, performed in, created, and experienced beyond the classroom.</p>
+  </header>
+
+  <!-- Timeline: only known years are labelled; undated things are listed without a year. -->
+  <ol class="timeline" aria-label="Milestones">
+    <li><span class="yr">2018</span>English Olympiad — Silver</li>
+    <li><span class="mid">Competing &amp; creating</span>Inter-IISER Entrepreneurship — 1st Prize</li>
+    <li>IIT Madras I-Summit — Finalist &nbsp;·&nbsp; IIT Delhi Incubator Summit — Finalist</li>
+    <li><span class="yr">2026</span>Drama — Gold &nbsp;·&nbsp; Web Design — 3rd Prize</li>
+    <li>Chhayasutra — Short Film</li>
+  </ol>
+
+  <div id="cats"></div>
+
+  <footer>© <span id="year">2026</span> Youktik Sajjan · <a href="gallery.html">Gallery</a></footer>
+</div>
+
+<!-- Detail modal -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title" aria-hidden="true">
+  <div class="modal-inner">
+    <div class="modal-bar">
+      <span class="kicker" id="m-kicker"></span>
+      <button class="close" id="m-close" type="button">Close ✕</button>
+    </div>
+    <p class="m-cat" id="m-cat"></p>
+    <h2 id="m-title"></h2>
+    <div id="m-visual"></div>
+    <p class="m-desc" id="m-desc"></p>
+    <dl id="m-meta"></dl>
+    <p class="tags" id="m-tags"></p>
+    <div id="m-actions"></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   EXTRACURRICULARS & ACHIEVEMENTS
+   Only facts given in the brief. No invented names, years, ranks or URLs.
+   Cards are data-driven; clicking one opens the detail modal.
+   ===================================================================== */
+(function () {
+  'use strict';
+
+  var NEW_TAB = ' (opens in a new tab)';
+
+  var SECTIONS = [
+    { n: '01', name: 'Performing Arts' },
+    { n: '02', name: 'Entrepreneurship &amp; Competitions' },
+    { n: '03', name: 'Film &amp; Creative Arts' },
+    { n: '04', name: 'Sports' },
+    { n: '05', name: 'Olympiads' },
+    { n: '06', name: 'Nature &amp; Community' }
+  ];
+
+  var CARDS = [
+    /* 01 — Performing Arts */
+    { sec: '01', featured: true, type: 'achievement',
+      title: 'Drama — Gold at Inter-IISER–NISER Cultural Meet',
+      cat: 'Cultural / Theatre / Performing Arts',
+      desc: "I was part of the IISER Kolkata drama team at the Inter-IISER–NISER Cultural Meet. We built the piece together over weeks of rehearsals — blocking, stagecraft, timing — and performed it at the national inter-institute meet. The team took Gold in Drama. What I remember most is the collective part: everybody covering for everybody else on stage.",
+      year: '2026', achievement: 'Gold Medal — Drama', org: 'IISER Kolkata',
+      tags: '#Drama #Theatre #PerformingArts #IISER #CulturalActivities #Teamwork',
+      link: { href: 'https://www.instagram.com/p/DTzr8etEkF4/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==', label: 'View Achievement →', kind: 'Instagram' } },
+
+    /* 02 — Entrepreneurship & Competitions */
+    { sec: '02', type: 'achievement',
+      title: 'Inter-IISER Entrepreneurship — 1st Prize',
+      cat: 'Entrepreneurship / Competition',
+      desc: "We took an early-stage startup idea into an Inter-IISER entrepreneurship and pitching competition — shaping the concept as a team, building the pitch, and defending it in front of judges against teams from other IISERs. We won First Prize.",
+      year: '', achievement: '1st Prize', org: 'Inter-IISER competition',
+      tags: '#Entrepreneurship #Pitching #Startup #Competition #Leadership' },
+
+    { sec: '02', type: 'achievement',
+      title: 'IIT Madras I-Summit — Finalist',
+      cat: 'Entrepreneurship / Startup',
+      desc: "We reached the finalist stage at IIT Madras I-Summit with iFiNN. It was the first time I had to compress an early-stage venture into a short, high-pressure pitch for a national audience.",
+      year: '', achievement: 'Finalist', org: 'IIT Madras I-Summit',
+      tags: '#Entrepreneurship #IITMadras #ISummit #Startup #Pitching',
+      link: { href: 'https://www.linkedin.com/posts/youktik-sajjan_ifinn-foundersjourney-iitdelhi-activity-7428128002766553088-Ukgy', label: 'View Journey →', kind: 'LinkedIn' } },
+
+    { sec: '02', type: 'achievement',
+      title: 'IIT Delhi Incubator Summit — Finalist',
+      cat: 'Entrepreneurship / Startup',
+      desc: "Separately from IIT Madras, we also reached the finalist stage at the IIT Delhi Incubator Summit with iFiNN — a different room, different judges, and a second chance to sharpen how we tell the story.",
+      year: '', achievement: 'Finalist', org: 'IIT Delhi Incubator Summit',
+      tags: '#Entrepreneurship #IITDelhi #Startup #Pitching #Innovation',
+      link: { href: 'https://www.linkedin.com/posts/youktik-sajjan_ifinn-foundersjourney-iitdelhi-activity-7428128002766553088-Ukgy', label: 'View Journey →', kind: 'LinkedIn' } },
+
+    { sec: '02', type: 'achievement',
+      title: 'Web Design — 3rd Prize',
+      cat: 'Design / Web / Competition',
+      desc: "I won 3rd Prize in the Inter-Batch Website Development / Web Design competition at IISER Kolkata, run by the Slashdot Coding Club. It was a design- and front-end-focused contest — mobile-first layout, UI/UX, maintainability and performance.",
+      year: '2026', achievement: '3rd Prize', org: 'Slashdot Coding Club · IISER Kolkata',
+      tags: '#WebDesign #Design #Competition #IISERKolkata #Slashdot',
+      link: { href: 'https://slashdot-iiserk.github.io/events/web-design-2026/', label: 'View Competition →', kind: 'Slashdot' } },
+
+    /* 03 — Film & Creative Arts */
+    { sec: '03', type: 'creative',
+      title: 'Chhayasutra — Short Film',
+      cat: 'Film / Cinematography / Creative Arts',
+      desc: "A short film I created, exploring storytelling through film — visual composition, cinematography and creative direction. This one is about what I put on screen rather than something I competed in.",
+      year: '', achievement: 'Short film', org: '',
+      tags: '#ShortFilm #Film #Cinematography #CreativeArts #Storytelling',
+      img: 'https://img.youtube.com/vi/_q8SxFPoHyE/hqdefault.jpg',
+      imgAlt: 'Thumbnail of the short film Chhayasutra',
+      link: { href: 'https://youtu.be/_q8SxFPoHyE?si=ESKEQuypDdzCzlPI', label: 'Watch Chhayasutra →', kind: 'YouTube' } },
+
+    /* 04 — Sports */
+    { sec: '04', type: 'sport',
+      title: 'Powerlifting',
+      cat: 'Sports / Strength',
+      desc: "Powerlifting is the part of my week that keeps everything else honest. It is competitive sport, but most of it is invisible: consistency, progressive training, and turning up on the days you don't feel like it. Discipline I've carried straight into everything else.",
+      year: '', achievement: 'Participation', org: '',
+      tags: '#Powerlifting #Sports #Strength #Discipline' },
+
+    /* 05 — Olympiads */
+    { sec: '05', type: 'achievement',
+      title: 'English Olympiad — Silver',
+      cat: 'Olympiad / Competition',
+      desc: "I received a Silver medal in the English Olympiad conducted by the Science Olympiad Foundation (SOF).",
+      year: '2018', achievement: 'Silver Medal', org: 'Science Olympiad Foundation (SOF)',
+      tags: '#EnglishOlympiad #SOF #Competition #Language' },
+
+    /* 06 — Nature & Community */
+    { sec: '06', type: 'creative',
+      title: 'Wildlife & Nature Photography',
+      cat: 'Nature / Wildlife / Photography',
+      desc: "I spend a lot of time watching animals and taking photographs of them. One campus experience stands out: a nearly five-foot snake was found on campus, and I handled and photographed it safely while coordinating with the nature club and staff. Word got around, and afterwards security would sometimes call me when a snake turned up. Not an award — just something that happened, and I was glad to be useful.",
+      year: '', achievement: '', org: '',
+      tags: '#Wildlife #NaturePhotography #Biodiversity #Nature #Photography' }
+  ];
+
+  var CAMPUS = [
+    { k: 'Cultural', v: 'IISER Kolkata cultural activities and Drama / theatre' },
+    { k: 'Coding', v: 'Slashdot Coding Club involvement' },
+    { k: 'Startups', v: 'Entrepreneurship activities and inter-institute competitions' },
+    { k: 'Nature', v: 'Nature and wildlife activities on and around campus' },
+    { k: 'Inter-institute', v: 'Inter-IISER competitions and meets' }
+  ];
+
+  function el(t, c) { var n = document.createElement(t); if (c) n.className = c; return n; }
+  function ext(href, label, kind) {
+    var a = el('a', 'btn');
+    a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.textContent = label.replace(' →', '');
+    var arrow = el('span'); arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = ' ↗';
+    a.appendChild(arrow);
+    var sr = el('span', 'sr'); sr.textContent = (kind ? kind + ' —' : '') + NEW_TAB; a.appendChild(sr);
+    return a;
+  }
+
+  function makeCard(c, idx) {
+    var card = el('article', 'card' + (c.featured ? ' featured' : ''));
+    card.tabIndex = 0; card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', 'Open: ' + c.title);
+
+    var viz = el('div', 'viz');
+    if (c.img) {
+      var im = el('img'); im.src = c.img; im.alt = c.imgAlt || c.title; im.loading = 'lazy';
+      im.addEventListener('error', function () { viz.innerHTML = ''; var n = el('span', 'numeral'); n.textContent = c.sec; viz.appendChild(n); });
+      viz.appendChild(im);
+    } else {
+      var n = el('span', 'numeral'); n.textContent = c.sec; viz.appendChild(n);
+    }
+    if (c.achievement) { var b = el('span', 'badge'); b.textContent = c.achievement; viz.appendChild(b); }
+    card.appendChild(viz);
+
+    var body = el('div', 'body');
+    body.appendChild(el2('p', 'kicker', c.cat));
+    body.appendChild(el2('h3', '', c.title));
+    var d = el('p', 'desc'); d.textContent = c.desc.length > 150 ? c.desc.slice(0, 147).replace(/\s+\S*$/, '') + '…' : c.desc; body.appendChild(d);
+    var rev = el('div', 'reveal');
+    var metaBits = [];
+    if (c.year) metaBits.push(c.year);
+    if (c.org) metaBits.push(c.org);
+    if (metaBits.length) rev.appendChild(el2('p', 'meta', metaBits.join(' · ')));
+    rev.appendChild(el2('p', 'tags', c.tags));
+    body.appendChild(rev);
+    body.appendChild(el2('p', 'more', 'Open →'));
+    card.appendChild(body);
+
+    card.addEventListener('click', function () { openModal(c); });
+    card.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(c); } });
+    return card;
+  }
+  function el2(t, c, text) { var n = el(t, c); n.textContent = text; return n; }
+
+  /* render sections */
+  var host = document.getElementById('cats');
+  SECTIONS.forEach(function (s) {
+    var items = CARDS.filter(function (c) { return c.sec === s.n; });
+    var h = el('h2', 'cat');
+    var num = el('span', 'n'); num.textContent = s.n + ' / ';
+    h.appendChild(num);
+    var nm = el('span'); nm.innerHTML = s.name; h.appendChild(nm);
+    host.appendChild(h);
+
+    if (items.length) {
+      var grid = el('div', 'cards');
+      items.forEach(function (c, i) { grid.appendChild(makeCard(c, i)); });
+      host.appendChild(grid);
+    }
+    if (s.n === '06') {
+      var sub = el('h3'); sub.style.cssText = 'font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:1.1rem 0 .6rem';
+      sub.textContent = 'Campus & Community';
+      host.appendChild(sub);
+      var ul = el('ul', 'campus');
+      CAMPUS.forEach(function (row) {
+        var li = el('li');
+        var k = el('span'); k.textContent = row.k;
+        li.appendChild(k); li.appendChild(document.createTextNode(row.v));
+        ul.appendChild(li);
+      });
+      host.appendChild(ul);
+    }
+  });
+
+  /* modal */
+  var modal = document.getElementById('modal');
+  var lastFocus = null;
+  function openModal(c) {
+    lastFocus = document.activeElement;
+    document.getElementById('m-kicker').textContent = 'Extracurriculars & Achievements';
+    document.getElementById('m-cat').textContent = c.cat;
+    document.getElementById('m-title').textContent = c.title;
+    var viz = document.getElementById('m-visual'); viz.innerHTML = '';
+    if (c.img) { var im = el('img', 'm-visual'); im.src = c.img; im.alt = c.imgAlt || c.title;
+      im.addEventListener('error', function () { viz.innerHTML = ''; }); viz.appendChild(im); }
+    document.getElementById('m-desc').textContent = c.desc;
+    var dl = document.getElementById('m-meta'); dl.innerHTML = '';
+    var rows = [];
+    if (c.year) rows.push(['Year', c.year]);
+    if (c.achievement) rows.push(['Recognition', c.achievement]);
+    if (c.org) rows.push(['Event / Institution', c.org]);
+    rows.forEach(function (r) { var dt = el('dt'); dt.textContent = r[0]; var dd = el('dd'); dd.textContent = r[1]; dl.appendChild(dt); dl.appendChild(dd); });
+    document.getElementById('m-tags').textContent = c.tags;
+    var act = document.getElementById('m-actions'); act.innerHTML = '';
+    if (c.link) act.appendChild(ext(c.link.href, c.link.label, c.link.kind));
+    modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('no-scroll'); modal.scrollTop = 0;
+    document.getElementById('m-close').focus();
+  }
+  function closeModal() {
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('no-scroll');
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  document.getElementById('m-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  var DMETA = { black:'#0a0a0a', white:'#ffffff' };
+  var meta = document.getElementById('theme-color');
+  var picker = document.querySelector('.theme-picker');
+  var sw = picker ? [].slice.call(picker.querySelectorAll('.swatch')) : [];
+  function current(){ return root.getAttribute('data-theme') || 'black'; }
+  function paint(){
+    var t = current();
+    if (meta) meta.setAttribute('content', DMETA[t] || DMETA.black);
+    sw.forEach(function(b){ var on = b.getAttribute('data-theme-choice') === t; b.setAttribute('aria-checked', on ? 'true' : 'false'); b.setAttribute('tabindex', on ? '0' : '-1'); });
+  }
+  function set(t){ if (t!=='black' && t!=='white') t='black'; root.setAttribute('data-theme', t); try { localStorage.setItem('site-theme', t); } catch(e){} paint(); }
+  sw.forEach(function(b, idx){
+    b.addEventListener('click', function(){ set(b.getAttribute('data-theme-choice')); b.focus(); });
+    b.addEventListener('keydown', function(e){
+      var n = -1;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (idx + 1) % sw.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (idx - 1 + sw.length) % sw.length;
+      else if (e.key === ' ' || e.key === 'Enter') { set(sw[idx].getAttribute('data-theme-choice')); e.preventDefault(); return; }
+      if (n >= 0){ e.preventDefault(); sw[n].focus(); set(sw[n].getAttribute('data-theme-choice')); }
+    });
+  });
+  window.addEventListener('storage', function(e){ if (e.key === 'site-theme' && e.newValue){ root.setAttribute('data-theme', e.newValue); paint(); } });
+  paint();
+})();
+</script>
+</body>
+</html>
