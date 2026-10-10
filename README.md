@@ -174,13 +174,6 @@ An interactive arcade **Ender Dragon**, together with its ambient mobs, is drawn
 
 GitHub Pages serves this repository root from `main` → https://xyzouktik.github.io
 
-## Acknowledgements
-
-- **liquidGL — Liquid Glass v3.0.0** by [NaughtyDuk©](https://liquidgl.naughtyduk.com) ([github.com/naughtyduk/liquidGL](https://github.com/naughtyduk/liquidGL)) — the liquid-glass implementation used across this homepage. `scripts/liquidGL.js` is a verbatim local copy of the library; the WebGPU/WebGL refraction, bevel, specular, tint and the CSS `backdrop-filter` fallback chain all come from it. The pane/backdrop architecture was built by studying the upstream demos *tinted-glass*, *multiple-lenses*, *frost-specular* and *stacked-lenses*. MIT © NaughtyDuk.
-- The Ender-dragon canvas, black/white theme system and all page content are original to this site.
-
----
-
 ## License
 
 MIT — see [LICENSE.txt](./LICENSE.txt). liquidGL v3.0.0 is MIT © NaughtyDuk (https://liquidgl.naughtyduk.com).
